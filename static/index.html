@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advice Document Filing</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f2f5f4;
+    --surface: #ffffff;
+    --surface-sunken: #f7f9f8;
+    --ink: #172127;
+    --ink-soft: #52646a;
+    --ink-faint: #8a9a99;
+    --border: #dde3e0;
+    --border-soft: #eaeeec;
+    --accent: #2b6d6f;
+    --accent-ink: #ffffff;
+    --accent-soft: #e2eeed;
+    --accent-soft-border: #bcdad8;
+    --high: #2f7d4f;
+    --high-bg: #e6f3ea;
+    --high-border: #bcdcc6;
+    --medium: #a06a15;
+    --medium-bg: #f7ecd6;
+    --medium-border: #e6cf9a;
+    --low: #a6452f;
+    --low-bg: #f6e1db;
+    --low-border: #e3bbab;
+    --idle: #62716f;
+    --idle-bg: #eaeeec;
+    --idle-border: #d3dbd8;
+    --shadow: 0 1px 2px rgba(20, 32, 30, 0.05), 0 10px 30px -14px rgba(20, 32, 30, 0.22);
+    --radius: 4px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10171a;
+      --surface: #182226;
+      --surface-sunken: #131c1f;
+      --ink: #e8edec;
+      --ink-soft: #a6b6b4;
+      --ink-faint: #74857f;
+      --border: #2a3538;
+      --border-soft: #212b2e;
+      --accent: #74c3c1;
+      --accent-ink: #0b1a1a;
+      --accent-soft: #1c3132;
+      --accent-soft-border: #2c4b4b;
+      --high: #79c294;
+      --high-bg: #1b2f22;
+      --high-border: #2e4a37;
+      --medium: #e2b562;
+      --medium-bg: #362a15;
+      --medium-border: #4d3c1e;
+      --low: #e38a71;
+      --low-bg: #37231d;
+      --low-border: #4d332a;
+      --idle: #97a3a1;
+      --idle-bg: #1c2426;
+      --idle-border: #2c3739;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 30px -14px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10171a; --surface: #182226; --surface-sunken: #131c1f;
+    --ink: #e8edec; --ink-soft: #a6b6b4; --ink-faint: #74857f;
+    --border: #2a3538; --border-soft: #212b2e;
+    --accent: #74c3c1; --accent-ink: #0b1a1a; --accent-soft: #1c3132; --accent-soft-border: #2c4b4b;
+    --high: #79c294; --high-bg: #1b2f22; --high-border: #2e4a37;
+    --medium: #e2b562; --medium-bg: #362a15; --medium-border: #4d3c1e;
+    --low: #e38a71; --low-bg: #37231d; --low-border: #4d332a;
+    --idle: #97a3a1; --idle-bg: #1c2426; --idle-border: #2c3739;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 30px -14px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 640px; margin: 0 auto; padding: 56px 20px 80px; }
+
+  code, .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---- header ---- */
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+
+  .lede {
+    color: var(--ink-soft);
+    font-size: 15px;
+    max-width: 54ch;
+    margin: 0 0 4px;
+  }
+
+  .scope-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin: 18px 0 0;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    font-family: "IBM Plex Mono", monospace;
+  }
+  .scope-strip span::before { content: "· "; }
+  .scope-strip span:first-child::before { content: ""; }
+
+  /* ---- drop zone ---- */
+
+  #drop {
+    margin-top: 32px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 44px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  #drop:hover { border-color: var(--accent-soft-border); }
+  #drop.hover { border-color: var(--accent); background: var(--accent-soft); }
+  #drop .icon {
+    width: 34px; height: 34px; margin: 0 auto 14px;
+    color: var(--ink-faint);
+  }
+  #drop .primary { font-weight: 600; color: var(--ink); font-size: 15px; }
+  #drop .secondary { color: var(--ink-faint); font-size: 13px; margin-top: 4px; }
+
+  #status {
+    margin-top: 14px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    font-family: "IBM Plex Mono", monospace;
+    min-height: 1.4em;
+  }
+  #status.err { color: var(--low); }
+
+  /* ---- result card ---- */
+
+  #result { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .card-head .filename {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+    word-break: break-all;
+  }
+  .card-head .doc-type {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .pill {
+    flex-shrink: 0;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .pill.high { color: var(--high); background: var(--high-bg); border-color: var(--high-border); }
+  .pill.medium { color: var(--medium); background: var(--medium-bg); border-color: var(--medium-border); }
+  .pill.low { color: var(--low); background: var(--low-bg); border-color: var(--low-border); }
+  .pill.idle { color: var(--idle); background: var(--idle-bg); border-color: var(--idle-border); }
+
+  .card-body { padding: 18px 20px; }
+
+  .confidence-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .confidence-row .n { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 14px; width: 44px; text-align: right; }
+  .meter { flex: 1; height: 6px; background: var(--border-soft); border-radius: 3px; overflow: hidden; }
+  .meter > div { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+  .meter.high > div { background: var(--high); }
+  .meter.medium > div { background: var(--medium); }
+  .meter.low > div { background: var(--low); }
+
+  .proposal-note {
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    margin-top: 10px;
+  }
+
+  .signals-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 18px 0 8px;
+  }
+  .signals { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .signals li {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    padding-left: 14px;
+    border-left: 2px solid var(--accent-soft-border);
+  }
+
+  .out-of-scope, .error-block {
+    padding: 16px 20px;
+    font-size: 14px;
+  }
+  .out-of-scope { color: var(--ink-soft); background: var(--idle-bg); }
+  .error-block { color: var(--low); background: var(--low-bg); }
+
+  /* ---- meta / preview ---- */
+
+  details.meta { font-size: 13.5px; }
+  details.meta summary {
+    cursor: pointer;
+    padding: 12px 20px;
+    color: var(--ink-soft);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  details.meta summary::-webkit-details-marker { display: none; }
+  details.meta summary::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-right: 1.5px solid var(--ink-faint);
+    border-bottom: 1.5px solid var(--ink-faint);
+    transform: rotate(-45deg);
+    transition: transform 0.15s ease;
+  }
+  details.meta[open] summary::before { transform: rotate(45deg); }
+
+  .meta-grid {
+    padding: 0 20px 16px;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 16px;
+    font-size: 13px;
+  }
+  .meta-grid dt { color: var(--ink-faint); }
+  .meta-grid dd { margin: 0; font-family: "IBM Plex Mono", monospace; color: var(--ink); }
+  .meta-grid dd.warn { color: var(--low); font-family: "IBM Plex Sans", sans-serif; font-weight: 600; }
+
+  pre {
+    margin: 0 20px 18px;
+    padding: 12px 14px;
+    background: var(--surface-sunken);
+    border: 1px solid var(--border-soft);
+    border-radius: 3px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    white-space: pre-wrap;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  footer {
+    margin-top: 40px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Advice document filing — working prototype</div>
+  <h1>What is this document?</h1>
+  <p class="lede">
+    Drop a client document and get a proposed classification with the
+    reasoning behind it. Nothing is filed or renamed — this reads and
+    suggests; a person still decides.
+  </p>
+  <div class="scope-strip">
+    <span>In scope today: SOA, ROA, FSG, PDS</span>
+    <span>One document at a time</span>
+    <span>Runs locally</span>
+  </div>
+
+  <div id="drop">
+    <svg class="icon" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+      <path d="M17 5v16M17 5l-6 6M17 5l6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M6 24v3a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="primary">Drop a PDF here, or click to choose one</div>
+    <div class="secondary">Native-text PDFs only for now — scanned pages are flagged, not read</div>
+  </div>
+  <input type="file" id="fileInput" accept="application/pdf" style="display:none">
+  <div id="status"></div>
+
+  <div id="result" style="display:none"></div>
+
+  <footer>Local prototype · single-document ingest via <code>POST /ingest</code> · nothing persisted between requests</footer>
+</div>
+
+<script>
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('fileInput');
+const status = document.getElementById('status');
+const result = document.getElementById('result');
+
+drop.addEventListener('click', () => fileInput.click());
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('hover'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('hover'));
+drop.addEventListener('drop', e => {
+  e.preventDefault();
+  drop.classList.remove('hover');
+  if (e.dataTransfer.files.length) sendFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) sendFile(fileInput.files[0]);
+});
+
+function confidenceTier(confidence) {
+  if (confidence >= 0.75) return 'high';
+  if (confidence >= 0.5) return 'medium';
+  return 'low';
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function metaGrid(data) {
+  const selectable = data.has_selectable_text;
+  return `
+    <details class="meta">
+      <summary>Parsing details</summary>
+      <dl class="meta-grid">
+        <dt>Pages</dt><dd>${data.page_count}</dd>
+        <dt>Characters extracted</dt><dd>${data.char_count.toLocaleString()}</dd>
+        <dt>Selectable text</dt><dd class="${selectable ? '' : 'warn'}">${selectable ? 'Yes' : 'No — likely scanned/image-only'}</dd>
+      </dl>
+      <pre>${escapeHtml(data.extracted_text.slice(0, 1000))}${data.extracted_text.length > 1000 ? '…' : ''}</pre>
+    </details>`;
+}
+
+function render(data) {
+  if (!data.in_scope) {
+    result.innerHTML = `
+      <div class="card">
+        <div class="card-head">
+          <div><div class="filename">${escapeHtml(data.filename)}</div><div class="doc-type">Not recognised</div></div>
+          <span class="pill idle">Out of scope</span>
+        </div>
+        <div class="out-of-scope">Doesn't match SOA, ROA, FSG, or PDS — outside what this prototype covers today.</div>
+        ${metaGrid(data)}
+      </div>`;
+    return;
+  }
+
+  const c = data.classification || {};
+
+  if (c.classifier_error) {
+    result.innerHTML = `
+      <div class="card">
+        <div class="card-head">
+          <div><div class="filename">${escapeHtml(data.filename)}</div><div class="doc-type">Looks like a ${escapeHtml(data.likely_type_name || data.likely_type)}</div></div>
+          <span class="pill low">Classifier unavailable</span>
+        </div>
+        <div class="error-block">Couldn't reach the classifier: ${escapeHtml(c.classifier_error)}. Title match above is a rough guess only — is Ollama running?</div>
+        ${metaGrid(data)}
+      </div>`;
+    return;
+  }
+
+  const pct = Math.round((c.confidence || 0) * 100);
+  const tier = confidenceTier(c.confidence || 0);
+  const tierLabel = tier === 'high' ? 'High confidence' : tier === 'medium' ? 'Medium confidence' : 'Needs review';
+  const signals = (c.matched_signals && c.matched_signals.length)
+    ? `<div class="signals-label">Why</div><ul class="signals">${c.matched_signals.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>`
+    : '';
+
+  result.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div><div class="filename">${escapeHtml(data.filename)}</div><div class="doc-type">${escapeHtml(c.doc_type_name || c.doc_type || '?')}</div></div>
+        <span class="pill ${tier}">${tierLabel}</span>
+      </div>
+      <div class="card-body">
+        <div class="confidence-row">
+          <div class="meter ${tier}"><div style="width:${pct}%"></div></div>
+          <div class="n">${pct}%</div>
+        </div>
+        <div class="proposal-note">Proposed classification — confirm before filing.</div>
+        ${signals}
+      </div>
+      ${metaGrid(data)}
+    </div>`;
+}
+
+async function sendFile(file) {
+  status.className = '';
+  status.textContent = `Reading ${file.name}…`;
+  result.style.display = 'none';
+  result.innerHTML = '';
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/ingest', { method: 'POST', body: formData });
+    if (!res.ok) {
+      status.className = 'err';
+      status.textContent = `Server returned ${res.status}`;
+      return;
+    }
+    const data = await res.json();
+    status.textContent = '';
+    render(data);
+    result.style.display = 'flex';
+  } catch (err) {
+    status.className = 'err';
+    status.textContent = `Error: ${err.message}`;
+  }
+}
+</script>
+</body>
+</html>

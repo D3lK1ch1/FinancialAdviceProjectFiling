@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.log
+.venv/
+venv/
+.env/
+
+.pytest_cache/  
+.vscode/
+.idea/
+Thumbs.ds
+.DS_Store
+
+# Classified documents
+docs
+samples
