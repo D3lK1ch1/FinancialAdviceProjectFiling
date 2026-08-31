@@ -3,7 +3,7 @@
 Source of truth for **how to run this project**. For what it does and why, see
 `CLAUDE.md` (ground rules) and `docs/SYSTEM.md` (spec). For what's already been done, see `CHANGELOG.md`
 
-> **`docs/` and `samples/` are not in this git repo.** They're gitignored on purpose sinc e planning docs and sample documents are client/collaborator-sourced material, not cleared for public repo (in discussion). A fresh clone will build and pass most tests but won't have them.
+> **`docs/` and `samples/` are not in this git repo.** They're gitignored on purpose since planning docs and sample documents are client/collaborator-sourced material, not cleared for public repo (in discussion). A fresh clone will build and pass most tests but won't have them.
 
 ## Run it
 
@@ -20,6 +20,8 @@ Then open `http://127.0.0.1:8000/` — drop a PDF on the page.
 
 If Ollama isn't running, `/ingest` still works — you just get a `classifier_error`
 in the response instead of a `doc_type`.
+
+Ollama is used for the purposes of this project, but API keys from LLMs such as Anhropic (Claude) and OpenAI (Codex) can be considered and built upon.
 
 ## Run the tests
 
