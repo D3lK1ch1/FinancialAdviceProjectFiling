@@ -475,6 +475,75 @@ a single branch.
    testable on its own; skipping ahead to grouping means building the three
    underneath it at the same time.
 
+### Tests a fresh contributor can run, and CI
+
+1. **A bare clone cannot satisfy the project's own pre-PR rule.** Contributing
+   says `python -m pytest` must pass before opening a PR, but Run the tests notes
+   most of the suite needs local `samples/` and
+   `docs/sample_documents.labelling.md`, and neither is in git — correctly so,
+   per File hygiene above. So the first thing a new collaborator hits is a rule
+   they cannot follow until documents are transferred out of band. The fix is not
+   to commit the samples; it is to make part of the suite runnable without them.
+   *Steps:* add a synthetic-fixture tier. `check_scope()`, `_parse_response()`
+   and `log_failure()` all take **text**, not PDFs — their tests need no client
+   documents at all, only realistic strings, and `harness_demo_fixture.json`
+   already sets that pattern. Split the suite so `python -m pytest` on a bare
+   clone runs everything that doesn't need real documents and reports the rest as
+   skipped-with-a-reason, and say in Contributing which tier is the PR gate.
+
+2. **`tests/test_e2e.py` gates PRs on a non-deterministic LLM.** It hits Ollama
+   for real, by design, which makes it the honest end-to-end check — but the same
+   input can return a different answer on two runs, so a red result may mean
+   nothing changed and a green one proves less than it appears to. It is also the
+   slowest thing in the suite and needs a model pulled locally.
+   *Steps:* mark it (`@pytest.mark.llm`), deselect it by default, and run it
+   deliberately as a calibration pass over the sample set rather than as a gate
+   on every change. Judge it on aggregate accuracy across the samples — with the
+   `engine_version` stamp from Reproducibility above, that run becomes the record
+   of whether a model or prompt change actually helped. A single-case pass/fail
+   on a probabilistic component is the wrong instrument.
+
+3. **There is no CI at all** — no `.github/` in the repo. With a public
+   repository and two people merging into a `main` that is meant to stay
+   runnable, CI is what makes "main always runnable" true rather than intended.
+   *Steps:* one GitHub Actions workflow on pull requests that installs from the
+   `requirements.txt` proposed in File hygiene and runs the no-documents-needed
+   tier from item 1.
+
+4. **Let CI enforce the file-hygiene rule mechanically.** This is the one that
+   earns CI on its own. `.gitignore` protects the `docs` and `samples` *paths*;
+   it does nothing about a client document added anywhere else — a repo-root
+   `Example SOA.pdf`, a zip of a working folder. On a public repository that
+   mistake cannot be taken back by a later commit.
+   *Steps:* fail any pull request whose diff adds a `*.pdf`, `*.docx`, `*.doc` or
+   `*.zip` file, with a message pointing at the docs-and-samples-outside-git
+   policy in Contributing. It is a handful of lines, it runs before a human
+   reviewer looks, and it converts the most expensive mistake available in this
+   repo from a matter of care into a matter of configuration.
+
+### Suggested order
+
+Roughly by cost of being wrong, and dependencies noted where they exist:
+
+| # | Work | Why here |
+|---|---|---|
+| 1 | CI document-extension gate (Tests item 4) | Cheapest item on this page and it closes the only irreversible risk |
+| 2 | Case-insensitive scope gate (item 1) | One-line fix to a silent document drop |
+| 3 | `needs_ocr` as a review reason (item 6) | Same silent drop, different cause; needs no OCR to exist |
+| 4 | `requirements.txt` (File hygiene 1) | Unblocks CI and dependency review |
+| 5 | Auth + upload limits + type check (Security 1-3) | Before the app is reachable by anything but you |
+| 6 | Verified-signal confidence + threshold (items 3, 4) | Ground rule #2 needs a calibrated number to route on |
+| 7 | `engine_version` stamp (Reproducibility 1-2) | Cheap now, and every later change is measured against it |
+| 8 | Single-document flags, then dates (State 1-2) | Dates gate grouping and three cross-document flags |
+| 9 | `client_model` + `ambiguous_client` (item 7) | Before filing writes anything to a client folder |
+| 10 | Document store, then grouping (State 3) | Needs 8 and 9 first |
+
+The three silent-drop items (2, 3, and the out-of-scope path generally) share one
+root cause worth naming: the pipeline has a single exit for uncertainty,
+`in_scope: false`, and it is indistinguishable from "not a document type we
+handle". Everything ambiguous leaves through that one hole without a flag. Giving
+uncertainty its own named outcomes is what makes ground rule #2 real.
+
 ## Contributing
 
 **Read `CLAUDE.md` first.** It's not optional decoration — it's the ground rules
