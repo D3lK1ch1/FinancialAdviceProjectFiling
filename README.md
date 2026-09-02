@@ -133,6 +133,158 @@ live app, or gets replaced by it.
   read nowhere in the code yet.
 - No Approve/Edit/Reject UI — everything today is read-only output on the page.
 
+## Proposed improvements (nothing here is built)
+
+Findings from a read-through of `app.py`, `scope_gate.py`, `classifier.py` and
+`knowledge_base.json` at `2ed1a12`. This section is deliberately notes-only: each
+item is written so it can be picked up later as its own `feature/` or `fix/`
+branch per Contributing below, rather than folded in as an unreviewed change.
+Every item is measured against a rule this project already set for itself —
+`CLAUDE.md`'s ground rules, `docs/1_PRD.md`, or `docs/security-checklist.md` —
+and cites which one.
+
+### Security
+
+None of these are defects in a Phase-1 POC that stays on localhost. They're the
+gap between here and `docs/security-checklist.md`'s "required controls for a web
+app", and the point is that **nothing in the code currently enforces the
+localhost boundary** — the checklist says "do not expose the app to the public
+internet before security review", but `uvicorn app:app --host 0.0.0.0` is one
+flag away and there's no guard.
+
+1. **`/ingest` is unauthenticated.** Any caller who can reach the port can upload
+   a document and read back its text. Checklist calls for "authenticated access"
+   and "role-based permissions".
+   *Steps:* add a single shared-secret header check as a FastAPI dependency now
+   (a stand-in, not the final auth); make it the one place a real identity
+   provider is wired in later; add a test that an unauthenticated `POST /ingest`
+   returns 401.
+
+2. **Upload size is unbounded.** `await file.read()` in `app.py` reads the whole
+   upload into memory before anything validates it. A single large file is enough
+   to exhaust memory — no attacker sophistication required.
+   *Steps:* read in chunks against a max-bytes ceiling, return 413 past it; put
+   the ceiling in `knowledge_base.json` rather than in Python, per ground rule #1;
+   test at the boundary and one byte over.
+
+3. **No file-type validation before parsing.** `parse_pdf()` is handed whatever
+   arrives. The checklist lists "file upload validation", "PDF/Word parsing
+   safety", "no direct file execution from uploaded content" and "quarantined
+   temp folder".
+   *Steps:* check the `%PDF-` magic bytes (not the filename extension, which the
+   caller controls) and reject anything else before `parse_pdf()` is reached;
+   treat `file.filename` as untrusted — never join it into a path.
+
+4. **The response echoes the full document text.** `/ingest` returns
+   `extracted_text` in the JSON. With a real SOA that is a client's complete
+   financial position travelling back over the wire and into any proxy or
+   browser-devtools log along the way.
+   *Steps:* drop `extracted_text` from the default response; keep it behind an
+   explicit `?include_text=true` for local debugging; make sure exception
+   handlers never put document text in a log line.
+
+5. **Local-only classification is a feature — write it down.** `classifier.py`
+   posting to `localhost:11434` means document text never leaves the machine.
+   That's the right call for client files and it should be recorded as a decision
+   so it isn't casually swapped for a hosted API. The README already notes that
+   Anthropic/OpenAI keys "can be considered" — worth adding what that would
+   require first: Australian data residency, a DPA, and a contractual no-training
+   guarantee.
+
+### File hygiene
+
+1. **No `requirements.txt`.** Already flagged under Dependencies. It's a hygiene
+   item because "review dependencies before installation" is the first line of
+   `docs/security-checklist.md`, and there's currently no manifest to review.
+   *Steps:* pin `fastapi`, `uvicorn`, `pypdf`, `requests` to exact versions; add
+   the install line to Run it; note that Ollama stays a separate prerequisite.
+
+2. **Keep client documents out of git history permanently.** `.gitignore` already
+   excludes `docs` and `samples` for exactly this reason. The failure mode is a
+   contributor adding an advice document at some *other* path — a repo-root
+   `Example SOA.pdf`, a zip of a working folder — where the ignore rules don't
+   reach. An SOA or ROA is a named client's financial position, and this repo is
+   public.
+   *Steps:* add `*.pdf`, `*.docx`, `*.zip` to `.gitignore` as a catch-all
+   alongside the path rules; consider a pre-commit hook that refuses those
+   extensions; and note in Contributing that a `.gitignore` fix does **not**
+   remove anything already committed — that needs history rewriting and a
+   credential/document review, so the cheap fix is never letting it land.
+
+3. **`failure_log.jsonl` is tracked in git — keep it de-identified.** It's meant
+   to be, and the shared improvement loop depends on it. But it records
+   `document_id` and a free-text `note`, and it's the one client-adjacent file
+   that is deliberately committed to a public repo.
+   *Steps:* state in the Failure log section that `document_id` is a filename or
+   hash and the note describes the *document type* decision, never a client name
+   or a figure; add a test asserting the written record contains only the
+   expected keys.
+
+4. **Two unmerged build tracks is a hygiene cost, not just an open question.**
+   `harness.py` and the live app both classify, from the same knowledge base, by
+   different logic. Until one is retired, every rule change has two homes and the
+   two known `harness.py` bugs stay ambiguous — bugs to fix, or dead code.
+   *Steps:* make the call, record it in `CHANGELOG.md`, and either delete the
+   loser or move it under `prototypes/` so no one reads it as live.
+
+### Making it suitable for a real firm
+
+1. **The scope gate is case-sensitive, so caps cover pages fall out silently.**
+   `check_scope()` does `p in head`, and the `title_patterns` in
+   `knowledge_base.json` are Title Case — `"Statement of Advice"`, `"Record of
+   Advice"`. A cover page typeset as **"STATEMENT OF ADVICE"** — ordinary in
+   advice documents — matches nothing, so `in_scope: false`, `classifier.py`
+   never runs, and the document leaves the pipeline with no type, no confidence
+   and no flag. It doesn't reach review, because being out of scope isn't
+   modelled as something to review.
+   *Steps:* casefold both sides of the comparison in `check_scope()`; add a test
+   per doc type with an all-caps title; keep the patterns in
+   `knowledge_base.json` untouched, per ground rule #1.
+
+2. **Tie-breaking on matched-pattern length can pick the wrong type.**
+   `sum(len(p) for p in matched)` rewards long pattern strings, not strong
+   evidence. An SOA cover page that also names `"Product Disclosure Statement"`
+   (28 chars) outscores its own `"Statement of Advice"` + `"SOA"` (22) and comes
+   back as a PDS. The 500-char window reduces how often this happens; it doesn't
+   remove it.
+   *Steps:* score on earliest match position (a title sits above a
+   cross-reference) or on number of distinct patterns matched; better, return the
+   full candidate set and let the classifier resolve it — `docs/1_PRD.md` §2.2
+   already asks for a candidate set rather than a silent single answer.
+
+3. **Confidence is the model's own self-assessment.** `classify()` passes
+   `parsed.get("confidence", 0.0)` straight through. `docs/2_ARCHITECTURE.md` §4
+   requires confidence "calculated from multiple signal types, not only
+   keywords", and `docs/1_PRD.md` §2.1 requires the evidence to be recorded. An
+   LLM's stated confidence is neither calibrated nor evidence — and the prompt
+   asks for `matched_signals` "actually present in the document text" without
+   anything checking that they are. This matters more than the two bugs above,
+   because ground rule #2 routes to review on low confidence: an uncalibrated
+   number decides what a human ever sees.
+   *Steps:* after parsing the response, verify each `matched_signals` phrase
+   really occurs in `extracted_text` and drop the ones that don't; derive the
+   confidence the system acts on from the verified-signal proportion plus
+   agreement with the scope gate's `likely_type`; keep the raw model number as a
+   separate field so the two can be compared in `failure_log.jsonl` over time.
+
+4. **Nothing routes to review yet, because there's no threshold.** Ground rule #2
+   is "never file silently; on low confidence route to `_Needs review` with a
+   reason". Today `/ingest` returns whatever it got and stops, which is honest
+   for Phase 1 — but the threshold is the piece that makes the rule real, and it
+   should land with filing rather than after it.
+   *Steps:* put the per-doc-type threshold in `knowledge_base.json`; return an
+   explicit `needs_review` boolean and a reason code with every result; make
+   out-of-scope a review reason rather than a dead end (see item 1).
+
+5. **The failure log has no path for a human correction.** `log_failure()` takes a
+   `correct_type`, but the only caller is `tests/test_e2e.py`, which knows the
+   answer from a hand-label. In a firm the correct answer comes from a reviewer,
+   and without that the improvement loop only ever learns from the sample set.
+   *Steps:* when the Approve/Edit/Reject UI lands (build sequence step 5), have
+   Edit and Reject write a `log_failure()` record with the reviewer's chosen type
+   and reason code — that closes ground rule #6's loop with real firm data
+   instead of test fixtures.
+
 ## Contributing
 
 **Read `CLAUDE.md` first.** It's not optional decoration — it's the ground rules
