@@ -375,6 +375,56 @@ flag away and there's no guard.
      under one family grouping in the tree while staying separate client records
      underneath. That is how firms pull files without merging identities.
 
+### Reproducibility and audit
+
+`docs/1_PRD.md` §2.6 requires "an audit log of every classification and reviewer
+action", and ground rule #6 makes the failure log the proof of accuracy. Both
+assume you can say *what produced a given decision*. Right now nothing records
+that, and three separate things can change a classification without leaving a
+trace.
+
+1. **The model is a floating tag.** `classifier.py` pins `MODEL = "llama3.1"`.
+   The next `ollama pull llama3.1` can fetch a different build, every
+   classification shifts, and nothing in the output or the failure log says the
+   engine changed. For a tool whose purpose is defending how a document was
+   filed, "we can't tell you which model decided that" is the failure.
+   *Steps:* record the model digest, not just the tag — Ollama's `/api/show`
+   returns one; pin it in config and treat a digest change as a deliberate
+   upgrade with a failure-log re-run, not an ambient event.
+
+2. **Nothing stamps the knowledge base version onto a result.**
+   `knowledge_base.json` carries `meta.version` (`0.3`) and it is, per ground
+   rule #1, where every document rule lives — so a rule edit legitimately changes
+   past answers. Without the version on the record, a decision made under v0.3
+   is indistinguishable from one made under v0.4, and the failure log cannot tell
+   "the model got worse" from "we changed the rules".
+   *Steps:* return an `engine_version` block on every classification —
+   `{model, model_digest, kb_version, prompt_version}` — and write the same block
+   into each `failure_log.jsonl` record. `prompt_version` is a constant bumped by
+   hand when `_build_prompt()` changes; a prompt edit is a behaviour change and
+   should be as visible as a rule edit.
+
+3. **Configuration is hardcoded across three files.** `OLLAMA_URL`, `MODEL` and
+   the 180-second timeout sit in `classifier.py`; `TITLE_WINDOW = 500` sits in
+   `scope_gate.py`. The last one is arguably a document rule and belongs in
+   `knowledge_base.json` under ground rule #1 — how far into a document a title
+   can appear is domain knowledge, not plumbing.
+   *Steps:* move the connection settings to environment variables with the
+   current values as defaults, so nothing changes for a local run; move
+   `TITLE_WINDOW` into the knowledge base alongside the patterns it applies to.
+
+4. **`knowledge_base.json` is opened three times by relative path.** `app.py`,
+   `scope_gate.py` and `classifier.py` each run `open("knowledge_base.json")` at
+   import. Three consequences: the app only starts when the working directory is
+   the repo root, so it breaks under a service manager or any launcher that sets
+   its own cwd; the same file is parsed three times; and a malformed knowledge
+   base fails somewhere deep rather than at startup with a useful message.
+   *Steps:* one `kb.py` that resolves the path relative to `__file__`, loads
+   once, and validates the shape the three consumers rely on — that every
+   in-scope document has `classifier_hints.title_patterns` — raising a clear
+   error at import. Small change, and it removes a whole class of "works on my
+   machine".
+
 ## Contributing
 
 **Read `CLAUDE.md` first.** It's not optional decoration — it's the ground rules
