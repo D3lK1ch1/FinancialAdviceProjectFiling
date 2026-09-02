@@ -425,6 +425,56 @@ trace.
    error at import. Small change, and it removes a whole class of "works on my
    machine".
 
+### State, dates and sequencing
+
+"No flagging engine wired" reads like one unit of work in Status above. It isn't
+— and the dependency is worth writing down before someone picks it up expecting
+a single branch.
+
+1. **Six of the eleven `edge_case_flags` rules cannot fire without cross-document
+   state.** `app.py` is explicit that nothing is persisted; every request is
+   stateless. But `roa_without_soa` triggers on "no prior SOA **on file for the
+   client**", `atp_without_advice_record` on "no matching SOA/ROA **on file**",
+   `fact_find_after_soa` on comparing two documents' dates, `risk_mismatch` on
+   comparing a Risk Profile to an SOA, and `superseding_ambiguity` on finding two
+   candidate current documents for one client. Each needs a document store *and*
+   the client resolution from item 7 above — you cannot ask "for the client"
+   without knowing who the client is.
+   *Steps:* ship the single-document rules first — `multi_doc_bundle`,
+   `advice_record_label_shift`, `no_date`, `low_confidence`, `unknown_type` need
+   nothing but the document in hand, and they exercise the flag-output contract
+   end to end. Give them a shared shape (`{rule_id, severity, reason, evidence}`)
+   and a severity-to-routing map, so the cross-document rules later plug into a
+   pipeline that already exists rather than inventing one.
+
+2. **Nothing extracts a date, yet dates are load-bearing in three places.**
+   `no_date` is a knowledge-base rule with no code behind it;
+   `filing_model.advice_event.identity` keys an event on "client + advice-record
+   date + subject matter"; and the naming pattern is `YYYY-MM — <subject>`. Until
+   dates are extracted, advice-event grouping cannot start, and three of the
+   cross-document flags have nothing to compare.
+   *Steps:* extract candidate dates with their context (a preparation date, a
+   signature date and a review date can all appear in one SOA), return the
+   candidate set plus which one was taken as the document date and why, and fire
+   `no_date` when none is found rather than defaulting to the file's mtime.
+   **Parse day-first explicitly.** `03/04/2025` is 3 April in an Australian
+   document and 4 March to most date libraries' defaults — a US-ordered parse
+   silently reorders a client's advice history and quietly breaks
+   `fact_find_after_soa`, which exists to catch advice predating its own fact
+   find. This is a one-line setting that is very expensive to get wrong.
+
+3. **Persistence, when it lands, has a design already written for it.**
+   `docs/2_ARCHITECTURE.md` §3 defines Document, Client/Party, AdviceEvent,
+   ReviewDecision and FailureLog, and `failure_log.py` deliberately matches its
+   future SQLite `failure_log` table so it can move without a schema change.
+   *Steps:* follow the same approach for the other four — SQLite, schema matching
+   §3, behind a small storage module so ground rule #3's abstraction holds and
+   the classifier never learns where anything is stored. Order that actually
+   unblocks things: single-document flags → date extraction → client resolution
+   → document store → cross-document flags → advice-event grouping. Each step is
+   testable on its own; skipping ahead to grouping means building the three
+   underneath it at the same time.
+
 ## Contributing
 
 **Read `CLAUDE.md` first.** It's not optional decoration — it's the ground rules
