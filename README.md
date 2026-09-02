@@ -139,15 +139,24 @@ Findings from a read-through of `app.py`, `parser.py`, `scope_gate.py`,
 `classifier.py` and `knowledge_base.json` at `2ed1a12`. This section is deliberately notes-only: each
 item is written so it can be picked up later as its own `feature/` or `fix/`
 branch per Contributing below, rather than folded in as an unreviewed change.
-Every item is measured against a rule this project already set for itself —
-`CLAUDE.md`'s ground rules, `docs/1_PRD.md`, or `docs/security-checklist.md` —
-and cites which one.
+Every item is measured against a rule this project already set for itself, and
+says which one.
+
+> **On the citations below.** Beyond `CLAUDE.md` and `knowledge_base.json`, which
+> are in the repo, these point at requirements read in the planning docs as they
+> were handed over: a requirements document, an architecture document with a
+> layered design and data model, and a security-and-governance checklist. Because
+> `docs/` is deliberately not in git, I could not check those against the
+> filenames in the Docs map below, so they are cited **by content rather than by
+> file and section number**. If they correspond to `docs/1_PRD.md`,
+> `docs/2_ARCHITECTURE.md` and a checklist under another name, please correct the
+> references. The findings themselves come from the code and stand either way.
 
 ### Security
 
 None of these are defects in a Phase-1 POC that stays on localhost. They're the
-gap between here and `docs/security-checklist.md`'s "required controls for a web
-app", and the point is that **nothing in the code currently enforces the
+gap between here and the security-and-governance checklist's "required controls
+for a web app", and the point is that **nothing in the code currently enforces the
 localhost boundary** — the checklist says "do not expose the app to the public
 internet before security review", but `uvicorn app:app --host 0.0.0.0` is one
 flag away and there's no guard.
@@ -195,7 +204,8 @@ flag away and there's no guard.
 
 1. **No `requirements.txt`.** Already flagged under Dependencies. It's a hygiene
    item because "review dependencies before installation" is the first line of
-   `docs/security-checklist.md`, and there's currently no manifest to review.
+   the security-and-governance checklist, and there's currently no manifest to
+   review.
    *Steps:* pin `fastapi`, `uvicorn`, `pypdf`, `requests` to exact versions; add
    the install line to Run it; note that Ollama stays a separate prerequisite.
 
@@ -249,13 +259,15 @@ flag away and there's no guard.
    remove it.
    *Steps:* score on earliest match position (a title sits above a
    cross-reference) or on number of distinct patterns matched; better, return the
-   full candidate set and let the classifier resolve it — `docs/1_PRD.md` §2.2
-   already asks for a candidate set rather than a silent single answer.
+   full candidate set and let the classifier resolve it — the requirements doc's
+   client-and-entity-resolution section already asks for a candidate set rather
+   than a silent single answer.
 
 3. **Confidence is the model's own self-assessment.** `classify()` passes
-   `parsed.get("confidence", 0.0)` straight through. `docs/2_ARCHITECTURE.md` §4
-   requires confidence "calculated from multiple signal types, not only
-   keywords", and `docs/1_PRD.md` §2.1 requires the evidence to be recorded. An
+   `parsed.get("confidence", 0.0)` straight through. The architecture doc's
+   design rules require confidence "calculated from multiple signal types, not
+   only keywords", and the requirements doc's document-classification section
+   requires the evidence to be recorded. An
    LLM's stated confidence is neither calibrated nor evidence — and the prompt
    asks for `matched_signals` "actually present in the document text" without
    anything checking that they are. This matters more than the two bugs above,
@@ -285,9 +297,9 @@ flag away and there's no guard.
    and reason code — that closes ground rule #6's loop with real firm data
    instead of test fixtures.
 
-6. **Only native-text PDFs actually work end to end.** `docs/2_ARCHITECTURE.md`
-   Layer 1 asks for PDF, DOCX and image-based scans, with an OCR fallback and
-   scan-quality detection. Today `parse_pdf()` is `pypdf` and nothing else.
+6. **Only native-text PDFs actually work end to end.** The architecture doc's
+   ingestion layer asks for PDF, DOCX and image-based scans, with an OCR fallback
+   and scan-quality detection. Today `parse_pdf()` is `pypdf` and nothing else.
    - *Scans.* `parser.py` returns `has_selectable_text` deliberately — its
      docstring says an image-only PDF "is a flag, not silently empty input" —
      but nothing consumes it. `app.py` hands the empty string to
@@ -312,14 +324,14 @@ flag away and there's no guard.
      extractor from the detected type — `pypdf` for native PDF, `python-docx`
      for Word — returning one shape either way, so `check_scope()` and
      `classify()` never learn what the source format was. Same reasoning as
-     Layer 6's storage abstraction.
+     the architecture doc's storage-abstraction rule.
    - Only then add OCR behind the `needs_ocr` path. Record an extraction-quality
      figure (mean OCR character confidence, or extracted characters per page)
      on the result and let it **cap** classification confidence: text recovered
      from a poor scan must never support a high-confidence auto-file. That is
-     Layer 1's "detect scan quality", and it feeds item 3 above.
+     the ingestion layer's "detect scan quality", and it feeds item 3 above.
    - Settle one security question before OCR lands, not after: OCR usually means
-     writing page images to disk. `docs/security-checklist.md` already requires
+     writing page images to disk. The security checklist already requires
      a "quarantined temp folder" — decide now that extraction happens in memory
      or in a mode-`700` temp directory removed in a `finally` block.
 
@@ -332,7 +344,8 @@ flag away and there's no guard.
    nothing handles two candidate *clients*. So the axis the whole filing tree
    hangs from has no rules behind it and no way to flag when it is unsure.
 
-   `docs/1_PRD.md` §2.2 is explicit about what this has to survive — personal
+   The requirements doc's client-and-entity-resolution section is explicit about
+   what this has to survive — personal
    clients, joint clients, trusts, companies, partnerships — and names the trap
    directly: *avoid surname-only matching as a primary identity rule*. Three
    distinct failures sit behind that one line:
@@ -360,13 +373,13 @@ flag away and there's no guard.
    - Resolve on a **combination** of signals — full names, date of birth where
      present, address, member or account number. A surname may narrow a candidate
      set; it must never select one.
-   - Return a **scored candidate set**, which is what §2.2 and Layer 3 both ask
-     for. Exactly one candidate above threshold files; anything else is ambiguous
+   - Return a **scored candidate set**, which is what the requirements doc and
+     the architecture doc's resolution layer both ask for. Exactly one candidate above threshold files; anything else is ambiguous
      by definition rather than by judgement.
    - Add the missing rule: `ambiguous_client`, high severity, triggering on
      multiple candidates above threshold *or* none, routed to `_Needs review`.
-     This is what makes `docs/2_ARCHITECTURE.md` §4's "no silent auto-assignment
-     when multiple client candidates exist" enforceable instead of aspirational,
+     This is what makes the architecture doc's "no silent auto-assignment when
+     multiple client candidates exist" enforceable instead of aspirational,
      and it should exist before filing is wired, not after.
    - Treat joint-versus-individual as its own flag, not a resolution rule. An SOA
      naming two people may belong to a joint relationship or to one member's
@@ -377,8 +390,8 @@ flag away and there's no guard.
 
 ### Reproducibility and audit
 
-`docs/1_PRD.md` §2.6 requires "an audit log of every classification and reviewer
-action", and ground rule #6 makes the failure log the proof of accuracy. Both
+The requirements doc's audit-and-learning section requires "an audit log of
+every classification and reviewer action", and ground rule #6 makes the failure log the proof of accuracy. Both
 assume you can say *what produced a given decision*. Right now nothing records
 that, and three separate things can change a classification without leaving a
 trace.
@@ -464,7 +477,7 @@ a single branch.
    find. This is a one-line setting that is very expensive to get wrong.
 
 3. **Persistence, when it lands, has a design already written for it.**
-   `docs/2_ARCHITECTURE.md` §3 defines Document, Client/Party, AdviceEvent,
+   The architecture doc's data model defines Document, Client/Party, AdviceEvent,
    ReviewDecision and FailureLog, and `failure_log.py` deliberately matches its
    future SQLite `failure_log` table so it can move without a schema change.
    *Steps:* follow the same approach for the other four — SQLite, schema matching
