@@ -135,8 +135,8 @@ live app, or gets replaced by it.
 
 ## Proposed improvements (nothing here is built)
 
-Findings from a read-through of `app.py`, `scope_gate.py`, `classifier.py` and
-`knowledge_base.json` at `2ed1a12`. This section is deliberately notes-only: each
+Findings from a read-through of `app.py`, `parser.py`, `scope_gate.py`,
+`classifier.py` and `knowledge_base.json` at `2ed1a12`. This section is deliberately notes-only: each
 item is written so it can be picked up later as its own `feature/` or `fix/`
 branch per Contributing below, rather than folded in as an unreviewed change.
 Every item is measured against a rule this project already set for itself —
@@ -284,6 +284,96 @@ flag away and there's no guard.
    Edit and Reject write a `log_failure()` record with the reviewer's chosen type
    and reason code — that closes ground rule #6's loop with real firm data
    instead of test fixtures.
+
+6. **Only native-text PDFs actually work end to end.** `docs/2_ARCHITECTURE.md`
+   Layer 1 asks for PDF, DOCX and image-based scans, with an OCR fallback and
+   scan-quality detection. Today `parse_pdf()` is `pypdf` and nothing else.
+   - *Scans.* `parser.py` returns `has_selectable_text` deliberately — its
+     docstring says an image-only PDF "is a flag, not silently empty input" —
+     but nothing consumes it. `app.py` hands the empty string to
+     `check_scope()`, which matches no title pattern and returns
+     `in_scope: false`. A scanned SOA and a genuinely out-of-scope document are
+     indistinguishable in the response, and both leave with no type and no
+     flag. Same dead end as item 1, different cause. Scanned advice files are
+     ordinary in firms: anything pre-digital, anything signed and re-scanned.
+   - *Word.* A `.docx` reaching `parse_pdf()` raises inside `pypdf` and
+     `/ingest` returns an unhandled 500. Fact finds and file notes are commonly
+     `.docx`.
+
+   *Steps, in the order they pay off:*
+   - Make `has_selectable_text: false` a first-class outcome — a `needs_ocr`
+     review reason routed to `_Needs review`, not `in_scope: false`. That is one
+     branch in `app.py`, it needs no OCR to exist, and it stops the silent drop
+     immediately.
+   - Add an `unsupported_format` review reason alongside the magic-byte check in
+     Security item 3, so a `.docx` or an image returns 415 with a reason rather
+     than a 500.
+   - Split `parse_pdf()` into a `parse_document()` dispatcher that selects an
+     extractor from the detected type — `pypdf` for native PDF, `python-docx`
+     for Word — returning one shape either way, so `check_scope()` and
+     `classify()` never learn what the source format was. Same reasoning as
+     Layer 6's storage abstraction.
+   - Only then add OCR behind the `needs_ocr` path. Record an extraction-quality
+     figure (mean OCR character confidence, or extracted characters per page)
+     on the result and let it **cap** classification confidence: text recovered
+     from a poor scan must never support a high-confidence auto-file. That is
+     Layer 1's "detect scan quality", and it feeds item 3 above.
+   - Settle one security question before OCR lands, not after: OCR usually means
+     writing page images to disk. `docs/security-checklist.md` already requires
+     a "quarantined temp folder" — decide now that extraction happens in memory
+     or in a mode-`700` temp directory removed in a `finally` block.
+
+7. **There is no client-identity model at all — and `client` is the outer filing
+   axis.** `filing_model.axes.outer` files every document under a client, but
+   `knowledge_base.json` holds no client, party or entity structure: searching it
+   for `joint`, `surname`, `family`, `partnership`, `company` or `SMSF` returns
+   nothing. None of the 11 `edge_case_flags` rules covers an ambiguous client
+   either — `superseding_ambiguity` handles two candidate *documents*, and
+   nothing handles two candidate *clients*. So the axis the whole filing tree
+   hangs from has no rules behind it and no way to flag when it is unsure.
+
+   `docs/1_PRD.md` §2.2 is explicit about what this has to survive — personal
+   clients, joint clients, trusts, companies, partnerships — and names the trap
+   directly: *avoid surname-only matching as a primary identity rule*. Three
+   distinct failures sit behind that one line:
+   - **A surname is not a client.** Two unrelated Nguyen households in one firm's
+     book collapse into a single folder, and one client can see another's advice.
+     That is a privacy incident, not a filing error.
+   - **A family is not one client either.** John Smith, Mary Smith, John & Mary
+     Smith jointly, and The Smith Family Trust are routinely four separate advice
+     relationships sharing a surname — and the joint and trust documents
+     legitimately name the same individuals. Grouping on surname merges all four;
+     splitting on exact name string scatters documents that do belong together.
+     Both directions are wrong, which is why this needs a model rather than a
+     matching tweak.
+   - **An entity's name need not contain its members' names.** A corporate
+     trustee may appear as *Smith Super Pty Ltd ATF The Smith Superannuation
+     Fund* while the SOA names John and Mary personally. Neither exact-string nor
+     surname matching connects those, yet it is one advice relationship.
+
+   *Steps:*
+   - Add a `client_model` block to `knowledge_base.json` *before* any resolution
+     code, per ground rule #1: `party_type` (individual / joint / trust / company
+     / partnership / SMSF), a `family_key` that groups related parties without
+     merging them, and the `ATF` / `ITF` / "as trustee for" patterns that mark an
+     entity relationship in Australian advice documents.
+   - Resolve on a **combination** of signals — full names, date of birth where
+     present, address, member or account number. A surname may narrow a candidate
+     set; it must never select one.
+   - Return a **scored candidate set**, which is what §2.2 and Layer 3 both ask
+     for. Exactly one candidate above threshold files; anything else is ambiguous
+     by definition rather than by judgement.
+   - Add the missing rule: `ambiguous_client`, high severity, triggering on
+     multiple candidates above threshold *or* none, routed to `_Needs review`.
+     This is what makes `docs/2_ARCHITECTURE.md` §4's "no silent auto-assignment
+     when multiple client candidates exist" enforceable instead of aspirational,
+     and it should exist before filing is wired, not after.
+   - Treat joint-versus-individual as its own flag, not a resolution rule. An SOA
+     naming two people may belong to a joint relationship or to one member's
+     individual file; only the firm knows which. Flag it rather than guess.
+   - Let `family_key` do its work at the folder level: related parties can sit
+     under one family grouping in the tree while staying separate client records
+     underneath. That is how firms pull files without merging identities.
 
 ## Contributing
 
