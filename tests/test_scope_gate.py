@@ -118,6 +118,47 @@ def test_acronym_patterns_stay_case_sensitive():
     # Multi-word patterns go the other way: they must match in any casing.
     assert _matcher("Statement of Advice").search("STATEMENT OF ADVICE") is not None
     assert _matcher("Statement of Advice").search("statement of advice") is not None
+# Every type the knowledge base defines that the code previously did not support.
+# These are most of a firm's real intake, and each one used to leave the pipeline
+# as in_scope: False with no type and no flag — indistinguishable from a file that
+# couldn't be read at all.
+NEWLY_SUPPORTED = [
+    ("car", "Client Advice Record\nPrepared for the client, 3 March 2025"),
+    ("authority_to_proceed", "Authority to Proceed\nI authorise my adviser to implement"),
+    ("fact_find", "Fact Find\nClient Data Form completed 1 July 2024"),
+    ("risk_profile", "Investor Risk Profile\nAttitude to Risk questionnaire"),
+    ("fee_disclosure_statement", "Fee Disclosure Statement\nOngoing Fee Consent for the period"),
+]
+
+
+def test_supported_types_come_from_the_knowledge_base():
+    """Ground rule #1. The supported set is whatever the KB defines — asserting
+    the set equality rather than a count, so the test doesn't fight a KB that
+    legitimately grows.
+    """
+    kb_path = Path(__file__).resolve().parent.parent / "knowledge_base.json"
+    kb = json.loads(kb_path.read_text())
+
+    assert set(IN_SCOPE_TYPES) == {doc["id"] for doc in kb["documents"]}
+
+
+@pytest.mark.parametrize(
+    "expected_type, text", NEWLY_SUPPORTED, ids=[t for t, _ in NEWLY_SUPPORTED]
+)
+def test_newly_supported_types_are_recognised(expected_type, text):
+    result = check_scope(text)
+
+    assert result["in_scope"] is True
+    assert result["likely_type"] == expected_type
+
+
+def test_car_acronym_does_not_match_inside_an_ordinary_word():
+    """Widening the type set is what brings `car`'s "CAR" pattern into play, and
+    it is the most substring-prone pattern in the knowledge base. Pinned here
+    because this is the change that makes it live.
+    """
+    assert check_scope("Financial Services Guide\nWe act with duty of CARE.")["likely_type"] == "fsg"
+    assert check_scope("Authority to Proceed\nSCARBOROUGH FINANCIAL PTY LTD")["likely_type"] == "authority_to_proceed"
 
 
 # Every advice document names other document types in its body — that's what the

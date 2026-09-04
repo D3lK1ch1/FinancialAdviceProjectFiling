@@ -19,20 +19,18 @@ MODEL = "llama3.1"
 with open("knowledge_base.json") as f:
     _KB = json.load(f)
 
-_HINTS = {
-    doc["id"]: doc["classifier_hints"]
-    for doc in _KB["documents"]
-    if doc["id"] in ("soa", "roa", "fsg", "pds")
-}
+_HINTS = {doc["id"]: doc["classifier_hints"] for doc in _KB["documents"]}
+
+_DOC_TYPE_ENUM = " | ".join(f'"{doc_id}"' for doc_id in _HINTS)
 
 
 def _build_prompt(text: str) -> str:
     hints_block = json.dumps(_HINTS, indent=2)
     return f"""You classify Australian financial-advice documents. You are
-given classifier hints for four document types and the text of one document.
-Respond with ONLY a JSON object, no prose, no markdown fences:
+given classifier hints for each supported document type and the text of one
+document. Respond with ONLY a JSON object, no prose, no markdown fences:
 
-{{"doc_type": "soa" | "roa" | "fsg" | "pds", "confidence": 0.0-1.0, "matched_signals": ["..."]}}
+{{"doc_type": {_DOC_TYPE_ENUM}, "confidence": 0.0-1.0, "matched_signals": ["..."]}}
 
 matched_signals must be short phrases actually present in the document text
 that support your answer (e.g. a title phrase, a key field you found).

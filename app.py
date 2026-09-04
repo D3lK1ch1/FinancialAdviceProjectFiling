@@ -20,7 +20,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 with open("knowledge_base.json") as f:
     _KB = json.load(f)
 
-_DOC_NAMES = {doc["id"]: doc["name"] for doc in _KB["documents"] if doc["id"] in ("soa", "roa", "fsg", "pds")}
+_DOC_NAMES = {doc["id"]: doc["name"] for doc in _KB["documents"]}
 
 
 @app.get("/")
