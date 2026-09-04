@@ -26,8 +26,31 @@ _TITLE_PATTERNS = {
 # street address, and it sits inside exactly the first 500 chars this function
 # reads — so a document issued from "42 BROADWAY" scored as an ROA. That is a
 # live misclassification on ordinary documents, not a contrived one.
+#
+# Case sensitivity is decided per pattern, by the pattern's own shape:
+#
+#   mixed-case patterns ("Statement of Advice")  -> case-insensitive
+#   all-caps acronyms   ("SOA", "CAR")           -> case-sensitive
+#
+# Cover pages are routinely typeset in capitals, so a case-sensitive check
+# missed "STATEMENT OF ADVICE" entirely and returned in_scope: False with no
+# flag — a document silently leaving the pipeline, which is worse than a wrong
+# answer because nothing surfaces for review.
+#
+# Casefolding the acronyms too would trade that for a new false positive: with
+# word boundaries in place "CAR" no longer matches CARE or SCARBOROUGH, but a
+# case-insensitive "CAR" does match the ordinary word "car" — and "car loan"
+# or "car insurance" is entirely at home in the scope paragraph of an SOA. An
+# acronym in a title is capitalised; the word in a sentence is not. Keying on
+# `p.isupper()` uses the knowledge base's own formatting to tell them apart,
+# so it stays a data decision rather than a list of exceptions in Python.
+def _matcher(pattern: str) -> re.Pattern:
+    flags = 0 if pattern.isupper() else re.IGNORECASE
+    return re.compile(rf"\b{re.escape(pattern)}\b", flags)
+
+
 _MATCHERS = {
-    doc_id: [(p, re.compile(rf"\b{re.escape(p)}\b")) for p in patterns]
+    doc_id: [(p, _matcher(p)) for p in patterns]
     for doc_id, patterns in _TITLE_PATTERNS.items()
 }
 
