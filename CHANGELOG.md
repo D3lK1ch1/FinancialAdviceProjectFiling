@@ -15,6 +15,13 @@ a finished step (see Contributing in `README.md`). Newest at top.
   `*.doc`, `*.zip`) anywhere in the tree, alongside the existing `docs`/
   `samples` path rules, which miss a PDF dropped at the repo root. Not
   retroactive; that limit is now written down in README's Contributing.
+
+- `scope_gate.py` — candidate types now rank on earliest match position, not on
+  summed pattern length. Length was standing in for confidence: "Product
+  Disclosure Statement" (28 chars) outranked "Record of Advice" (16), so an ROA
+  that cites the PDS of the product it discusses came back as a `pds`. A
+  document's own title is at the top; a type it merely cites appears further
+  down. Ties break on distinct patterns matched (#4).
 - `scope_gate.py` — case sensitivity is now decided per pattern from the pattern's
   own shape: mixed-case titles match in any casing, all-caps acronyms stay
   case-sensitive. An ALL-CAPS cover page previously matched nothing and left the
