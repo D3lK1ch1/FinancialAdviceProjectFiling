@@ -44,9 +44,9 @@ directly — no package/src layout needed.
 | `tests/test_scope_gate.py` | `check_scope()` against all 10 samples (correct type per filename prefix), the 2026-08-22 FSG/SOA cross-reference regression, and an out-of-scope text case |
 | `tests/test_classifier.py` | `_parse_response()` (plain/fenced/malformed JSON) and `classify()` (success, missing optional fields, request exception, malformed JSON, missing `response` key) — `requests.post` mocked, no Ollama needed |
 | `tests/test_e2e.py` | Full `POST /ingest` pipeline (parse → scope_gate → classify), one real sample per doc type, plus an out-of-scope (text-less) PDF. **Needs Ollama running with `llama3.1` pulled — hits it for real, not mocked.** On a misclassification, also writes a `failure_log.jsonl` entry |
-| `tests/test_failure_log.py` | `log_failure()` appends correctly-shaped JSON Lines records; handles `None` predicted type; appends without overwriting |
+| `tests/test_failure_log.py` | `log_failure()` appends correctly-shaped JSON Lines records; handles `None` predicted type; appends without overwriting; the record carries **only** the five de-identified fields (guards against client identity reaching a shared file) and `logged_at` is UTC |
 
-40 tests total. More test files land as the suite grows — see `docs/TO_DO_LIST.md`
+42 tests total. More test files land as the suite grows — see `docs/TO_DO_LIST.md`
 for what's still open.
 
 ## Failure log
@@ -55,6 +55,23 @@ for what's still open.
 appends one JSON Lines record per misclassification to `failure_log.jsonl` at the
 project root. Field names match `docs/2_ARCHITECTURE.md`'s `failure_log` SQLite
 table, so this moves into SQLite later (unit #9) without a schema change.
+
+**The record must stay de-identified.** Unlike `samples/`, `failure_log.jsonl` is
+committed to git and shared between collaborators — it travels. So:
+
+- **`document_id`** — a filename or a hash. *Never a full path.* A path like
+  `/clients/Nguyen Family/fact find.pdf` leaks a client name in the folder it sits
+  in, even when the filename itself is clean.
+- **`note`** — the classification decision only: what was predicted, what was
+  correct, one line on why it went wrong. *Never* a client name, an account number,
+  a balance, or any figure read out of the document.
+- **`predicted_type` / `correct_type`** — document-type ids from
+  `knowledge_base.json`, nothing else.
+
+`tests/test_failure_log.py` asserts the record's **exact** field set, so a new field
+cannot be added to `log_failure()` without that test failing first. If a record
+genuinely needs more context, the answer is a reference someone with access can look
+up — not the content itself.
 
 No review UI exists yet to capture human corrections, so the current caller is
 `tests/test_e2e.py` — it already has both a real classifier prediction and a

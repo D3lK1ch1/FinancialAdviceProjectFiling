@@ -7,6 +7,16 @@ Append-only JSON Lines file. Field names mirror 2_ARCHITECTURE.md's
 logged_at) so this can move into SQLite later (unit #9) without a schema
 rethink — it's the same shape, just not persisted there yet.
 
+DE-IDENTIFIED BY RULE. Unlike samples/, this file is committed to git and
+shared between collaborators, so it travels — and it must never carry client
+identity. document_id is a filename or a hash, never a full path: a path like
+"/clients/Nguyen Family/fact find.pdf" leaks a client name in the folder it
+sits in even when the filename itself is clean. note describes the
+classification decision only — predicted, correct, one line on why — never a
+client name, an account number, a balance, or any figure read out of the
+document. tests/test_failure_log.py asserts the record's exact field set, so
+a field cannot be added here without that test failing first.
+
 No review UI exists yet to capture human corrections (unit #12), so the
 current caller is tests/test_e2e.py: it has both a real classifier
 prediction and a hand-labelled correct answer for every sample, which is
