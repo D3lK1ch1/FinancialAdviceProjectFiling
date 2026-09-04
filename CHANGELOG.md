@@ -3,6 +3,15 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 05-09-2026
+
+### Done
+- `scope_gate.py` — `title_patterns` now match on word boundaries instead of bare
+  substrings. Six of them are three-letter acronyms, so `"ROA" in head` was also
+  true for ROAD and BROADWAY, and a letterhead street address sits inside exactly
+  the 500-char title window the gate reads. Out-of-scope documents were entering
+  the pipeline as ROAs. Prerequisite for widening the supported type set (#12).
+
 ## Session 31-08-2026
 
 ### In progress
