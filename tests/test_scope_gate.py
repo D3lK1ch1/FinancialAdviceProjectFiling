@@ -49,3 +49,24 @@ def test_check_scope_out_of_scope_text():
     result = check_scope(text)
 
     assert result == {"in_scope": False, "likely_type": None}
+
+
+def test_street_address_is_not_read_as_a_document_type():
+    """Regression: several title_patterns are three-letter acronyms, and the
+    old bare-substring check matched "ROA" inside ROAD and BROADWAY. Every
+    advice document carries a letterhead address, and it lands inside exactly
+    the 500-char title window this function reads — so an out-of-scope
+    document issued from a street address was pulled into the pipeline as an
+    ROA. Ordinary documents, not contrived ones.
+    """
+    text = "Tax invoice\nIssued by Example Advice Pty Ltd\n42 BROADWAY, SYDNEY NSW 2000"
+
+    assert check_scope(text) == {"in_scope": False, "likely_type": None}
+
+
+def test_acronym_still_matches_when_it_is_the_title():
+    """The boundary fix must not break the case it exists to serve: a cover
+    page whose title really is the bare acronym.
+    """
+    assert check_scope("ROA - further advice\nPrepared 3 March 2025")["likely_type"] == "roa"
+    assert check_scope("SOA prepared for the client\n1 July 2024")["likely_type"] == "soa"
