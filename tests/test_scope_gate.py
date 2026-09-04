@@ -5,12 +5,13 @@ etc.) — that convention is how docs/sample_documents.labelling.md ground-
 truths the sample set too.
 """
 
+import json
 from pathlib import Path
 
 import pytest
 
 from parser import parse_pdf
-from scope_gate import check_scope
+from scope_gate import IN_SCOPE_TYPES, _matcher, check_scope
 
 SAMPLES_DIR = Path(__file__).resolve().parent.parent / "samples"
 SAMPLE_PDFS = sorted(SAMPLES_DIR.glob("*.pdf"))
@@ -70,3 +71,50 @@ def test_acronym_still_matches_when_it_is_the_title():
     """
     assert check_scope("ROA - further advice\nPrepared 3 March 2025")["likely_type"] == "roa"
     assert check_scope("SOA prepared for the client\n1 July 2024")["likely_type"] == "soa"
+
+
+def _longest_title_pattern(doc_id: str) -> str:
+    kb_path = Path(__file__).resolve().parent.parent / "knowledge_base.json"
+    kb = json.loads(kb_path.read_text())
+    doc = next(d for d in kb["documents"] if d["id"] == doc_id)
+    return max(doc["classifier_hints"]["title_patterns"], key=len)
+
+
+@pytest.mark.parametrize("doc_id", IN_SCOPE_TYPES)
+def test_all_caps_cover_page_is_recognised(doc_id):
+    """#4: cover pages are routinely typeset in capitals, and a case-sensitive
+    check missed "STATEMENT OF ADVICE" entirely — in_scope: False, no type, no
+    flag. A document silently leaving the pipeline is worse than a wrong
+    answer, because nothing surfaces for review.
+
+    Parametrised over IN_SCOPE_TYPES and sourced from the knowledge base, so
+    this covers whatever the supported set becomes without being rewritten.
+    """
+    title = _longest_title_pattern(doc_id)
+    result = check_scope(f"{title.upper()}\nPrepared for the client, 1 July 2024")
+
+    assert result["in_scope"] is True
+    assert result["likely_type"] == doc_id
+
+
+@pytest.mark.parametrize("doc_id", IN_SCOPE_TYPES)
+def test_lower_case_title_is_recognised(doc_id):
+    title = _longest_title_pattern(doc_id)
+    result = check_scope(f"{title.lower()}\nprepared for the client, 1 july 2024")
+
+    assert result["likely_type"] == doc_id
+
+
+def test_acronym_patterns_stay_case_sensitive():
+    """Case sensitivity is decided per pattern, not globally. An acronym in a
+    title is capitalised; the same letters lowercase in a sentence are an
+    ordinary word. Casefolding the acronyms too would make car's "CAR" pattern
+    match "car loan" — entirely at home in the scope paragraph of an SOA — so
+    the fix for one false negative would have bought a new false positive.
+    """
+    assert _matcher("CAR").search("we reviewed your car loan and car insurance") is None
+    assert _matcher("CAR").search("CLIENT ADVICE RECORD (CAR)") is not None
+
+    # Multi-word patterns go the other way: they must match in any casing.
+    assert _matcher("Statement of Advice").search("STATEMENT OF ADVICE") is not None
+    assert _matcher("Statement of Advice").search("statement of advice") is not None
