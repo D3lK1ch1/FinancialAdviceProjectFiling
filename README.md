@@ -44,9 +44,9 @@ directly — no package/src layout needed.
 | `tests/test_scope_gate.py` | `check_scope()` against all 10 samples (correct type per filename prefix), the 2026-08-22 FSG/SOA cross-reference regression, and an out-of-scope text case |
 | `tests/test_classifier.py` | `_parse_response()` (plain/fenced/malformed JSON) and `classify()` (success, missing optional fields, request exception, malformed JSON, missing `response` key) — `requests.post` mocked, no Ollama needed |
 | `tests/test_e2e.py` | Full `POST /ingest` pipeline (parse → scope_gate → classify), one real sample per doc type, plus an out-of-scope (text-less) PDF. **Needs Ollama running with `llama3.1` pulled — hits it for real, not mocked.** On a misclassification, also writes a `failure_log.jsonl` entry |
-| `tests/test_failure_log.py` | `log_failure()` appends correctly-shaped JSON Lines records; handles `None` predicted type; appends without overwriting |
+| `tests/test_failure_log.py` | `log_failure()` appends correctly-shaped JSON Lines records; handles `None` predicted type; appends without overwriting; the record carries **only** the five de-identified fields, and `logged_at` is UTC |
 
-40 tests total. More test files land as the suite grows — see `docs/TO_DO_LIST.md`
+42 tests total. More test files land as the suite grows — see `docs/TO_DO_LIST.md`
 for what's still open.
 
 ## Failure log
@@ -55,6 +55,15 @@ for what's still open.
 appends one JSON Lines record per misclassification to `failure_log.jsonl` at the
 project root. Field names match `docs/2_ARCHITECTURE.md`'s `failure_log` SQLite
 table, so this moves into SQLite later (unit #9) without a schema change.
+
+**The record must stay de-identified.** Unlike `samples/`, `failure_log.jsonl` is
+committed and shared — it travels. `document_id` is a filename or a hash, never a
+path (a path leaks a client in the folder name even when the filename is clean).
+`note` carries the classification decision only — never a name, an account number,
+or a figure read out of the document. The full rule with worked examples is in
+`failure_log.py`'s docstring; `tests/test_failure_log.py` asserts the record's exact
+field set, so a new field fails that test before it can reach a shared file. Open
+questions on the format are tracked in the issues, not here.
 
 No review UI exists yet to capture human corrections, so the current caller is
 `tests/test_e2e.py` — it already has both a real classifier prediction and a
@@ -176,14 +185,11 @@ a PR, not after.
 - Update `CHANGELOG.md` with what you finished, and `docs/TO_DO_LIST.md` if you
   closed or opened an item.
 
-**Client documents never enter git.** `.gitignore` blocks `*.pdf`, `*.docx`,
-`*.doc` and `*.zip` by extension, anywhere in the tree. That's on purpose:
-the `docs`/`samples` path rules only cover the two folders anyone remembered
-to list, and miss a client PDF dropped at the repo root while testing. **The
-rule is not retroactive** — it stops the next commit, it does not scrub
-anything already in history. If a client document has already been committed,
-say so before you push anything on top of it: getting it out means rewriting
-history, not a follow-up commit.
+**Client documents never enter git.** `.gitignore` blocks `*.pdf`, `*.docx`, `*.doc`
+and `*.zip` by extension anywhere in the tree — a path rule like `samples/` misses a
+PDF dropped at the repo root. It is **not retroactive**: it stops the next commit, it
+does not scrub history. If a client document is already committed, raise it before
+pushing on top of it.
 
 **`docs/` and `samples/` — shared outside git:**
 Both are gitignored — planning docs and sample advice documents aren't cleared for
