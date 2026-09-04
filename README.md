@@ -44,7 +44,7 @@ directly — no package/src layout needed.
 | `tests/test_scope_gate.py` | `check_scope()` against all 10 samples (correct type per filename prefix), the 2026-08-22 FSG/SOA cross-reference regression, and an out-of-scope text case |
 | `tests/test_classifier.py` | `_parse_response()` (plain/fenced/malformed JSON) and `classify()` (success, missing optional fields, request exception, malformed JSON, missing `response` key) — `requests.post` mocked, no Ollama needed |
 | `tests/test_e2e.py` | Full `POST /ingest` pipeline (parse → scope_gate → classify), one real sample per doc type, plus an out-of-scope (text-less) PDF. **Needs Ollama running with `llama3.1` pulled — hits it for real, not mocked.** On a misclassification, also writes a `failure_log.jsonl` entry |
-| `tests/test_failure_log.py` | `log_failure()` appends correctly-shaped JSON Lines records; handles `None` predicted type; appends without overwriting; the record carries **only** the five de-identified fields (guards against client identity reaching a shared file) and `logged_at` is UTC |
+| `tests/test_failure_log.py` | `log_failure()` appends correctly-shaped JSON Lines records; handles `None` predicted type; appends without overwriting; the record carries **only** the five de-identified fields, and `logged_at` is UTC |
 
 42 tests total. More test files land as the suite grows — see `docs/TO_DO_LIST.md`
 for what's still open.
@@ -57,56 +57,13 @@ project root. Field names match `docs/2_ARCHITECTURE.md`'s `failure_log` SQLite
 table, so this moves into SQLite later (unit #9) without a schema change.
 
 **The record must stay de-identified.** Unlike `samples/`, `failure_log.jsonl` is
-committed to git and shared between collaborators — it travels. So:
-
-- **`document_id`** — a filename or a hash. *Never a full path.* A path like
-  `/clients/Nguyen Family/fact find.pdf` leaks a client name in the folder it sits
-  in, even when the filename itself is clean.
-- **`note`** — the classification decision only: what was predicted, what was
-  correct, one line on why it went wrong. *Never* a client name, an account number,
-  a balance, or any figure read out of the document.
-- **`predicted_type` / `correct_type`** — document-type ids from
-  `knowledge_base.json`, nothing else.
-
-The difference in practice — both records describe the same failure.
-
-**Leaks:**
-
-```json
-{"document_id": "/Users/adviser/Clients/Nguyen Family/2024 fact find.pdf",
- "predicted_type": null, "correct_type": "fact_find",
- "note": "OCR poor on page 3, missed $840,000 super balance for Linh Nguyen"}
-```
-
-That names a person, states their super balance, and confirms they're a client of this
-firm. Note that it leaks *because* someone was being helpful — that's a note written at
-the end of the day for whoever debugs it next, not a careless one. Which is exactly why
-the rule is written down instead of left to judgement in the moment.
-
-**De-identified — same diagnostic value:**
-
-```json
-{"document_id": "fact_find_2024.pdf",
- "predicted_type": null, "correct_type": "fact_find",
- "note": "OCR poor on page 3, balance field not extracted"}
-```
-
-You still know what broke, on which page, and what it cost you.
-
-**Measuring accuracy without carrying identity.** The failure log exists to prove
-accuracy, and once client resolution and event grouping are built, "was this filed
-under the right client?" is half of what accurate means — so the log will need to
-record client matching, not just document type. Record it as an opaque key on both
-sides (`client_key_predicted` / `client_key_correct`), never a name. A mismatch stays
-visible and countable, anyone inside the firm can resolve a key back to a client, and
-the shared log stays meaningless to everyone else. Same for advice events.
-
-`tests/test_failure_log.py` asserts the record's **exact** field set, so a new field
-cannot be added to `log_failure()` without that test failing first — including those
-future ones. That's intended: it forces the keys-not-names decision to be made
-deliberately rather than by whoever happens to be typing. If a record genuinely needs
-more context, the answer is a reference someone with access can look up, not the
-content itself.
+committed and shared — it travels. `document_id` is a filename or a hash, never a
+path (a path leaks a client in the folder name even when the filename is clean).
+`note` carries the classification decision only — never a name, an account number,
+or a figure read out of the document. The full rule with worked examples is in
+`failure_log.py`'s docstring; `tests/test_failure_log.py` asserts the record's exact
+field set, so a new field fails that test before it can reach a shared file. Open
+questions on the format are tracked in the issues, not here.
 
 No review UI exists yet to capture human corrections, so the current caller is
 `tests/test_e2e.py` — it already has both a real classifier prediction and a
@@ -228,14 +185,11 @@ a PR, not after.
 - Update `CHANGELOG.md` with what you finished, and `docs/TO_DO_LIST.md` if you
   closed or opened an item.
 
-**Client documents never enter git.** `.gitignore` blocks `*.pdf`, `*.docx`,
-`*.doc` and `*.zip` by extension, anywhere in the tree. That's on purpose:
-the `docs`/`samples` path rules only cover the two folders anyone remembered
-to list, and miss a client PDF dropped at the repo root while testing. **The
-rule is not retroactive** — it stops the next commit, it does not scrub
-anything already in history. If a client document has already been committed,
-say so before you push anything on top of it: getting it out means rewriting
-history, not a follow-up commit.
+**Client documents never enter git.** `.gitignore` blocks `*.pdf`, `*.docx`, `*.doc`
+and `*.zip` by extension anywhere in the tree — a path rule like `samples/` misses a
+PDF dropped at the repo root. It is **not retroactive**: it stops the next commit, it
+does not scrub history. If a client document is already committed, raise it before
+pushing on top of it.
 
 **`docs/` and `samples/` — shared outside git:**
 Both are gitignored — planning docs and sample advice documents aren't cleared for

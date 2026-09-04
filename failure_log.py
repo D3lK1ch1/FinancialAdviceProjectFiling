@@ -17,6 +17,21 @@ client name, an account number, a balance, or any figure read out of the
 document. tests/test_failure_log.py asserts the record's exact field set, so
 a field cannot be added here without that test failing first.
 
+The restriction is on the PERSON, not the classification. The system itself
+extracts client names and must — it files documents into folders named after
+clients. Only this file is restricted, because only this file leaves the firm.
+Advice type and advice stage are knowledge_base.json categories, not personal
+information, and belong here in full.
+
+    leaks:  {"document_id": "/Clients/Nguyen Family/2024 fact find.pdf",
+             "note": "OCR poor p3, missed $840,000 super balance for Linh Nguyen"}
+    clean:  {"document_id": "fact_find_2024.pdf",
+             "note": "OCR poor p3, balance field not extracted"}
+
+The leaking one was written by somebody being helpful at the end of the day,
+not somebody being careless. That is the realistic failure mode, and the
+reason this rule is written down instead of left to judgement.
+
 No review UI exists yet to capture human corrections (unit #12), so the
 current caller is tests/test_e2e.py: it has both a real classifier
 prediction and a hand-labelled correct answer for every sample, which is
