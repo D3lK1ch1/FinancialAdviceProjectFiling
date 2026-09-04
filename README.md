@@ -83,15 +83,27 @@ JSON out.
 
 ## Dependencies
 
-No `requirements.txt` exists yet (known gap — not fixed by this README). What's
-installed and in use, confirmed in this environment:
+```
+python -m pip install -r requirements.txt
+```
 
-| package | used by |
-|---|---|
-| `fastapi` | `app.py` |
-| `uvicorn` | running the app |
-| `pypdf` | `parser.py` |
-| `requests` | `classifier.py` (talks to Ollama's HTTP API) |
+Pinned to exact versions, so a clone installs what this was built and tested
+against rather than whatever is current that week:
+
+| package | version | used by |
+|---|---|---|
+| `fastapi` | 0.128.0 | `app.py` |
+| `uvicorn` | 0.39.0 | running the app |
+| `pypdf` | 6.15.0 | `parser.py` |
+| `requests` | 2.32.4 | `classifier.py` (talks to Ollama's HTTP API) |
+
+**Python 3.10 or newer.** `failure_log.py` annotates a parameter `str | None`,
+which is a `TypeError` at import time on 3.9 — the failure is an import error
+with no obvious link to the Python version, so it's worth stating here.
+
+Test-only dependencies (`pytest`, and `httpx` for FastAPI's `TestClient`) are
+deliberately not in `requirements.txt` — they belong with contributor-runnable
+tests and CI, which is its own open item.
 
 Plus a running Ollama instance with `llama3.1` pulled (see above).
 
@@ -163,6 +175,15 @@ a PR, not after.
   improve the classifier against.
 - Update `CHANGELOG.md` with what you finished, and `docs/TO_DO_LIST.md` if you
   closed or opened an item.
+
+**Client documents never enter git.** `.gitignore` blocks `*.pdf`, `*.docx`,
+`*.doc` and `*.zip` by extension, anywhere in the tree. That's on purpose:
+the `docs`/`samples` path rules only cover the two folders anyone remembered
+to list, and miss a client PDF dropped at the repo root while testing. **The
+rule is not retroactive** — it stops the next commit, it does not scrub
+anything already in history. If a client document has already been committed,
+say so before you push anything on top of it: getting it out means rewriting
+history, not a follow-up commit.
 
 **`docs/` and `samples/` — shared outside git:**
 Both are gitignored — planning docs and sample advice documents aren't cleared for

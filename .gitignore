@@ -14,3 +14,12 @@ Thumbs.ds
 # Classified documents
 docs
 samples
+
+# Client documents — never commit, in any folder. Extension rules, not path
+# rules: `docs`/`samples` above miss a PDF dropped at the repo root, or in a
+# folder nobody thought to list. Does NOT retroactively scrub anything already
+# committed — see Contributing in README.md.
+*.pdf
+*.docx
+*.doc
+*.zip
