@@ -68,10 +68,45 @@ committed to git and shared between collaborators — it travels. So:
 - **`predicted_type` / `correct_type`** — document-type ids from
   `knowledge_base.json`, nothing else.
 
+The difference in practice — both records describe the same failure.
+
+**Leaks:**
+
+```json
+{"document_id": "/Users/adviser/Clients/Nguyen Family/2024 fact find.pdf",
+ "predicted_type": null, "correct_type": "fact_find",
+ "note": "OCR poor on page 3, missed $840,000 super balance for Linh Nguyen"}
+```
+
+That names a person, states their super balance, and confirms they're a client of this
+firm. Note that it leaks *because* someone was being helpful — that's a note written at
+the end of the day for whoever debugs it next, not a careless one. Which is exactly why
+the rule is written down instead of left to judgement in the moment.
+
+**De-identified — same diagnostic value:**
+
+```json
+{"document_id": "fact_find_2024.pdf",
+ "predicted_type": null, "correct_type": "fact_find",
+ "note": "OCR poor on page 3, balance field not extracted"}
+```
+
+You still know what broke, on which page, and what it cost you.
+
+**Measuring accuracy without carrying identity.** The failure log exists to prove
+accuracy, and once client resolution and event grouping are built, "was this filed
+under the right client?" is half of what accurate means — so the log will need to
+record client matching, not just document type. Record it as an opaque key on both
+sides (`client_key_predicted` / `client_key_correct`), never a name. A mismatch stays
+visible and countable, anyone inside the firm can resolve a key back to a client, and
+the shared log stays meaningless to everyone else. Same for advice events.
+
 `tests/test_failure_log.py` asserts the record's **exact** field set, so a new field
-cannot be added to `log_failure()` without that test failing first. If a record
-genuinely needs more context, the answer is a reference someone with access can look
-up — not the content itself.
+cannot be added to `log_failure()` without that test failing first — including those
+future ones. That's intended: it forces the keys-not-names decision to be made
+deliberately rather than by whoever happens to be typing. If a record genuinely needs
+more context, the answer is a reference someone with access can look up, not the
+content itself.
 
 No review UI exists yet to capture human corrections, so the current caller is
 `tests/test_e2e.py` — it already has both a real classifier prediction and a
