@@ -6,6 +6,13 @@ a finished step (see Contributing in `README.md`). Newest at top.
 ## Session 05-09-2026
 
 ### Done
+- `app.py` / `classifier.py` / `scope_gate.py` — the supported document-type set
+  now comes from `knowledge_base.json` instead of the same four-type tuple
+  hardcoded in three files. All nine KB types are in scope, and the classifier's
+  hint block covers all nine (they already carry complete `classifier_hints`, so
+  this is a data change, not new matching logic). Previously the five unsupported
+  types — most of a firm's real intake — left the pipeline as `in_scope: False`
+  with no type and no flag, indistinguishable from an unreadable file (#12).
 - `scope_gate.py` — candidate types now rank on earliest match position, not on
   summed pattern length. Length was standing in for confidence: "Product
   Disclosure Statement" (28 chars) outranked "Record of Advice" (16), so an ROA
