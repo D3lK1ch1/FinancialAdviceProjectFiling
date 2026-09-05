@@ -3,6 +3,18 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 05-09-2026 — knowledge base
+
+### Done
+- `knowledge_base.json` — the Authority to Proceed's hints now key on what the
+  document *does* rather than what it looks like. Firms name this one
+  inconsistently (four title variants already), so title is weak evidence; the
+  substance is constant: a named party, specific actions, and a client's grant of
+  authority to act. Adds the first-person grant, the authorised party as a key
+  field, and the distinction from application forms — both are signed lists of
+  actions, but an ATP empowers the ADVISER while application forms instruct the
+  PRODUCT ISSUER.
+
 ## Session 31-08-2026
 
 ### In progress
