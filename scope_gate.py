@@ -9,15 +9,19 @@ real classifier, later.
 import json
 import re
 
-IN_SCOPE_TYPES = ["soa", "roa", "fsg", "pds"]
-
 with open("knowledge_base.json") as f:
     _KB = json.load(f)
+
+# The supported set is whatever the knowledge base defines — never a list in
+# Python (CLAUDE.md rule #1). Previously this was hardcoded to four types in
+# three separate files while the KB defined nine, so the five it didn't know
+# about left the pipeline as in_scope: False with no type and no flag —
+# indistinguishable from an unreadable file.
+IN_SCOPE_TYPES = [doc["id"] for doc in _KB["documents"]]
 
 _TITLE_PATTERNS = {
     doc["id"]: doc["classifier_hints"]["title_patterns"]
     for doc in _KB["documents"]
-    if doc["id"] in IN_SCOPE_TYPES
 }
 
 # Patterns match on word boundaries, not as bare substrings. Six of the KB's

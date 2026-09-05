@@ -118,6 +118,123 @@ def test_acronym_patterns_stay_case_sensitive():
     # Multi-word patterns go the other way: they must match in any casing.
     assert _matcher("Statement of Advice").search("STATEMENT OF ADVICE") is not None
     assert _matcher("Statement of Advice").search("statement of advice") is not None
+# Every type the knowledge base defines that the code previously did not support.
+# These are most of a firm's real intake, and each one used to leave the pipeline
+# as in_scope: False with no type and no flag — indistinguishable from a file that
+# couldn't be read at all.
+NEWLY_SUPPORTED = [
+    ("authority_to_proceed", "Authority to Proceed\nI authorise my adviser to implement"),
+    ("fact_find", "Fact Find\nClient Data Form completed 1 July 2024"),
+    ("risk_profile", "Investor Risk Profile\nAttitude to Risk questionnaire"),
+    ("fee_disclosure_statement", "Fee Disclosure Statement\nOngoing Fee Consent for the period"),
+]
+
+
+def test_supported_types_come_from_the_knowledge_base():
+    """Ground rule #1. The supported set is whatever the KB defines — asserting
+    the set equality rather than a count, so the test doesn't fight a KB that
+    legitimately grows.
+    """
+    kb_path = Path(__file__).resolve().parent.parent / "knowledge_base.json"
+    kb = json.loads(kb_path.read_text())
+
+    assert set(IN_SCOPE_TYPES) == {doc["id"] for doc in kb["documents"]}
+
+
+@pytest.mark.parametrize(
+    "expected_type, text", NEWLY_SUPPORTED, ids=[t for t, _ in NEWLY_SUPPORTED]
+)
+def test_newly_supported_types_are_recognised(expected_type, text):
+    result = check_scope(text)
+
+    assert result["in_scope"] is True
+    assert result["likely_type"] == expected_type
+
+
+def test_ordinary_words_do_not_match_any_document_type():
+    """Kept from when `car` was a type and "CAR" was the sharpest test of the
+    word-boundary work. `car` is gone — not legislated, so not carried — but the
+    protection still matters: several title_patterns are three-letter acronyms
+    and the words that could swallow them are ordinary English. Asserted
+    negatively now, which needs no type that shouldn't exist.
+    """
+    for text in (
+        "Client agreement\nWe act with duty of CARE at all times.",
+        "Engagement letter\nSCARBOROUGH FINANCIAL PTY LTD",
+        "Tax invoice\nExample Advice Pty Ltd\n42 BROADWAY, SYDNEY",
+    ):
+        assert check_scope(text) == {"in_scope": False, "likely_type": None}
+
+
+def test_a_new_advice_record_type_needs_no_code_change():
+    """DBFO Tranche 2 would replace the SOA with a successor advice record.
+    That successor is deliberately NOT carried as a document type while it is
+    unlegislated (`reform_watch`) — the system does not classify document types
+    that are not law.
+
+    Which means the claim that the transition is "a relabel, not a rebuild" has
+    to be asserted rather than assumed, since there is no longer a placeholder
+    entry standing in for it. This adds a synthetic advice-record type to a copy
+    of the knowledge base and shows it classifies with no Python changed.
+    """
+    import importlib
+
+    import scope_gate as sg
+
+    kb_path = Path(__file__).resolve().parent.parent / "knowledge_base.json"
+    kb = json.loads(kb_path.read_text())
+    kb["documents"].append(
+        {
+            "id": "successor_advice_record",
+            "name": "Hypothetical successor to the SOA",
+            "abbrev": "SAR",
+            "category": "advice_record",
+            "advice_record_role": True,
+            "legislation": {"primary": "hypothetical"},
+            "classifier_hints": {
+                "title_patterns": ["Successor Advice Record"],
+                "key_fields": [],
+                "distinguishing_signals": [],
+                "confusable_with": [],
+            },
+            "links_to": [],
+            "version_notes": "",
+        }
+    )
+
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        (Path(tmp) / "knowledge_base.json").write_text(json.dumps(kb))
+        cwd = Path.cwd()
+        try:
+            import os
+
+            os.chdir(tmp)
+            reloaded = importlib.reload(sg)
+
+            assert "successor_advice_record" in reloaded.IN_SCOPE_TYPES
+            result = reloaded.check_scope("Successor Advice Record\nPrepared 1 July 2026")
+            assert result["in_scope"] is True
+            assert result["likely_type"] == "successor_advice_record"
+        finally:
+            os.chdir(cwd)
+            importlib.reload(sg)
+
+
+def test_advice_record_role_survives_the_removed_successor_type():
+    """CLAUDE.md: advice_record_role is the DBFO seam and is load-bearing. It is
+    still carried by more than one type after the unlegislated successor was
+    removed, so role-keyed logic stays exercised and cannot rot into a field
+    nothing reads.
+    """
+    kb_path = Path(__file__).resolve().parent.parent / "knowledge_base.json"
+    kb = json.loads(kb_path.read_text())
+    carriers = [d["id"] for d in kb["documents"] if d.get("advice_record_role")]
+
+    assert len(carriers) > 1, f"the seam needs more than one carrier to stay exercised: {carriers}"
+    assert "soa" in carriers
+
 
 
 # Every advice document names other document types in its body — that's what the
