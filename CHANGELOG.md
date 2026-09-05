@@ -3,6 +3,20 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 05-09-2026 — parser
+
+### Done
+- `parser.py` — `parse_pdf()` now returns per-page text alongside the joined text.
+  Extraction was already page by page; the boundaries existed and were discarded
+  on the join. They are the only evidence a bundle split point can be argued from
+  (#19). `"\n".join(pages) == extracted_text` always holds, so the two views
+  cannot disagree. `/ingest` does not echo `pages` — no consumer yet, and it would
+  roughly double the payload.
+- `tests/test_parser.py` — multi-page PDFs are now built in the test with `pypdf`
+  itself, so the file runs on a bare clone. `test_parse_pdf_returns_expected_keys`
+  previously indexed `samples/` and raised `IndexError` rather than guarding the
+  record shape when the samples weren't present.
+
 ## Session 31-08-2026
 
 ### In progress
