@@ -8,11 +8,20 @@ a finished step (see Contributing in `README.md`). Newest at top.
 ### Done
 - `app.py` / `classifier.py` / `scope_gate.py` — the supported document-type set
   now comes from `knowledge_base.json` instead of the same four-type tuple
-  hardcoded in three files. All nine KB types are in scope, and the classifier's
-  hint block covers all nine (they already carry complete `classifier_hints`, so
-  this is a data change, not new matching logic). Previously the five unsupported
+  hardcoded in three files. Every KB type is in scope, and the classifier's
+  hint block covers all of them (they already carry complete `classifier_hints`, so
+  this is a data change, not new matching logic). Previously the unsupported
   types — most of a firm's real intake — left the pipeline as `in_scope: False`
   with no type and no flag, indistinguishable from an unreadable file (#12).
+- `knowledge_base.json` — the `car` (Client Advice Record) document type is
+  removed. DBFO Tranche 2 is not law, and the system does not classify or file
+  document types that are not legislated. `reform_watch` keeps the record of the
+  reform and now carries the decision. The transition seam is
+  `advice_record_role`, still carried by `soa` and `roa`, so role-keyed logic
+  stays exercised; and because the supported type set is read from the knowledge
+  base rather than hardcoded, adding the successor on enactment is one entry and
+  no Python. That property is now asserted by a test instead of assumed, which
+  the placeholder entry never did (#12).
 - `scope_gate.py` — candidate types now rank on earliest match position, not on
   summed pattern length. Length was standing in for confidence: "Product
   Disclosure Statement" (28 chars) outranked "Record of Advice" (16), so an ROA

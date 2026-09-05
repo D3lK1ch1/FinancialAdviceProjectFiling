@@ -13,23 +13,138 @@
       "status": "Draft legislation released 21 March 2025; delayed through 2025-2026; not passed as at this build.",
       "impact": "SOA to be replaced by 'Client Advice Record' (CAR) — intended to be shorter, principles-based. Proposed CAR content: the words 'client advice record'; scope of advice; the advice; reasons (how it meets client objectives/situation/needs); cost of advice and benefits to provider; providing entity name/contact and authorised-representative status.",
       "also_proposed": "Removal/streamlining of the s961B(2) safe-harbour steps; shift from prescriptive process to outcomes.",
-      "design_implication": "Add 'car' as a document type now, mapped to the same advice-record ROLE as 'soa', so the classifier and UI absorb the transition by relabelling rather than rebuilding."
+      "design_implication": "DECIDED 2026-09-05: 'car' is NOT carried as a document type while it is unlegislated — the system does not classify or file document types that are not law. The transition seam is advice_record_role, which is still carried by 'soa' and 'roa', so role-keyed logic stays exercised. Because the supported type set is read from this file rather than hardcoded, adding the successor type on enactment is a data change: one entry here, no Python. That property is asserted by a test rather than assumed — see tests/test_scope_gate.py, test_a_new_advice_record_type_needs_no_code_change."
     }
   },
   "advice_types": [
-    {"id": "personal_advice", "name": "Personal advice", "provision": "s766B(3)", "plain": "Advice given where the provider has considered one or more of the client's objectives, financial situation or needs (or a reasonable person would expect them to have). Triggers the SOA/ROA regime and the best-interests duty (s961B).", "documents": ["soa", "roa", "car"]},
-    {"id": "general_advice", "name": "General advice", "provision": "s766B(4)", "plain": "Financial product advice that is not personal advice. No SOA; instead a general-advice warning is required.", "provision_warning": "s949A", "documents": ["general_advice_warning"]},
-    {"id": "scaled_advice", "name": "Scaled (limited-scope) personal advice", "provision": "Personal advice; scope limited by agreement. RG 244.", "plain": "Personal advice limited in subject matter (e.g. one topic). Still personal advice — SOA/ROA and best-interests duty apply, assessed against the agreed scope.", "documents": ["soa", "roa"]},
-    {"id": "further_advice", "name": "Further advice", "provision": "s946B(1)-(3A); reg 7.7.10AE", "plain": "Subsequent personal advice to a client with an existing SOA, where there is no material change in circumstances or basis of advice. May be recorded via ROA instead of a fresh SOA.", "documents": ["roa"]},
-    {"id": "execution_only", "name": "Execution-only / no advice", "provision": "No personal advice given (s766B not engaged)", "plain": "Client instructs a transaction with no personal recommendation. No SOA/ROA; dealing and product-disclosure rules still apply.", "documents": []}
+    {
+      "id": "personal_advice",
+      "name": "Personal advice",
+      "provision": "s766B(3)",
+      "plain": "Advice given where the provider has considered one or more of the client's objectives, financial situation or needs (or a reasonable person would expect them to have). Triggers the SOA/ROA regime and the best-interests duty (s961B).",
+      "documents": [
+        "soa",
+        "roa",
+        "car"
+      ]
+    },
+    {
+      "id": "general_advice",
+      "name": "General advice",
+      "provision": "s766B(4)",
+      "plain": "Financial product advice that is not personal advice. No SOA; instead a general-advice warning is required.",
+      "provision_warning": "s949A",
+      "documents": [
+        "general_advice_warning"
+      ]
+    },
+    {
+      "id": "scaled_advice",
+      "name": "Scaled (limited-scope) personal advice",
+      "provision": "Personal advice; scope limited by agreement. RG 244.",
+      "plain": "Personal advice limited in subject matter (e.g. one topic). Still personal advice — SOA/ROA and best-interests duty apply, assessed against the agreed scope.",
+      "documents": [
+        "soa",
+        "roa"
+      ]
+    },
+    {
+      "id": "further_advice",
+      "name": "Further advice",
+      "provision": "s946B(1)-(3A); reg 7.7.10AE",
+      "plain": "Subsequent personal advice to a client with an existing SOA, where there is no material change in circumstances or basis of advice. May be recorded via ROA instead of a fresh SOA.",
+      "documents": [
+        "roa"
+      ]
+    },
+    {
+      "id": "execution_only",
+      "name": "Execution-only / no advice",
+      "provision": "No personal advice given (s766B not engaged)",
+      "plain": "Client instructs a transaction with no personal recommendation. No SOA/ROA; dealing and product-disclosure rules still apply.",
+      "documents": []
+    }
   ],
   "advice_process_stages": [
-    {"stage": 1, "name": "Engagement & disclosure", "plain": "The relationship is established; the client is told who the provider is, what they offer, and how they're paid — before any service is provided.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg"]},
-    {"stage": 2, "name": "Discovery / fact-find", "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile"]},
-    {"stage": 3, "name": "Advice construction", "plain": "Recommendations are formed and the reasoning/basis for advice is documented.", "governing_provisions": ["s961B", "s961G (appropriate advice)"], "typical_docs": ["soa", "car"]},
-    {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B + reg 7.7.10AE (ROA path)"], "typical_docs": ["soa", "roa", "car"]},
-    {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "application_forms"]},
-    {"stage": 6, "name": "Ongoing service & review", "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "ongoing_fee_consent", "annual_review"]}
+    {
+      "stage": 1,
+      "name": "Engagement & disclosure",
+      "plain": "The relationship is established; the client is told who the provider is, what they offer, and how they're paid — before any service is provided.",
+      "governing_provisions": [
+        "s941A",
+        "s941B",
+        "s941D"
+      ],
+      "typical_docs": [
+        "fsg"
+      ]
+    },
+    {
+      "stage": 2,
+      "name": "Discovery / fact-find",
+      "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.",
+      "governing_provisions": [
+        "s961B (best interests)",
+        "s912G record-keeping (via ASIC Instrument 2024/508)"
+      ],
+      "typical_docs": [
+        "fact_find",
+        "risk_profile"
+      ]
+    },
+    {
+      "stage": 3,
+      "name": "Advice construction",
+      "plain": "Recommendations are formed and the reasoning/basis for advice is documented.",
+      "governing_provisions": [
+        "s961B",
+        "s961G (appropriate advice)"
+      ],
+      "typical_docs": [
+        "soa"
+      ]
+    },
+    {
+      "stage": 4,
+      "name": "Advice delivery",
+      "plain": "The advice record is given to the client, at or as soon as practicable after the advice.",
+      "governing_provisions": [
+        "s946A",
+        "s946C (timing)",
+        "s946B + reg 7.7.10AE (ROA path)"
+      ],
+      "typical_docs": [
+        "soa",
+        "roa"
+      ]
+    },
+    {
+      "stage": 5,
+      "name": "Implementation / execution",
+      "plain": "The client authorises action and the recommendations are executed; product applications are lodged.",
+      "governing_provisions": [
+        "General s912A conduct; product application terms; dealing provisions"
+      ],
+      "typical_docs": [
+        "authority_to_proceed",
+        "application_forms"
+      ]
+    },
+    {
+      "stage": 6,
+      "name": "Ongoing service & review",
+      "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.",
+      "governing_provisions": [
+        "Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)",
+        "s946B + reg 7.7.10AE"
+      ],
+      "typical_docs": [
+        "roa",
+        "fee_disclosure_statement",
+        "ongoing_fee_consent",
+        "annual_review"
+      ]
+    }
   ],
   "version_status_values": {
     "current": "The live, in-force version of this document for this client (or this edition, for licensee/issuer-wide docs).",
@@ -47,7 +162,14 @@
       "advice_record_role": true,
       "legislation": {
         "primary": "s946A — obligation to give an SOA when personal advice is provided to a retail client",
-        "related": ["s946B — situations where an SOA is not required", "s946C — timing", "s947B — content (licensee)", "s947C — content (authorised representative)", "s947D — additional content where advice recommends product replacement/switching", "s961B/s961G — best interests & appropriate advice underpinning the content"],
+        "related": [
+          "s946B — situations where an SOA is not required",
+          "s946C — timing",
+          "s947B — content (licensee)",
+          "s947C — content (authorised representative)",
+          "s947D — additional content where advice recommends product replacement/switching",
+          "s961B/s961G — best interests & appropriate advice underpinning the content"
+        ],
         "retention": "7 years (reg 7.7.09C and related)",
         "penalty_note": "s946A obligations sit within the civil-penalty framework (s1317E); content failures also expose the licensee via s912A."
       },
@@ -58,46 +180,52 @@
         "two_weeks_in_note": "If you learn to recognise one document, make it this. Everything else is input to it, disclosure around it, a lighter follow-up to it (ROA), or its implementation (ATP). Note the coming CAR reform — same role, new label."
       },
       "classifier_hints": {
-        "title_patterns": ["Statement of Advice", "SOA", "Statement of Advice prepared for"],
-        "key_fields": ["client name", "adviser + AFSL/authorised-rep number", "scope/subject matter of advice", "basis for advice / reasoning", "recommendations", "replacement/switching costs and lost benefits (s947D)", "remuneration & conflicts", "date of advice"],
-        "distinguishing_signals": ["long-form, stands alone", "explicit basis-for-advice and scope sections", "remuneration + conflicts disclosure", "s947D switching disclosure when products are being replaced", "an Authority to Proceed is frequently appended at the end"],
-        "confusable_with": ["roa — a full SOA stands alone; an ROA references a prior SOA and is shorter", "car — the future replacement; classify by role, read the title to set the label", "fsg — the FSG is about the provider, not client-specific recommendations"]
+        "title_patterns": [
+          "Statement of Advice",
+          "SOA",
+          "Statement of Advice prepared for"
+        ],
+        "key_fields": [
+          "client name",
+          "adviser + AFSL/authorised-rep number",
+          "scope/subject matter of advice",
+          "basis for advice / reasoning",
+          "recommendations",
+          "replacement/switching costs and lost benefits (s947D)",
+          "remuneration & conflicts",
+          "date of advice"
+        ],
+        "distinguishing_signals": [
+          "long-form, stands alone",
+          "explicit basis-for-advice and scope sections",
+          "remuneration + conflicts disclosure",
+          "s947D switching disclosure when products are being replaced",
+          "an Authority to Proceed is frequently appended at the end"
+        ],
+        "confusable_with": [
+          "roa — a full SOA stands alone; an ROA references a prior SOA and is shorter",
+          "a document titled 'Client Advice Record' — the proposed DBFO Tranche 2 successor, NOT legislated and deliberately not a document type here (see reform_watch). It has no type to match, so it routes to review rather than being filed as advice whose legal status we cannot determine.",
+          "fsg — the FSG is about the provider, not client-specific recommendations"
+        ]
       },
       "links_to": [
-        {"doc": "authority_to_proceed", "relationship": "implemented_by", "note": "The ATP authorises the client to proceed with THIS SOA's recommendations. Often physically appended to the SOA PDF — a frequent multi-document-bundle split point."},
-        {"doc": "roa", "relationship": "may_be_followed_by", "note": "Later further advice on the same basis may be recorded as an ROA referencing this SOA."},
-        {"doc": "fact_find", "relationship": "based_on", "note": "The SOA's recommendations must trace back to the fact find and risk profile."}
+        {
+          "doc": "authority_to_proceed",
+          "relationship": "implemented_by",
+          "note": "The ATP authorises the client to proceed with THIS SOA's recommendations. Often physically appended to the SOA PDF — a frequent multi-document-bundle split point."
+        },
+        {
+          "doc": "roa",
+          "relationship": "may_be_followed_by",
+          "note": "Later further advice on the same basis may be recorded as an ROA referencing this SOA."
+        },
+        {
+          "doc": "fact_find",
+          "relationship": "based_on",
+          "note": "The SOA's recommendations must trace back to the fact find and risk profile."
+        }
       ],
       "version_notes": "Client-specific and dated. A new SOA for the same client and scope supersedes the prior one; rarely a true duplicate."
-    },
-    {
-      "id": "car",
-      "name": "Client Advice Record (proposed DBFO replacement for the SOA)",
-      "abbrev": "CAR",
-      "category": "advice_record",
-      "advice_record_role": true,
-      "status": "PROPOSED — not in force as at build. Included so the system absorbs the transition by relabelling, not rebuilding.",
-      "legislation": {
-        "primary": "DBFO Tranche 2 draft (not passed). Intended successor to s946A SOA regime.",
-        "related": ["Proposed 'good advice' duty; proposed streamlining of s961B(2) safe harbour"],
-        "retention": "Expected to mirror SOA (7 years) — confirm on enactment."
-      },
-      "teaching": {
-        "what_it_is": "The intended replacement for the SOA — a shorter, more client-focused record of personal advice.",
-        "why_it_exists": "DBFO reform aims to cut advice cost and length while keeping the client-protection core.",
-        "where_it_sits": "Same as the SOA (stages 3-4) once in force.",
-        "two_weeks_in_note": "As at now this is horizon-scanning, not something you'll see in a live file yet. The system knows about it so you're not surprised when it lands."
-      },
-      "classifier_hints": {
-        "title_patterns": ["Client Advice Record", "CAR"],
-        "key_fields": ["the words 'client advice record'", "scope of advice", "the advice", "reasons (objectives/situation/needs)", "cost of advice + benefits to provider", "providing entity name/contact + authorised-rep status"],
-        "distinguishing_signals": ["explicitly titled 'Client Advice Record'", "shorter than a legacy SOA"],
-        "confusable_with": ["soa — same role; the title and length distinguish them"]
-      },
-      "links_to": [
-        {"doc": "authority_to_proceed", "relationship": "implemented_by", "note": "Same implementation link as the SOA."}
-      ],
-      "version_notes": "Treat identically to the SOA for versioning. Same advice_record_role, so version logic keyed on role, not label, needs no change."
     },
     {
       "id": "roa",
@@ -108,10 +236,26 @@
       "legislation": {
         "primary": "s946B — situations in which an SOA is not required (the ROA pathway)",
         "four_kinds": [
-          {"kind": "Further advice", "basis": "s946B(1)-(3A) + reg 7.7.10AE", "when": "Existing SOA client; no material change in circumstances or basis of advice."},
-          {"kind": "No-action / 'hold' recommendation", "basis": "s946B(7)", "when": "Advice to take no action; no prior SOA required."},
-          {"kind": "Small investment advice", "basis": "s946AA + reg 7.7.09A", "when": "Advice value under the threshold; timing rules in reg 7.7.09A(10)-(12)."},
-          {"kind": "No recommendation to buy/sell", "basis": "reg 7.7.10AAA", "when": "Personal advice with no purchase/sell recommendation; content per reg 7.7.10AAA."}
+          {
+            "kind": "Further advice",
+            "basis": "s946B(1)-(3A) + reg 7.7.10AE",
+            "when": "Existing SOA client; no material change in circumstances or basis of advice."
+          },
+          {
+            "kind": "No-action / 'hold' recommendation",
+            "basis": "s946B(7)",
+            "when": "Advice to take no action; no prior SOA required."
+          },
+          {
+            "kind": "Small investment advice",
+            "basis": "s946AA + reg 7.7.09A",
+            "when": "Advice value under the threshold; timing rules in reg 7.7.09A(10)-(12)."
+          },
+          {
+            "kind": "No recommendation to buy/sell",
+            "basis": "reg 7.7.10AAA",
+            "when": "Personal advice with no purchase/sell recommendation; content per reg 7.7.10AAA."
+          }
         ],
         "retention": "7 years after the day the further advice is provided (reg 7.7.09(3); reg 7.7.05; reg 7.7.08)",
         "content_note": "Content requirements differ by kind — chiefly reg 7.7.10AE (further advice) and reg 7.7.10AAA (no buy/sell)."
@@ -123,14 +267,39 @@
         "two_weeks_in_note": "The most common kind (further advice) points back to an earlier SOA. An ROA with no prior SOA on file isn't automatically wrong — the 'hold', small-investment, and no-buy/sell kinds don't need one — but it's worth flagging to confirm which kind it is."
       },
       "classifier_hints": {
-        "title_patterns": ["Record of Advice", "ROA"],
-        "key_fields": ["client name", "adviser", "reference to prior SOA (for further-advice kind)", "the further advice / change / hold recommendation", "basis on which recommendations are made", "date"],
-        "distinguishing_signals": ["short-form (often 1-5 pages)", "further-advice kind references a prior SOA by date", "narrow scope"],
-        "confusable_with": ["soa — shorter and (for the further-advice kind) dependent on a prior SOA", "file_note — an ROA is client advice; a file note is internal only"]
+        "title_patterns": [
+          "Record of Advice",
+          "ROA"
+        ],
+        "key_fields": [
+          "client name",
+          "adviser",
+          "reference to prior SOA (for further-advice kind)",
+          "the further advice / change / hold recommendation",
+          "basis on which recommendations are made",
+          "date"
+        ],
+        "distinguishing_signals": [
+          "short-form (often 1-5 pages)",
+          "further-advice kind references a prior SOA by date",
+          "narrow scope"
+        ],
+        "confusable_with": [
+          "soa — shorter and (for the further-advice kind) dependent on a prior SOA",
+          "file_note — an ROA is client advice; a file note is internal only"
+        ]
       },
       "links_to": [
-        {"doc": "soa", "relationship": "references_prior", "note": "The further-advice ROA depends on an existing SOA; the other three kinds do not."},
-        {"doc": "authority_to_proceed", "relationship": "may_be_implemented_by", "note": "Where the ROA advises an action the client then authorises."}
+        {
+          "doc": "soa",
+          "relationship": "references_prior",
+          "note": "The further-advice ROA depends on an existing SOA; the other three kinds do not."
+        },
+        {
+          "doc": "authority_to_proceed",
+          "relationship": "may_be_implemented_by",
+          "note": "Where the ROA advises an action the client then authorises."
+        }
       ],
       "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the four kinds — it changes both content expectations and whether a prior SOA is required."
     },
@@ -142,7 +311,10 @@
       "advice_record_role": false,
       "legislation": {
         "primary": "No single dedicated section — it evidences client consent to implement, supporting the licensee's s912A 'efficient, honest and fair' obligation and creating an audit trail for the dealing.",
-        "related": ["Product application terms", "Dealing provisions where the implementation involves arranging to acquire a product"],
+        "related": [
+          "Product application terms",
+          "Dealing provisions where the implementation involves arranging to acquire a product"
+        ],
         "note": "Because it isn't a named statutory disclosure document, classification leans on structure (signature/authorisation) and its link to the advice record, not a titling provision."
       },
       "teaching": {
@@ -152,14 +324,41 @@
         "two_weeks_in_note": "Very often appended to the back of the SOA it implements. When splitting a scanned bundle, the ATP is the classic 'document 2' hiding at the end of an SOA PDF. Always link it to the advice record it authorises — an ATP with no matching SOA/ROA is an exception worth flagging."
       },
       "classifier_hints": {
-        "title_patterns": ["Authority to Proceed", "Authority to Implement", "Client Authorisation", "Authority to Act"],
-        "key_fields": ["client name", "client signature", "reference to the SOA/ROA being authorised", "products/actions authorised", "date signed"],
-        "distinguishing_signals": ["prominent signature block", "short and instructional, not explanatory", "references the advice record it implements", "may share a document with the SOA"],
-        "confusable_with": ["soa — the ATP authorises; the SOA advises", "application_forms — the ATP authorises the adviser; application forms go to the product issuer"]
+        "title_patterns": [
+          "Authority to Proceed",
+          "Authority to Implement",
+          "Client Authorisation",
+          "Authority to Act"
+        ],
+        "key_fields": [
+          "client name",
+          "client signature",
+          "reference to the SOA/ROA being authorised",
+          "products/actions authorised",
+          "date signed"
+        ],
+        "distinguishing_signals": [
+          "prominent signature block",
+          "short and instructional, not explanatory",
+          "references the advice record it implements",
+          "may share a document with the SOA"
+        ],
+        "confusable_with": [
+          "soa — the ATP authorises; the SOA advises",
+          "application_forms — the ATP authorises the adviser; application forms go to the product issuer"
+        ]
       },
       "links_to": [
-        {"doc": "soa", "relationship": "implements", "note": "Primary link. Match ATP to its SOA by client + date + referenced recommendations."},
-        {"doc": "roa", "relationship": "implements", "note": "Where the action advised in an ROA is the thing being authorised."}
+        {
+          "doc": "soa",
+          "relationship": "implements",
+          "note": "Primary link. Match ATP to its SOA by client + date + referenced recommendations."
+        },
+        {
+          "doc": "roa",
+          "relationship": "implements",
+          "note": "Where the action advised in an ROA is the thing being authorised."
+        }
       ],
       "version_notes": "Per client, per advice event, dated. Not usually superseded — each authorisation is a discrete event. A re-signed ATP for the same advice replaces the earlier one."
     },
@@ -171,7 +370,11 @@
       "advice_record_role": false,
       "legislation": {
         "primary": "s941A/s941B — obligation to give an FSG; s941D — timing",
-        "related": ["s942B — content (licensee)", "s942C — content (authorised representative)", "reg 7.7.10AB — FSG contents"],
+        "related": [
+          "s942B — content (licensee)",
+          "s942C — content (authorised representative)",
+          "reg 7.7.10AB — FSG contents"
+        ],
         "timing_rule": "Must be given before/at the point a financial service is provided; you cannot provide the service until the FSG is given (s941A, s941B, s941D)."
       },
       "teaching": {
@@ -181,10 +384,30 @@
         "two_weeks_in_note": "Generic to the licensee/adviser, not tailored to the client — the same FSG goes to many clients. So version tracking here is about which EDITION was in force on a date, not per-client history."
       },
       "classifier_hints": {
-        "title_patterns": ["Financial Services Guide", "FSG", "Part 1 FSG", "Part 2 Adviser Profile"],
-        "key_fields": ["licensee name + AFSL number", "services offered", "fees/commissions", "associations/conflicts", "AFCA/complaints details", "version or effective date"],
-        "distinguishing_signals": ["not client-specific", "describes services generally", "AFCA/complaints section", "often a Part 2 Adviser Profile"],
-        "confusable_with": ["soa — provider-focused and generic vs client-specific advice", "pds — a PDS describes a product; the FSG describes the advice service"]
+        "title_patterns": [
+          "Financial Services Guide",
+          "FSG",
+          "Part 1 FSG",
+          "Part 2 Adviser Profile"
+        ],
+        "key_fields": [
+          "licensee name + AFSL number",
+          "services offered",
+          "fees/commissions",
+          "associations/conflicts",
+          "AFCA/complaints details",
+          "version or effective date"
+        ],
+        "distinguishing_signals": [
+          "not client-specific",
+          "describes services generally",
+          "AFCA/complaints section",
+          "often a Part 2 Adviser Profile"
+        ],
+        "confusable_with": [
+          "soa — provider-focused and generic vs client-specific advice",
+          "pds — a PDS describes a product; the FSG describes the advice service"
+        ]
       },
       "links_to": [],
       "version_notes": "Editioned by effective date, not per client. Track which edition was current on a given date; a newer edition supersedes the prior edition licensee-wide."
@@ -197,7 +420,9 @@
       "advice_record_role": false,
       "legislation": {
         "primary": "Part 7.9 — Financial Product Disclosure; a retail client must receive a PDS before acquiring a financial product",
-        "related": ["RG 168 — PDS disclosure guidance"],
+        "related": [
+          "RG 168 — PDS disclosure guidance"
+        ],
         "note": "Prepared by the product issuer, not the adviser."
       },
       "teaching": {
@@ -207,10 +432,28 @@
         "two_weeks_in_note": "Issuer-produced and product-specific. Several PDSs in a client file usually means those products were considered or recommended — they're inputs, not the advice itself."
       },
       "classifier_hints": {
-        "title_patterns": ["Product Disclosure Statement", "PDS", "Additional Information Guide"],
-        "key_fields": ["product name", "issuer name + AFSL", "features", "fees and costs template", "risks", "effective date"],
-        "distinguishing_signals": ["issued by a product provider, not the advice firm", "describes one product", "consumer advisory warning / fees-and-costs template"],
-        "confusable_with": ["fsg — product vs advice-service", "soa — generic issuer material vs personal advice"]
+        "title_patterns": [
+          "Product Disclosure Statement",
+          "PDS",
+          "Additional Information Guide"
+        ],
+        "key_fields": [
+          "product name",
+          "issuer name + AFSL",
+          "features",
+          "fees and costs template",
+          "risks",
+          "effective date"
+        ],
+        "distinguishing_signals": [
+          "issued by a product provider, not the advice firm",
+          "describes one product",
+          "consumer advisory warning / fees-and-costs template"
+        ],
+        "confusable_with": [
+          "fsg — product vs advice-service",
+          "soa — generic issuer material vs personal advice"
+        ]
       },
       "links_to": [],
       "version_notes": "Editioned by issuer and effective date, not per client. A newer PDS edition supersedes the prior edition for that product."
@@ -223,7 +466,9 @@
       "advice_record_role": false,
       "legislation": {
         "primary": "Not a standalone statutory document, but the evidentiary basis for the best-interests duty (s961B) and appropriate advice (s961G)",
-        "related": ["s912G record-keeping for personal advice (via ASIC Instrument 2024/508)"],
+        "related": [
+          "s912G record-keeping for personal advice (via ASIC Instrument 2024/508)"
+        ],
         "note": "Its adequacy is judged through the best-interests lens, not a titling provision."
       },
       "teaching": {
@@ -233,13 +478,36 @@
         "two_weeks_in_note": "The raw material the SOA is built from. A fact find dated AFTER the SOA it supposedly underpins is a red flag worth surfacing."
       },
       "classifier_hints": {
-        "title_patterns": ["Fact Find", "Client Data Form", "Client Questionnaire", "Financial Needs Analysis"],
-        "key_fields": ["client personal details", "assets/liabilities", "income/expenses", "goals/objectives", "dependants", "date completed"],
-        "distinguishing_signals": ["form-like/tabular", "captures raw data not recommendations", "signature confirming accuracy"],
-        "confusable_with": ["risk_profile — narrower, risk-specific", "soa — gathers vs advises"]
+        "title_patterns": [
+          "Fact Find",
+          "Client Data Form",
+          "Client Questionnaire",
+          "Financial Needs Analysis"
+        ],
+        "key_fields": [
+          "client personal details",
+          "assets/liabilities",
+          "income/expenses",
+          "goals/objectives",
+          "dependants",
+          "date completed"
+        ],
+        "distinguishing_signals": [
+          "form-like/tabular",
+          "captures raw data not recommendations",
+          "signature confirming accuracy"
+        ],
+        "confusable_with": [
+          "risk_profile — narrower, risk-specific",
+          "soa — gathers vs advises"
+        ]
       },
       "links_to": [
-        {"doc": "soa", "relationship": "feeds", "note": "The SOA must trace to the fact find; a later-dated fact find is an exception."}
+        {
+          "doc": "soa",
+          "relationship": "feeds",
+          "note": "The SOA must trace to the fact find; a later-dated fact find is an exception."
+        }
       ],
       "version_notes": "Per client, dated. A newer fact find supersedes the prior, but retain the prior as history."
     },
@@ -260,13 +528,34 @@
         "two_weeks_in_note": "The risk category should be echoed in the SOA's recommendations. A mismatch between the two is exactly what a reviewer looks for."
       },
       "classifier_hints": {
-        "title_patterns": ["Risk Profile", "Investor Risk Profile", "Risk Tolerance Questionnaire", "Attitude to Risk"],
-        "key_fields": ["client name", "questionnaire responses", "resulting risk category", "date"],
-        "distinguishing_signals": ["scored questionnaire", "outputs a risk category", "narrower than a full fact find"],
-        "confusable_with": ["fact_find — narrower, risk-specific", "soa — produces a profile not recommendations"]
+        "title_patterns": [
+          "Risk Profile",
+          "Investor Risk Profile",
+          "Risk Tolerance Questionnaire",
+          "Attitude to Risk"
+        ],
+        "key_fields": [
+          "client name",
+          "questionnaire responses",
+          "resulting risk category",
+          "date"
+        ],
+        "distinguishing_signals": [
+          "scored questionnaire",
+          "outputs a risk category",
+          "narrower than a full fact find"
+        ],
+        "confusable_with": [
+          "fact_find — narrower, risk-specific",
+          "soa — produces a profile not recommendations"
+        ]
       },
       "links_to": [
-        {"doc": "soa", "relationship": "feeds", "note": "Risk category should be consistent with SOA recommendations; inconsistency is a flag."}
+        {
+          "doc": "soa",
+          "relationship": "feeds",
+          "note": "Risk category should be consistent with SOA recommendations; inconsistency is a flag."
+        }
       ],
       "version_notes": "Per client, dated. A re-assessment supersedes the prior profile."
     },
@@ -287,10 +576,29 @@
         "two_weeks_in_note": "This is the area DBFO Tranche 1 already reshaped, so older files and newer files may look different. Flag rather than guess when the format doesn't match the expected era."
       },
       "classifier_hints": {
-        "title_patterns": ["Fee Disclosure Statement", "FDS", "Ongoing Fee Consent", "Consent to Deduct Advice Fees"],
-        "key_fields": ["client name", "fees charged in the period", "services the client was entitled to / received", "consent signature", "period covered", "date"],
-        "distinguishing_signals": ["fee tables by period", "consent/authorisation to continue or deduct fees", "references an ongoing fee arrangement"],
-        "confusable_with": ["authority_to_proceed — ATP authorises implementation of advice; this authorises ongoing FEES", "soa — this is fee administration, not advice"]
+        "title_patterns": [
+          "Fee Disclosure Statement",
+          "FDS",
+          "Ongoing Fee Consent",
+          "Consent to Deduct Advice Fees"
+        ],
+        "key_fields": [
+          "client name",
+          "fees charged in the period",
+          "services the client was entitled to / received",
+          "consent signature",
+          "period covered",
+          "date"
+        ],
+        "distinguishing_signals": [
+          "fee tables by period",
+          "consent/authorisation to continue or deduct fees",
+          "references an ongoing fee arrangement"
+        ],
+        "confusable_with": [
+          "authority_to_proceed — ATP authorises implementation of advice; this authorises ongoing FEES",
+          "soa — this is fee administration, not advice"
+        ]
       },
       "links_to": [],
       "version_notes": "Per client, periodic (usually annual). Each period's statement is discrete; a corrected re-issue for the same period supersedes."
@@ -299,19 +607,36 @@
   "filing_model": {
     "purpose": "Defines how classified documents are arranged into folders. Filing is an arrangement of classifier output, not a separate engine. Two nested axes cross-check each other, which improves placement accuracy.",
     "axes": {
-      "outer": {"axis": "client", "rationale": "Matches how firms and compliance reviewers pull files. Stable top level."},
-      "inner": {"axis": "advice_event", "rationale": "Groups every document belonging to one advisory decision, using the document-to-document links. Reconstructs 'the advice and everything behind it'."}
+      "outer": {
+        "axis": "client",
+        "rationale": "Matches how firms and compliance reviewers pull files. Stable top level."
+      },
+      "inner": {
+        "axis": "advice_event",
+        "rationale": "Groups every document belonging to one advisory decision, using the document-to-document links. Reconstructs 'the advice and everything behind it'."
+      }
     },
     "advice_event": {
       "definition": "A single advisory decision and all documents that belong to it: the advice record (SOA/ROA/CAR), the inputs that fed it (fact find, risk profile), the implementation (authority to proceed), and supporting product disclosure (PDS) used for that decision.",
       "identity": "Derived from the advice record at its centre. Keyed on client + advice-record date + subject matter/scope.",
       "naming_pattern": "YYYY-MM — <subject matter> [<record type> · <sub-kind if ROA>]",
-      "examples": ["2024-03 — Retirement & Super Consolidation [SOA]", "2025-06 — Insurance Top-Up [ROA · further advice]"],
+      "examples": [
+        "2024-03 — Retirement & Super Consolidation [SOA]",
+        "2025-06 — Insurance Top-Up [ROA · further advice]"
+      ],
       "sequence_note": "A client accumulates multiple advice events over time (e.g. super advice year 1, insurance year 2). Each is its own nested folder. Events are ordered by date but NOT assumed to be related unless documents link them."
     },
     "special_folders": [
-      {"name": "_Client-level documents", "holds": "Documents tied to the client but not to any single advice event — chiefly the FSG, and general correspondence.", "why": "Forcing these into an event folder would be wrong; they belong to the relationship, not one decision."},
-      {"name": "_Needs review", "holds": "Any document the tool cannot confidently place into a client and/or an advice event.", "why": "Orphans and low-confidence items must surface, never be filed into a guessed location. This folder is the visible home of the flagging queue."}
+      {
+        "name": "_Client-level documents",
+        "holds": "Documents tied to the client but not to any single advice event — chiefly the FSG, and general correspondence.",
+        "why": "Forcing these into an event folder would be wrong; they belong to the relationship, not one decision."
+      },
+      {
+        "name": "_Needs review",
+        "holds": "Any document the tool cannot confidently place into a client and/or an advice event.",
+        "why": "Orphans and low-confidence items must surface, never be filed into a guessed location. This folder is the visible home of the flagging queue."
+      }
     ],
     "shared_document_rule": {
       "case": "A document (e.g. a PDS) legitimately relates to more than one advice event.",
@@ -328,7 +653,14 @@
     "purpose": "Generate a plain-English summary per advice event (not per loose document), leveraging the fact that documents are already grouped into a coherent bundle.",
     "why_event_level": "Summarising a whole advice event ('here is the March 2024 super consolidation advice: the recommendation, the basis, what it cost, whether it was authorised') is far more useful than summarising one document in isolation.",
     "inputs": "The grouped documents of one advice event.",
-    "output_shape": ["what the advice was", "the basis/reasoning", "cost to client and benefits to provider", "whether inputs (fact find, risk profile) were present and consistent", "whether it was authorised (ATP present)", "any flags raised on the event"],
+    "output_shape": [
+      "what the advice was",
+      "the basis/reasoning",
+      "cost to client and benefits to provider",
+      "whether inputs (fact find, risk profile) were present and consistent",
+      "whether it was authorised (ATP present)",
+      "any flags raised on the event"
+    ],
     "critical_cautions": {
       "not_advice": "The summary describes documents that already exist. It must never generate, alter, or recommend advice — doing so would cross into providing financial advice and change the whole regulatory posture.",
       "human_verified": "Summaries are drafts for a human to check against the source documents, not authoritative statements. Same human-in-the-loop principle as classification.",
@@ -339,17 +671,73 @@
   "edge_case_flags": {
     "purpose": "Rules that route a document to the internal human-review queue instead of forcing a category. Each fires a flag; it does not silently reclassify.",
     "rules": [
-      {"id": "roa_without_soa", "trigger": "Further-advice-style ROA identified but no prior SOA on file for the client", "why": "Further-advice ROA (s946B(1)-(3A)/reg 7.7.10AE) depends on an existing SOA. BUT hold (s946B(7)), small-investment (s946AA), and no-buy/sell (reg 7.7.10AAA) ROAs do not — so this is a 'confirm which kind', not an automatic error.", "severity": "medium"},
-      {"id": "atp_without_advice_record", "trigger": "Authority to Proceed with no matching SOA/ROA on file", "why": "An authorisation to implement advice that isn't on file — either a bundle-split miss or a genuine gap.", "severity": "high"},
-      {"id": "fact_find_after_soa", "trigger": "Fact Find dated later than the SOA it should underpin", "why": "Advice may predate the information it was supposedly based on (best-interests concern).", "severity": "medium"},
-      {"id": "risk_mismatch", "trigger": "Risk Profile category not reflected in SOA recommendations", "why": "Possible best-interests/suitability gap (s961B).", "severity": "high"},
-      {"id": "multi_doc_bundle", "trigger": "Single file appears to contain more than one document type (classic: SOA + appended Authority to Proceed)", "why": "Needs splitting before records and links are accurate.", "severity": "medium"},
-      {"id": "advice_record_label_shift", "trigger": "Document plays the advice-record role but titling is ambiguous between SOA and CAR", "why": "During the DBFO transition both may appear; capture the correct statutory label.", "severity": "low"},
-      {"id": "fds_era_mismatch", "trigger": "Fee/consent document format doesn't match the expected pre/post-DBFO-Tranche-1 era for its date", "why": "Ongoing-fee consent mechanics changed under DBFO; wrong-era format may indicate a compliance gap.", "severity": "medium"},
-      {"id": "no_date", "trigger": "No date extractable from a document type that requires one for sequencing", "why": "Version tracking and advice-timing checks impossible without a date.", "severity": "medium"},
-      {"id": "low_confidence", "trigger": "Classifier confidence below threshold", "why": "Ambiguous or poor-quality document; needs a human eye.", "severity": "medium"},
-      {"id": "unknown_type", "trigger": "No document type matched with sufficient confidence", "why": "Possibly out-of-scope or a novel/edge document.", "severity": "low"},
-      {"id": "superseding_ambiguity", "trigger": "Two candidate 'current' documents of the same type and scope for one client", "why": "Cannot determine which is in force.", "severity": "high"}
+      {
+        "id": "roa_without_soa",
+        "trigger": "Further-advice-style ROA identified but no prior SOA on file for the client",
+        "why": "Further-advice ROA (s946B(1)-(3A)/reg 7.7.10AE) depends on an existing SOA. BUT hold (s946B(7)), small-investment (s946AA), and no-buy/sell (reg 7.7.10AAA) ROAs do not — so this is a 'confirm which kind', not an automatic error.",
+        "severity": "medium"
+      },
+      {
+        "id": "atp_without_advice_record",
+        "trigger": "Authority to Proceed with no matching SOA/ROA on file",
+        "why": "An authorisation to implement advice that isn't on file — either a bundle-split miss or a genuine gap.",
+        "severity": "high"
+      },
+      {
+        "id": "fact_find_after_soa",
+        "trigger": "Fact Find dated later than the SOA it should underpin",
+        "why": "Advice may predate the information it was supposedly based on (best-interests concern).",
+        "severity": "medium"
+      },
+      {
+        "id": "risk_mismatch",
+        "trigger": "Risk Profile category not reflected in SOA recommendations",
+        "why": "Possible best-interests/suitability gap (s961B).",
+        "severity": "high"
+      },
+      {
+        "id": "multi_doc_bundle",
+        "trigger": "Single file appears to contain more than one document type (classic: SOA + appended Authority to Proceed)",
+        "why": "Needs splitting before records and links are accurate.",
+        "severity": "medium"
+      },
+      {
+        "id": "advice_record_label_shift",
+        "trigger": "Document plays the advice-record role but titling is ambiguous between SOA and CAR",
+        "why": "During the DBFO transition both may appear; capture the correct statutory label. DORMANT: 'car' is not a document type while DBFO Tranche 2 is unlegislated, so nothing fires this today. Kept because the rule becomes live the moment the successor type is added back — see reform_watch.",
+        "severity": "low",
+        "status": "dormant"
+      },
+      {
+        "id": "fds_era_mismatch",
+        "trigger": "Fee/consent document format doesn't match the expected pre/post-DBFO-Tranche-1 era for its date",
+        "why": "Ongoing-fee consent mechanics changed under DBFO; wrong-era format may indicate a compliance gap.",
+        "severity": "medium"
+      },
+      {
+        "id": "no_date",
+        "trigger": "No date extractable from a document type that requires one for sequencing",
+        "why": "Version tracking and advice-timing checks impossible without a date.",
+        "severity": "medium"
+      },
+      {
+        "id": "low_confidence",
+        "trigger": "Classifier confidence below threshold",
+        "why": "Ambiguous or poor-quality document; needs a human eye.",
+        "severity": "medium"
+      },
+      {
+        "id": "unknown_type",
+        "trigger": "No document type matched with sufficient confidence",
+        "why": "Possibly out-of-scope or a novel/edge document.",
+        "severity": "low"
+      },
+      {
+        "id": "superseding_ambiguity",
+        "trigger": "Two candidate 'current' documents of the same type and scope for one client",
+        "why": "Cannot determine which is in force.",
+        "severity": "high"
+      }
     ]
   }
 }
