@@ -32,6 +32,12 @@ def root():
 async def ingest(file: UploadFile):
     contents = await file.read()
     result = parse_pdf(BytesIO(contents), file.filename)
+    # Per-page text is for server-side work (bundle detection — see the
+    # multi_doc_bundle rule in knowledge_base.json). It is not part of the
+    # response: echoing it alongside extracted_text would roughly double the
+    # payload for a consumer that does not exist yet. The PR that consumes it
+    # can decide whether the API should expose it.
+    result.pop("pages")
     result.update(check_scope(result["extracted_text"]))
     result["likely_type_name"] = _DOC_NAMES.get(result["likely_type"])
     if result["in_scope"]:
