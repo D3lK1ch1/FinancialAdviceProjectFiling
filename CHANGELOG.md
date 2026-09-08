@@ -15,6 +15,11 @@ a finished step (see Contributing in `README.md`). Newest at top.
   `*.doc`, `*.zip`) anywhere in the tree, alongside the existing `docs`/
   `samples` path rules, which miss a PDF dropped at the repo root. Not
   retroactive; that limit is now written down in README's Contributing.
+- `scope_gate.py` — case sensitivity is now decided per pattern from the pattern's
+  own shape: mixed-case titles match in any casing, all-caps acronyms stay
+  case-sensitive. An ALL-CAPS cover page previously matched nothing and left the
+  pipeline as `in_scope: False` with no flag. Casefolding the acronyms too would
+  have traded that for `car`'s "CAR" matching the ordinary word "car" (#4).
 - `scope_gate.py` — `title_patterns` now match on word boundaries instead of bare
   substrings. Six of them are three-letter acronyms, so `"ROA" in head` was also
   true for ROAD and BROADWAY, and a letterhead street address sits inside exactly
