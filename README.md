@@ -87,9 +87,6 @@ JSON out.
 python -m pip install -r requirements.txt
 ```
 
-Pinned to exact versions, so a clone installs what this was built and tested
-against rather than whatever is current that week:
-
 | package | version | used by |
 |---|---|---|
 | `fastapi` | 0.128.0 | `app.py` |
@@ -103,7 +100,7 @@ with no obvious link to the Python version, so it's worth stating here.
 
 Test-only dependencies (`pytest`, and `httpx` for FastAPI's `TestClient`) are
 deliberately not in `requirements.txt` — they belong with contributor-runnable
-tests and CI, which is its own open item.
+tests and CI.
 
 Plus a running Ollama instance with `llama3.1` pulled (see above).
 
