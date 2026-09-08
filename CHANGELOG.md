@@ -15,6 +15,11 @@ a finished step (see Contributing in `README.md`). Newest at top.
   `*.doc`, `*.zip`) anywhere in the tree, alongside the existing `docs`/
   `samples` path rules, which miss a PDF dropped at the repo root. Not
   retroactive; that limit is now written down in README's Contributing.
+- `scope_gate.py` — `title_patterns` now match on word boundaries instead of bare
+  substrings. Six of them are three-letter acronyms, so `"ROA" in head` was also
+  true for ROAD and BROADWAY, and a letterhead street address sits inside exactly
+  the 500-char title window the gate reads. Out-of-scope documents were entering
+  the pipeline as ROAs. Prerequisite for widening the supported type set (#12).
 
 ## Session 31-08-2026
 

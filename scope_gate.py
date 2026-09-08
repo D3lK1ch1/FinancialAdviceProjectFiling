@@ -7,6 +7,7 @@ real classifier, later.
 """
 
 import json
+import re
 
 IN_SCOPE_TYPES = ["soa", "roa", "fsg", "pds"]
 
@@ -17,6 +18,17 @@ _TITLE_PATTERNS = {
     doc["id"]: doc["classifier_hints"]["title_patterns"]
     for doc in _KB["documents"]
     if doc["id"] in IN_SCOPE_TYPES
+}
+
+# Patterns match on word boundaries, not as bare substrings. Six of the KB's
+# title_patterns are three-letter acronyms, and `"ROA" in head` is also true
+# for ROAD and BROADWAY. Every advice document carries a letterhead with a
+# street address, and it sits inside exactly the first 500 chars this function
+# reads — so a document issued from "42 BROADWAY" scored as an ROA. That is a
+# live misclassification on ordinary documents, not a contrived one.
+_MATCHERS = {
+    doc_id: [(p, re.compile(rf"\b{re.escape(p)}\b")) for p in patterns]
+    for doc_id, patterns in _TITLE_PATTERNS.items()
 }
 
 
@@ -30,8 +42,8 @@ TITLE_WINDOW = 500  # documents commonly reference OTHER types by name in
 def check_scope(text: str) -> dict:
     head = text[:TITLE_WINDOW]
     scores = {}
-    for doc_id, patterns in _TITLE_PATTERNS.items():
-        matched = [p for p in patterns if p in head]
+    for doc_id, matchers in _MATCHERS.items():
+        matched = [p for p, pattern in matchers if pattern.search(head)]
         if matched:
             scores[doc_id] = sum(len(p) for p in matched)
     if not scores:
