@@ -3,6 +3,39 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 10-09-2026 — file notes
+
+### Done
+- `knowledge_base.json` — added the `file_note` document type. Stage 3 (advice
+  construction) now lists it. Data only; no Python changed.
+- **Why it is the biggest gap in the type set.** Safe harbour steps 3-6 —
+  assess competence, investigate, base the advice on that investigation,
+  prioritise the client — are four of the seven, they happen before the advice
+  record is written, and the file note is the only paper trail they leave.
+  `advice_classification_reference.md` §2 maps that stage to "(internal file
+  notes)". Stage 3 previously pointed at `soa`, which is stage 4's document.
+- **The failure was confident, not uncertain.** With no `file_note` type the
+  only patterns that could match were the ones the note cites, so a meeting note
+  came back `{'in_scope': True, 'likely_type': 'pds'}` — a Product Disclosure
+  Statement, stated with confidence.
+- **A file note often records a conversation with the PROVIDER, not the client**
+  — calling a fund about a balance, a rollover or a policy. Titles carry the
+  subject after a dash or "on" ("File Note - <fund>"), so a fund's name in one
+  says who was contacted, not who issued it. That is now the first thing
+  `distinguishing_signals` and `confusable_with` say.
+- `advice_record_role` is `false`. A file note describes advice being prepared;
+  it is never the advice record.
+- `tests/test_scope_gate.py` — seven cases, all plain text, no `samples/`
+  needed: four file-note shapes including the dash-subject and ALL-CAPS forms,
+  a provider-named note, and two regression cases proving a genuine SOA and PDS
+  still win their own titles.
+
+### Not done here
+- **`.docx` still returns HTTP 500.** File notes are typically Word documents,
+  and `app.py` calls `parse_pdf()` on whatever is uploaded with no format check.
+  So this classifies correctly through the scope gate but cannot yet run
+  end-to-end on the format it usually arrives in. Depends on #5.
+
 ## Session 05-09-2026
 
 ### Done
