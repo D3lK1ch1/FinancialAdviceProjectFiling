@@ -3,6 +3,49 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 10-09-2026 — filing settings
+
+### Done
+- `knowledge_base.json` — `filing_model.stage_filing_overrides`. A firm can tailor
+  how documents are grouped *inside* an advice event, without changing the two
+  base axes. Stage 5 (implementation) is specified: `flat` (default),
+  `by_provider`, `by_doc_type`. Firms differ most here — some want a folder per
+  product issuer, some per document type, some neither.
+- The base axes stay fixed. `client -> advice_event` is what
+  `accuracy_mechanism` rests on: two axes that must agree is where the placement
+  accuracy comes from. These settings subdivide within an event; they never
+  become a third axis, because a sub-level cross-checks nothing.
+- `by_provider`'s key is the **receiving** issuer — the entity the form
+  instructs — not simply the first firm named. An application involving a
+  rollover also names the funds being transferred out of, often prominently, and
+  a balance question can name several more. Picking the first firm on the page
+  would file a transfer under the fund the client is leaving.
+- A rollover form is evidence about two providers. It files **once**, under the
+  receiving issuer, and is **referenced** from the outgoing one rather than
+  copied — the rule `shared_document_rule` already applies across advice events,
+  applied here across providers. Never duplicate a signed form: two copies
+  leaves it ambiguous which one is the record.
+- `unresolved_key_rule` — no readable grouping key means file at event level and
+  flag, never a guessed folder name. Same rule the model already applies to
+  dates (`no_date`, never a filename guess). A folder named for the wrong issuer
+  is worse than no folder, because it looks deliberate.
+- Follows the precedent already set by `shared_document_rule`
+  (`"configurable": true`, "Firms differ") and by `build_note`, which puts the
+  folder scheme over results already produced so it can change without touching
+  the classifier.
+
+### Not done here
+- **Nothing reads this yet.** Filing is not built — `/ingest` returns a
+  classification and stops — so there is no proposed path for the setting to
+  change. This is correct data now that takes effect when filing lands, the same
+  shape as the ATP hints in #24.
+- **The independence test is deferred, not skipped.** #26 asks that switching
+  this setting leave `doc_type`, confidence and flags byte-identical, matching
+  the three tests in #11. It cannot be written until there is a proposed path to
+  hold constant, so it belongs with the filing work in #10 rather than here.
+- Only stage 5 is specified. Other stages are deliberately absent until a firm
+  asks for one.
+
 ## Session 05-09-2026
 
 ### Done

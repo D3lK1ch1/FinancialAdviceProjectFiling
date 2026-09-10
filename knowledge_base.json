@@ -319,6 +319,32 @@
       "configurable": true,
       "note": "Firms differ. Leave duplicate-vs-reference as a per-firm setting."
     },
+    "stage_filing_overrides": {
+      "purpose": "Per-stage sub-grouping INSIDE an advice event, so a firm can tailor placement without changing the two base axes. Filing shape only \u2014 never classification, confidence or flags.",
+      "configurable": true,
+      "base_axes_are_fixed": "client -> advice_event always holds. These settings subdivide within an event; they never replace or reorder the axes, because two-axis agreement is what accuracy_mechanism rests on.",
+      "applies_to": "Implementation-stage documents only. An advice record has no product issuer, so applying a provider level everywhere yields an empty issuer folder beside every SOA.",
+      "unresolved_key_rule": "If the grouping key cannot be read from the document, file at event level and flag. Never invent a folder name \u2014 the same rule this model already applies to dates (no date -> no_date flag, never a filename guess). A folder named for the wrong issuer is worse than no folder, because it looks deliberate.",
+      "stages": {
+        "5": {
+          "name": "Implementation / execution",
+          "default": "flat",
+          "options": {
+            "flat": "All implementation documents sit directly in the advice-event folder.",
+            "by_provider": "Sub-folder per product issuer.",
+            "by_doc_type": "Sub-folder per document type (authorities / applications / product docs)."
+          },
+          "key_source": {
+            "by_provider": "The RECEIVING product issuer \u2014 the entity the form instructs. Not merely the first firm named: an application involving a rollover also names the funds being transferred out of, often prominently, and a balance question can name several. Where the receiving issuer cannot be told from the outgoing ones, this is an unresolved key, not a guess. Also unreadable on a scanned signed form until OCR lands.",
+            "by_doc_type": "The classified doc_type \u2014 already produced, needs no extraction."
+          },
+          "cross_provider_reference": "A rollover form is evidence about two providers: the one receiving and the one being left. It files ONCE, under the receiving issuer, and is REFERENCED from the outgoing provider rather than copied \u2014 the same rule shared_document_rule already applies across advice events. Never duplicate a signed form: two copies leaves it ambiguous which is the record. Whether firms want the outgoing reference at all is a per-firm question to ask, not to assume.",
+          "trade_off": "by_provider splits one advice event's implementation across folders when an event has both a platform application and an insurer's. Some firms want exactly that; confirm with the firm rather than assuming."
+        }
+      },
+      "scope_note": "Only stage 5 is specified. The structure allows other stages later (e.g. ongoing review by year) without redesign \u2014 leave them absent until a firm asks, rather than inventing options nobody wanted.",
+      "status": "Data only. Nothing reads this yet: filing itself is not built (see CHANGELOG 'Not started'), so there is no proposed path for it to change. The independence test belongs with the filing work."
+    },
     "accuracy_mechanism": "Because a document is placed by two axes that must agree (correct client AND a coherent advice event), a document naming a client but referencing a non-existent event, or vice versa, is a disagreement that fires a flag. Single-axis filing would silently misplace it.",
     "human_in_the_loop": "Event grouping is always a proposal a human confirms, never silent auto-bundling. Confidence is visible per document and per event. Mis-grouping is expected early because it depends on link accuracy — the fiddliest part of the system.",
     "build_note": "Client-outer/event-inner is a nesting rule over results already produced. Keep the storage layer abstracted so the folder scheme (and later, local-folder vs cloud-bucket) can change without touching the classifier."
