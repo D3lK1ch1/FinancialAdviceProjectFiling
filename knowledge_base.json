@@ -101,6 +101,7 @@
         "s961G (appropriate advice)"
       ],
       "typical_docs": [
+        "file_note",
         "soa"
       ]
     },
@@ -558,6 +559,60 @@
         }
       ],
       "version_notes": "Per client, dated. A re-assessment supersedes the prior profile."
+    },
+    {
+      "id": "file_note",
+      "name": "File Note",
+      "abbrev": "File Note",
+      "category": "input",
+      "advice_record_role": false,
+      "legislation": {
+        "primary": "Not a standalone statutory document. Evidences the research and strategy work behind personal advice — safe harbour steps 3-6 (s961B(2)(c)-(f)) — and is kept under the s912G record-keeping obligation.",
+        "note": "No section prescribes its form or title, which is why the titles vary by firm. Its absence is not itself a breach; what it evidences is."
+      },
+      "teaching": {
+        "what_it_is": "An adviser's own record of an interaction or of the research behind a recommendation. Often the interaction is with the PRODUCT PROVIDER rather than the client — calling a fund about a balance, a rollover or a policy — as well as client meetings and calls.",
+        "why_it_exists": "Safe harbour steps 3-6 (assess competence, investigate, base the advice on that investigation, prioritise the client) happen before the advice record is written and leave no other paper trail. The file note is that trail.",
+        "where_it_sits": "Advice construction (stage 3). Sits between discovery and the advice record.",
+        "two_weeks_in_note": "A file note is ABOUT advice; it is never the advice. It routinely names a provider and the documents it concerns, which is exactly why it gets mistaken for them. 'File Note - <fund>' records a conversation WITH that fund; it is not that fund's document."
+      },
+      "classifier_hints": {
+        "title_patterns": [
+          "File Note",
+          "Meeting Note",
+          "Client Meeting Note",
+          "Adviser Note"
+        ],
+        "key_fields": [
+          "client name",
+          "date of the interaction",
+          "the product provider or company contacted",
+          "who was spoken to, and in what capacity",
+          "what was discussed with them",
+          "decision or next step",
+          "adviser name"
+        ],
+        "distinguishing_signals": [
+          "written in the adviser's voice, recording what happened, not addressed to the client",
+          "past tense narrative of a meeting, a call to a provider, or a piece of research",
+          "frequently records a conversation with a PRODUCT PROVIDER, not the client — so a fund's name in it is who was contacted, not who issued it",
+          "no recommendation given TO the client, and no signature block",
+          "often names the documents it is about — 'an SOA will be prepared', 'the PDS was provided'",
+          "title commonly carries the subject after a dash or 'on' — 'File Note - <provider>', 'File Note on <topic>' — so what follows is the subject, not the document type"
+        ],
+        "confusable_with": [
+          "soa — a file note DESCRIBES advice being prepared; the SOA IS the advice. Not an advice record: advice_record_role is false",
+          "roa — both are short and narrative, but an ROA is given to the client as the advice record; a file note stays on the firm's file",
+          "pds — a file note naming a product's PDS is a cross-reference, not the PDS. Rank on where the match falls, not that it appears",
+          "application_forms — both may carry a provider's name, but an application form INSTRUCTS the provider; a file note merely records talking to them",
+          "authority_to_proceed — an ATP is signed by the client and authorises action; a file note is unsigned and authorises nothing"
+        ]
+      },
+      "links_to": [
+        "soa — evidences the research and reasoning behind the advice record it precedes",
+        "fact_find — records inquiries made where the fact find was incomplete (safe harbour step 2)"
+      ],
+      "version_notes": "Per interaction, not per client or per event. A client accumulates many; they are discrete records, never superseded — a later note does not replace an earlier one."
     },
     {
       "id": "fee_disclosure_statement",
