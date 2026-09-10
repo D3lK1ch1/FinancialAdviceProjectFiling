@@ -3,6 +3,31 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 10-09-2026 — knowledge base
+
+### Done
+- `knowledge_base.json` — `advice_process_stages` stage 6 no longer names two
+  document ids that `documents` does not define. `ongoing_fee_consent` was an id
+  mismatch: the type exists as `fee_disclosure_statement`, whose own `name` reads
+  "Fee Disclosure Statement / Ongoing Fee Consent", and it was already listed in
+  the same stage — so the reference was a duplicate, not a missing type.
+  `annual_review` is removed because it is not a document type at all: an annual
+  review is a service event, and the documents it produces are the FDS and, where
+  something changed, a new ROA. `advice_classification_reference.md` §2 says so
+  directly ("Ongoing review ... FDS (+ new ROA)"), and §6's master mapping table
+  carries no annual-review row.
+- Stage-to-document mapping is what advice-event grouping (#10) will key on, so a
+  stage naming a type that does not exist is a defect in that mapping rather than
+  a cosmetic one.
+
+### Not done here
+- Stage 5 still names `application_forms`, which `documents` does not define. That
+  one is a genuine gap rather than a bad reference: the reference doc's §6 table
+  carries an "Application / insurance" row with legal basis **s1012**, so it is a
+  legislated type and belongs in the knowledge base. Adding it is its own change
+  (#23, checkbox 2). The self-consistency test (#23, checkbox 4) lands with it,
+  because it cannot pass until then.
+
 ## Session 05-09-2026
 
 ### Done
