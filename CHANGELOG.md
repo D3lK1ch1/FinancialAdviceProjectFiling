@@ -11,6 +11,11 @@ a finished step (see Contributing in `README.md`). Newest at top.
   stated (`failure_log.py`'s `str | None` is an import-time `TypeError` on
   3.9). README's Dependencies section now installs from it instead of listing
   whatever happened to be in the environment.
+- `failure_log.py` / `tests/test_failure_log.py` — the de-identification rule for
+  `failure_log.jsonl` is now written down (it's committed and shared, so
+  `document_id` is a filename or hash and never a path, and `note` carries the
+  classification decision only), and a test asserts the record's exact field set
+  so a new field can't be added without failing first (issue #3).
 - `.gitignore` — client documents blocked by extension (`*.pdf`, `*.docx`,
   `*.doc`, `*.zip`) anywhere in the tree, alongside the existing `docs`/
   `samples` path rules, which miss a PDF dropped at the repo root. Not
