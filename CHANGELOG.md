@@ -15,8 +15,6 @@ a finished step (see Contributing in `README.md`). Newest at top.
   `*.doc`, `*.zip`) anywhere in the tree, alongside the existing `docs`/
   `samples` path rules, which miss a PDF dropped at the repo root. Not
   retroactive; that limit is now written down in README's Contributing.
-
-
 - `app.py` / `classifier.py` / `scope_gate.py` — the supported document-type set
   now comes from `knowledge_base.json` instead of the same four-type tuple
   hardcoded in three files. Every KB type is in scope, and the classifier's
