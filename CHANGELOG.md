@@ -6,6 +6,15 @@ a finished step (see Contributing in `README.md`). Newest at top.
 ## Session 05-09-2026
 
 ### Done
+- `requirements.txt` — the four runtime dependencies (`fastapi`, `uvicorn`,
+  `pypdf`, `requests`) pinned to exact versions, with the Python 3.10 floor
+  stated (`failure_log.py`'s `str | None` is an import-time `TypeError` on
+  3.9). README's Dependencies section now installs from it instead of listing
+  whatever happened to be in the environment.
+- `.gitignore` — client documents blocked by extension (`*.pdf`, `*.docx`,
+  `*.doc`, `*.zip`) anywhere in the tree, alongside the existing `docs`/
+  `samples` path rules, which miss a PDF dropped at the repo root. Not
+  retroactive; that limit is now written down in README's Contributing.
 - `scope_gate.py` — candidate types now rank on earliest match position, not on
   summed pattern length. Length was standing in for confidence: "Product
   Disclosure Statement" (28 chars) outranked "Record of Advice" (16), so an ROA
