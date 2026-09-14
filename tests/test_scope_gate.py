@@ -118,3 +118,54 @@ def test_acronym_patterns_stay_case_sensitive():
     # Multi-word patterns go the other way: they must match in any casing.
     assert _matcher("Statement of Advice").search("STATEMENT OF ADVICE") is not None
     assert _matcher("Statement of Advice").search("statement of advice") is not None
+
+
+# Every advice document names other document types in its body — that's what the
+# knowledge base's links_to relationships describe. The gate has to tell "this IS
+# a PDS" from "this REFERS to a PDS", and it only has the title window to do it.
+CROSS_REFERENCES = [
+    (
+        "roa",
+        "Record of Advice\nFurther advice for the client, 3 March 2025.\n"
+        "Please refer to the Product Disclosure Statement for the product discussed.",
+    ),
+    (
+        "fsg",
+        "Financial Services Guide\nExample Advice Pty Ltd, AFSL 123456.\n"
+        "If we give you personal advice you will receive a Statement of Advice.",
+    ),
+    (
+        "soa",
+        "Statement of Advice\nPrepared for the client, 1 July 2024.\n"
+        "See the Product Disclosure Statement for details of the recommended product.",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "expected_type, text", CROSS_REFERENCES, ids=[t for t, _ in CROSS_REFERENCES]
+)
+def test_own_title_beats_a_longer_cross_reference(expected_type, text):
+    """#4: ranking by summed pattern length made string length a stand-in for
+    confidence, and a bad one. "Product Disclosure Statement" is 28 characters
+    and "Record of Advice" is 16, so an ROA that refers to the PDS of the
+    product it discusses — which is what an ROA does — came back as a pds.
+
+    Ranking by earliest match position is the signal that was actually meant:
+    a document's own title is at the top, a type it merely cites appears
+    further down.
+    """
+    assert check_scope(text)["likely_type"] == expected_type
+
+
+def test_more_matched_patterns_wins_a_position_tie():
+    """Two types whose earliest match sits at the same offset break on how many
+    distinct patterns each matched, so corroborated evidence beats a single hit.
+    """
+    from scope_gate import _MATCHERS  # noqa: PLC0415 — asserting the ranking input
+
+    text = "Financial Services Guide\nPart 2 Adviser Profile\nAFSL 123456"
+    matched = [p for p, rx in _MATCHERS["fsg"] if rx.search(text)]
+
+    assert len(matched) >= 2, "fsg should match on more than one pattern here"
+    assert check_scope(text)["likely_type"] == "fsg"

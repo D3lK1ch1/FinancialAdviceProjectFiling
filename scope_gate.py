@@ -64,11 +64,27 @@ TITLE_WINDOW = 500  # documents commonly reference OTHER types by name in
 
 def check_scope(text: str) -> dict:
     head = text[:TITLE_WINDOW]
-    scores = {}
+
+    # Rank on WHERE the earliest match falls, not on how long the matching
+    # pattern string is. Length was a proxy for confidence and a poor one: it
+    # made "Product Disclosure Statement" (28 chars) outrank "Record of
+    # Advice" (16), so an ROA that refers to the PDS of the product it
+    # discusses — which is what ROAs do — came back as a pds.
+    #
+    # Position is the signal that was actually meant. A document's own title
+    # sits at the very top; another type named further down is a
+    # cross-reference. That is the same observation TITLE_WINDOW already rests
+    # on, applied properly instead of approximated by string length.
+    #
+    # Ties break on the number of distinct patterns matched, so a type
+    # supported by two hits beats one supported by a single hit at the same
+    # position.
+    ranking = {}
     for doc_id, matchers in _MATCHERS.items():
-        matched = [p for p, pattern in matchers if pattern.search(head)]
-        if matched:
-            scores[doc_id] = sum(len(p) for p in matched)
-    if not scores:
+        positions = [found.start() for _p, pattern in matchers if (found := pattern.search(head))]
+        if positions:
+            ranking[doc_id] = (min(positions), -len(positions))
+
+    if not ranking:
         return {"in_scope": False, "likely_type": None}
-    return {"in_scope": True, "likely_type": max(scores, key=scores.get)}
+    return {"in_scope": True, "likely_type": min(ranking, key=ranking.get)}
