@@ -11,10 +11,37 @@ a finished step (see Contributing in `README.md`). Newest at top.
   stated (`failure_log.py`'s `str | None` is an import-time `TypeError` on
   3.9). README's Dependencies section now installs from it instead of listing
   whatever happened to be in the environment.
+- `failure_log.py` / `tests/test_failure_log.py` — the de-identification rule for
+  `failure_log.jsonl` is now written down (it's committed and shared, so
+  `document_id` is a filename or hash and never a path, and `note` carries the
+  classification decision only), and a test asserts the record's exact field set
+  so a new field can't be added without failing first (issue #3).
 - `.gitignore` — client documents blocked by extension (`*.pdf`, `*.docx`,
   `*.doc`, `*.zip`) anywhere in the tree, alongside the existing `docs`/
   `samples` path rules, which miss a PDF dropped at the repo root. Not
   retroactive; that limit is now written down in README's Contributing.
+- `app.py` / `classifier.py` / `scope_gate.py` — the supported document-type set
+  now comes from `knowledge_base.json` instead of the same four-type tuple
+  hardcoded in three files. Every KB type is in scope, and the classifier's
+  hint block covers all of them (they already carry complete `classifier_hints`, so
+  this is a data change, not new matching logic). Previously the unsupported
+  types — most of a firm's real intake — left the pipeline as `in_scope: False`
+  with no type and no flag, indistinguishable from an unreadable file (#12).
+- `knowledge_base.json` — the `car` (Client Advice Record) document type is
+  removed. DBFO Tranche 2 is not law, and the system does not classify or file
+  document types that are not legislated. `reform_watch` keeps the record of the
+  reform and now carries the decision. The transition seam is
+  `advice_record_role`, still carried by `soa` and `roa`, so role-keyed logic
+  stays exercised; and because the supported type set is read from the knowledge
+  base rather than hardcoded, adding the successor on enactment is one entry and
+  no Python. That property is now asserted by a test instead of assumed, which
+  the placeholder entry never did (#12).
+- `scope_gate.py` — candidate types now rank on earliest match position, not on
+  summed pattern length. Length was standing in for confidence: "Product
+  Disclosure Statement" (28 chars) outranked "Record of Advice" (16), so an ROA
+  that cites the PDS of the product it discusses came back as a `pds`. A
+  document's own title is at the top; a type it merely cites appears further
+  down. Ties break on distinct patterns matched (#4).
 - `scope_gate.py` — case sensitivity is now decided per pattern from the pattern's
   own shape: mixed-case titles match in any casing, all-caps acronyms stay
   case-sensitive. An ALL-CAPS cover page previously matched nothing and left the
@@ -37,6 +64,20 @@ a finished step (see Contributing in `README.md`). Newest at top.
   field, and the distinction from application forms — both are signed lists of
   actions, but an ATP empowers the ADVISER while application forms instruct the
   PRODUCT ISSUER.
+
+## Session 05-09-2026 — parser
+
+### Done
+- `parser.py` — `parse_pdf()` now returns per-page text alongside the joined text.
+  Extraction was already page by page; the boundaries existed and were discarded
+  on the join. They are the only evidence a bundle split point can be argued from
+  (#19). `"\n".join(pages) == extracted_text` always holds, so the two views
+  cannot disagree. `/ingest` does not echo `pages` — no consumer yet, and it would
+  roughly double the payload.
+- `tests/test_parser.py` — multi-page PDFs are now built in the test with `pypdf`
+  itself, so the file runs on a bare clone. `test_parse_pdf_returns_expected_keys`
+  previously indexed `samples/` and raised `IndexError` rather than guarding the
+  record shape when the samples weren't present.
 
 ## Session 31-08-2026
 

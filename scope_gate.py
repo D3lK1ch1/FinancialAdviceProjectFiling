@@ -9,15 +9,19 @@ real classifier, later.
 import json
 import re
 
-IN_SCOPE_TYPES = ["soa", "roa", "fsg", "pds"]
-
 with open("knowledge_base.json") as f:
     _KB = json.load(f)
+
+# The supported set is whatever the knowledge base defines — never a list in
+# Python (CLAUDE.md rule #1). Previously this was hardcoded to four types in
+# three separate files while the KB defined nine, so the five it didn't know
+# about left the pipeline as in_scope: False with no type and no flag —
+# indistinguishable from an unreadable file.
+IN_SCOPE_TYPES = [doc["id"] for doc in _KB["documents"]]
 
 _TITLE_PATTERNS = {
     doc["id"]: doc["classifier_hints"]["title_patterns"]
     for doc in _KB["documents"]
-    if doc["id"] in IN_SCOPE_TYPES
 }
 
 # Patterns match on word boundaries, not as bare substrings. Six of the KB's
@@ -64,11 +68,27 @@ TITLE_WINDOW = 500  # documents commonly reference OTHER types by name in
 
 def check_scope(text: str) -> dict:
     head = text[:TITLE_WINDOW]
-    scores = {}
+
+    # Rank on WHERE the earliest match falls, not on how long the matching
+    # pattern string is. Length was a proxy for confidence and a poor one: it
+    # made "Product Disclosure Statement" (28 chars) outrank "Record of
+    # Advice" (16), so an ROA that refers to the PDS of the product it
+    # discusses — which is what ROAs do — came back as a pds.
+    #
+    # Position is the signal that was actually meant. A document's own title
+    # sits at the very top; another type named further down is a
+    # cross-reference. That is the same observation TITLE_WINDOW already rests
+    # on, applied properly instead of approximated by string length.
+    #
+    # Ties break on the number of distinct patterns matched, so a type
+    # supported by two hits beats one supported by a single hit at the same
+    # position.
+    ranking = {}
     for doc_id, matchers in _MATCHERS.items():
-        matched = [p for p, pattern in matchers if pattern.search(head)]
-        if matched:
-            scores[doc_id] = sum(len(p) for p in matched)
-    if not scores:
+        positions = [found.start() for _p, pattern in matchers if (found := pattern.search(head))]
+        if positions:
+            ranking[doc_id] = (min(positions), -len(positions))
+
+    if not ranking:
         return {"in_scope": False, "likely_type": None}
-    return {"in_scope": True, "likely_type": max(scores, key=scores.get)}
+    return {"in_scope": True, "likely_type": min(ranking, key=ranking.get)}
