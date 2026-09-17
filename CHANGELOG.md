@@ -3,6 +3,50 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 17-09-2026 — an unreadable file stops being a crash
+
+### Done
+- `parser.py` — `parse_pdf()` no longer raises on a file it cannot open. It
+  returns the same shape either way, with `parse_error` carrying the reason,
+  so no caller has to branch on whether parsing worked.
+- **`/ingest` returned HTTP 500 on any unreadable PDF.** Encrypted with a user
+  password, corrupt, truncated, or not a PDF at all — all of them escaped as
+  an unhandled exception, and a reviewer got a stack trace where a document
+  should have been. Part of #36; the two missing dependency pins in that issue
+  are left for #9.
+- **The same defect as #22, in a different code path** — *"a document we
+  cannot read is treated the same as a document that is not advice"* — except
+  worse: it was not treated as anything. `parser.py`'s own docstring already
+  stated the principle it was breaking.
+- **Three situations that were being collapsed, now distinct**, because a
+  reviewer acts on each differently:
+
+  | reason | meaning | what a person does |
+  |---|---|---|
+  | `unreadable` | nothing was read | chase the file or the password |
+  | `no_selectable_text` | it opened and held no text | send it to OCR (#5) |
+  | `out_of_scope` | read in full, matched nothing | confirm it is not advice |
+
+- **A scanned Statement of Advice is still a Statement of Advice.** It was
+  coming back `out_of_scope`, which is the #22 defect surviving in the review
+  layer. `has_selectable_text` existed and was returned explicitly for exactly
+  this purpose — nothing had ever read it.
+- The catch is deliberately broad. pypdf raises `DependencyError` for AES
+  without `cryptography`, `PdfReadError` for corruption,
+  `FileNotDecryptedError` for a user password, and plain `ValueError`/`OSError`
+  for things that are not PDFs. Enumerating them would leave the next kind of
+  bad file crashing, and the response is the same for all of them: hand it to
+  a person and say why.
+
+### Not done here
+- **The two dependency pins stay with #9.** `python-multipart` (without which
+  the test suite cannot even be collected) and `cryptography` (without which
+  every AES-encrypted PDF fails) are one line each, but they are that issue's
+  subject matter and it is unassigned.
+- Failing soft means the three UniSuper PDS files now route to review with a
+  reason instead of crashing. They still do not get read — that needs the
+  `cryptography` pin. Correct behaviour in the meantime rather than a fix.
+
 ## Session 17-09-2026 — three ROA situations, not four
 
 ### Decided (issue #33)

@@ -648,6 +648,8 @@
       }
     },
     "reason_codes": {
+      "unreadable": "The file could not be opened at all — encrypted with a user password, corrupt, truncated, or not really a PDF. A property of the FILE, and the most specific answer available: nothing was read, so nothing else can be said about it. Distinct from a file that opened and held no text, and from one that was read in full and matched nothing. Before this existed the pipeline raised and returned HTTP 500, so a reviewer got a stack trace instead of a document.",
+      "no_selectable_text": "The file opened but carries no extractable text — a scan or a photograph of a document. Nothing is wrong with it; it simply cannot be read without OCR (#5). It is NOT out of scope: a scanned Statement of Advice is still a Statement of Advice, and treating it as 'not advice' is what #22 was about.",
       "out_of_scope": "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see.",
       "unknown_type": "The classifier returned no type. Distinct from out_of_scope: the title gate DID match something, so the document looks like one of ours and the classifier still could not name it.",
       "low_confidence": "The classifier named a type but below that type's threshold. The proposal and its reasoning are still returned — a reviewer confirming a correct low-confidence answer is useful failure-log data.",

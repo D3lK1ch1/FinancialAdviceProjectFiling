@@ -63,5 +63,7 @@ async def ingest(file: UploadFile):
         in_scope=result["in_scope"],
         classification=result.get("classification"),
         flags=result["flags"],
+        parse_error=result.get("parse_error"),
+        has_selectable_text=result["has_selectable_text"],
     )
     return result

@@ -53,6 +53,8 @@ def assess(
     in_scope: bool,
     classification: dict | None,
     flags: list[dict] | None = None,
+    parse_error: str | None = None,
+    has_selectable_text: bool = True,
 ) -> dict:
     """Whether this document needs a human, and what to tell them.
 
@@ -62,6 +64,22 @@ def assess(
     """
     flags = flags or []
     reasons = []
+
+    # Most specific first. These three are routinely collapsed into "we
+    # couldn't file it", and they are different situations a reviewer acts on
+    # differently: nothing was read, versus it was read and held no text,
+    # versus it was read in full and looked like nothing we model.
+    if parse_error:
+        reasons.append(_reason("unreadable", parse_error))
+        return _result(reasons, threshold=None, confidence=None)
+
+    if not has_selectable_text:
+        # A scanned Statement of Advice is still a Statement of Advice.
+        # Calling it out of scope is exactly what #22 was about.
+        reasons.append(
+            _reason("no_selectable_text", "The file opened but carries no extractable text.")
+        )
+        return _result(reasons, threshold=None, confidence=None)
 
     if not in_scope:
         # Previously the end of the road — no type, no confidence, no flag,
