@@ -112,6 +112,64 @@ a finished step (see Contributing in `README.md`). Newest at top.
   which legislative basis it is. With the classifier unreachable there is no
   type, so no flag. Verified with the classifier stubbed.
 
+## Session 17-09-2026 — the review threshold
+
+### Done
+- `review.py` — `needs_review` with a reason, per #4's fourth checkbox.
+  `/ingest` now returns a `review` block on every document: whether it can
+  stand on its own, what threshold it was held to, and if it cannot, why not.
+- `knowledge_base.json` — `review_policy`. A threshold per document type with
+  the reasoning written next to it, a `default_threshold` for any type without
+  its own entry, and the five reason codes a reviewer can be shown.
+- **The only thresholds in the system were two numbers in a browser file.**
+  `static/index.html` had `confidence >= 0.75` and `>= 0.5` and nothing else
+  did — so the rule deciding whether a person looks at a client's advice
+  record was a presentational detail of one page, applied to every document
+  type equally, with no reasoning attached and invisible to the API. Moved to
+  the knowledge base (ground rule #1); the page now colours the bar against
+  the threshold the server sends and no longer decides anything.
+- **Per type, because the cost of being wrong is not uniform.** Misfiling a
+  PDS moves a product brochure. Misfiling an SOA builds an advice event around
+  the wrong document. Advice records (`soa`, `roa`) sit at 0.80, the ATP and
+  FDS at 0.75, inputs at 0.70, and the FSG and PDS at 0.60 — licensee- and
+  issuer-wide documents that are not client-specific and are highly
+  standardised in their titling. There is a test asserting advice records are
+  held to the highest bar in the set, so the domain claim is pinned rather
+  than implied.
+- **Out of scope is a review reason, not a dead end.** It used to leave the
+  pipeline with no type, no confidence and no flag — indistinguishable from an
+  unreadable file. `unknown_type` is kept distinct from it: out of scope means
+  nothing looked like ours, unknown type means the title gate matched and the
+  classifier still could not name it.
+- **A low-confidence document keeps its working.** It is not discarded and not
+  blanked: the proposed type, the confidence and the matched signals all still
+  come back, because a reviewer confirming a correct low-confidence answer is
+  exactly the failure-log evidence ground rule #6 wants.
+- `classifier_unavailable` is its own reason. An unreachable classifier is a
+  property of the runtime, and must never be recorded against the document as
+  a classification failure it did not cause.
+- Reasons accumulate rather than short-circuit — two things wrong with a
+  document is two things a reviewer should see.
+
+### Open question, recorded rather than settled
+- **Only high severity forces review.** Medium deliberately does not, because
+  `roa_basis_unconfirmed` fires on every ROA and a queue that asks about every
+  document gets ignored — the failure mode named in #20's direction note. But
+  `multi_doc_bundle` is also medium, and filing a two-document bundle as one
+  document is not something to wave through. That probably wants a per-rule
+  `forces_review` override rather than a severity-wide rule. Left as
+  `review_policy.open_question` because no real case has forced it yet.
+
+### Not done here
+- **The numbers are a judgement, not a measurement**, and `calibration_status`
+  in the knowledge base says so in as many words. Nothing has been scored
+  against a labelled sample set, because the classifier is not wired to one.
+  They are set by the cost of being wrong per type, which is knowable now,
+  rather than by observed accuracy, which is not. They should move once the
+  failure log has entries.
+- Nothing routes anywhere yet. `_Needs review` is returned as a proposed
+  destination; filing itself is #10.
+
 ## Session 10-09-2026 — knowledge base
 
 ### Done

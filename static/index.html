@@ -245,6 +245,27 @@
     border-left: 2px solid var(--accent-soft-border);
   }
 
+  .review-reasons { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .review-reason {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    background: var(--surface-sunken);
+    border: 1px solid var(--border-soft);
+  }
+  .review-code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--low);
+    white-space: nowrap;
+  }
+  .review-detail { color: var(--ink-soft); }
+
   /* A flag is a question a reviewer answers, not an error. Severity tints it;
      it never reads as a failure, because all four ROA bases are valid. */
   .flag {
@@ -405,9 +426,20 @@ fileInput.addEventListener('change', () => {
   if (fileInput.files.length) sendFile(fileInput.files[0]);
 });
 
-function confidenceTier(confidence) {
-  if (confidence >= 0.75) return 'high';
-  if (confidence >= 0.5) return 'medium';
+// The review decision is the server's, not this page's. These two numbers
+// used to live here as `>= 0.75` and `>= 0.5` — which put the rule deciding
+// whether a person looks at a client's advice record inside one browser
+// file, applied to every document type equally, with no reasoning attached
+// and invisible to the API. They are now per-type thresholds in
+// knowledge_base.json, with the cost of being wrong written next to each.
+//
+// All this does is colour the bar: at or above the type's threshold reads as
+// settled, comfortably under it reads as weak. `needs_review` is the answer;
+// the tier is only how it looks.
+function confidenceTier(confidence, threshold) {
+  if (threshold === null || threshold === undefined) return 'low';
+  if (confidence >= threshold) return 'high';
+  if (confidence >= threshold * 0.75) return 'medium';
   return 'low';
 }
 
@@ -492,8 +524,19 @@ function render(data) {
   const flags = (data.flags || []).map(flagBlock).join('');
 
   const pct = Math.round((c.confidence || 0) * 100);
-  const tier = confidenceTier(c.confidence || 0);
-  const tierLabel = tier === 'high' ? 'High confidence' : tier === 'medium' ? 'Medium confidence' : 'Needs review';
+  const review = data.review || {};
+  const tier = review.needs_review ? 'low' : confidenceTier(c.confidence || 0, review.threshold);
+  const tierLabel = review.needs_review ? 'Needs review' : 'Ready to confirm';
+
+  // Why it needs review, in the reviewer's words rather than a bare flag.
+  // "Needs review" on its own tells somebody nothing about what to look at.
+  const reviewReasons = (review.reasons || []).length
+    ? `<div class="review-reasons">${(review.reasons || []).map(r => `
+        <div class="review-reason">
+          <span class="review-code">${escapeHtml(r.code.replace(/_/g, ' '))}</span>
+          <span class="review-detail">${escapeHtml(r.detail)}</span>
+        </div>`).join('')}</div>`
+    : '';
   const signals = (c.matched_signals && c.matched_signals.length)
     ? `<div class="signals-label">Why</div><ul class="signals">${c.matched_signals.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>`
     : '';
@@ -509,7 +552,14 @@ function render(data) {
           <div class="meter ${tier}"><div style="width:${pct}%"></div></div>
           <div class="n">${pct}%</div>
         </div>
-        <div class="proposal-note">Proposed classification — confirm before filing.</div>
+        <div class="proposal-note">${
+          review.needs_review
+            ? `Goes to <code>${escapeHtml(review.destination || '')}</code> until a person confirms it.`
+            : 'Proposed classification — confirm before filing.'
+        }${
+          review.threshold != null ? ` This type has to reach ${Math.round(review.threshold * 100)}%.` : ''
+        }</div>
+        ${reviewReasons}
         ${signals}
         ${flags}
       </div>
