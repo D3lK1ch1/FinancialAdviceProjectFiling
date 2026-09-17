@@ -606,6 +606,28 @@
       "sequencing": "Do not build this until classification and grouping are reliable. A summary built on mis-grouped documents is confidently wrong."
     }
   },
+  "confidence_policy": {
+    "purpose": "The classifier reports its own confidence. That number is a claim by the model about itself, not a measurement, and nothing checked it before acting on it. This turns it into evidence that can be checked: every phrase the model says it matched is looked for in the document, and the scope gate's independent reading is compared against the type the model chose.",
+    "direction_rule": "Verification can only LOWER the acted-on confidence, never raise it. A model that quotes accurately has told the truth about its own reasoning; it has not thereby proved the answer right. Allowing evidence to inflate a number the model invented would launder a guess into a measurement.",
+    "two_numbers": "`confidence_raw` keeps the model's own figure unchanged, so drift in the model is visible over time and the two can be compared in the failure log. `confidence` is what the system acts on, and is what review_policy's thresholds are applied to.",
+    "signal_verification": {
+      "rule": "Each phrase in `matched_signals` must actually occur in the extracted text. The proportion that do becomes a multiplier.",
+      "matching": "Case-insensitive, with ALL whitespace removed from both sides before comparing — not exact, and not merely whitespace-collapsed. PDF extraction splits words internally: the real ASIC samples produce 'A ustralian S ecurities' and 'h is advice', where the space sits inside the word, so collapsing runs of spaces does not help. Exact or collapsed matching would report honest quotes as fabricated on almost every real PDF, and a check that fires on everything gets ignored.",
+      "matching_trade_off": "Removing whitespace makes matching looser, and a short signal can match inside an unrelated word ('ROA' sits inside 'BROADWAY'). Tolerable here in a way it is not in the scope gate, because this only decides whether to LOWER confidence: a loose match declines to penalise and never promotes anything. Wrongly calling an honest quote fabricated is the more damaging error, because it sends correct classifications of ordinary documents to review.",
+      "no_signals_factor": 0.5,
+      "no_signals_why": "A model naming a type while quoting nothing has given an answer with no working. That is not a fabrication, so it is not zero, but it is not evidence either. Halved rather than rejected, because the flag and the review threshold still get to see the proposal."
+    },
+    "scope_agreement": {
+      "rule": "The scope gate reads the title region deterministically, by knowledge-base title patterns, with no model involved. Where it names a type and the classifier names a different one, two independent readings disagree.",
+      "agree_factor": 1.0,
+      "disagree_factor": 0.6,
+      "no_scope_type_factor": 1.0,
+      "no_scope_type_why": "The gate having no opinion is not disagreement. It only reads the first 500 characters, so a document whose title sits below that window leaves it silent — that is absence of evidence, and must not be scored as evidence of absence.",
+      "why_it_is_worth_something": "The gate is not smarter than the classifier, and on its own it is weak — it matches title strings. Its value is INDEPENDENCE: it cannot be wrong in the same way a language model is wrong, so agreement between them is worth more than either alone. This is the same argument filing_model.accuracy_mechanism makes about two axes having to agree."
+    },
+    "formula": "confidence = confidence_raw x signal_factor x scope_factor, clamped to [0, 1]. Deliberately multiplicative and deliberately simple: a reviewer looking at a lowered number should be able to see which of the two checks lowered it, and by how much, without reading Python.",
+    "calibration_status": "The two factors are judgements, not fitted values — nothing has been measured against a scored sample set, because the classifier is not wired to one. They encode a direction (unverified quotes and cross-reading disagreement should both reduce trust) and a rough weight, not an observed error rate."
+  },
   "review_policy": {
     "purpose": "Decides whether a classification is confident enough to act on, or must go to a human first. Ground rule #2: nothing files silently, and a document that cannot be placed confidently routes to _Needs review WITH A REASON rather than leaving the pipeline. The reason is the point — 'needs review' on its own tells a reviewer nothing about what to look at.",
     "threshold_meaning": "The classifier's confidence must MEET OR EXCEED the type's threshold for the proposal to stand on its own. Below it, the document still gets its proposed type and its reasoning — it is not discarded — but it is marked needs_review with the low_confidence reason.",
