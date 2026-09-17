@@ -3,6 +3,83 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 17-09-2026 — bundle detection
+
+### Done
+- `flags.py` — `multi_doc_bundle` now fires. #19's checkboxes 2 and 3: detect
+  from the knowledge base, flag before splitting. `/ingest` passes per-page
+  text (from #21) to the flag engine, which is why that had to land first —
+  joined text cannot show where one document ends and the next begins.
+- **Two signals, and the strong one needs no notion of type.** A page-number
+  marker reading "page 1 of N" on any page but the first is direct evidence of
+  a boundary. The example SOA inside ASIC's RG 90 file restarts at "Page 1 of
+  23" on page 31 of 53, and that is what finds it.
+- **The type signal is a TRANSITION, not a presence.** Every page of a real
+  SOA carries its own title in a running header, so a second type's name
+  appearing somewhere means nothing; the change from one type to another is
+  the signal.
+- **Nothing is ever split.** Candidate boundaries and proposed page ranges go
+  to a human. A missed bundle is a flag nobody actioned; a wrong split cuts a
+  record in half and nothing downstream can tell it happened.
+- **`review_policy.open_question` is resolved, by a real case.** It asked
+  whether medium severity should force review, given `roa_basis_unconfirmed`
+  fires on every ROA. The answer is a per-rule override rather than a
+  severity-wide rule: `multi_doc_bundle` sets `forces_review: true` because
+  filing a two-document bundle as one document destroys a record rather than
+  mislabelling one, and cannot be corrected later from what was filed.
+  `roa_basis_unconfirmed` stays non-blocking, so the queue does not fill with
+  every ROA.
+
+### Shown in the UI, and two things that fixing it exposed
+- The result card renders the bundle flag: page count, the proposed ranges as
+  `p1-18 + p19-24 + ...`, each boundary with its evidence and strength, and a
+  line saying nothing has been split.
+- **The flag renderer was keyed to one rule.** It branched on
+  `determination`, which belongs to `roa_basis_unconfirmed` alone, so a
+  bundle flag fell through to "The document does not say which:" followed by
+  an empty list — untrue, and it hid the evidence. Now one renderer per rule
+  id with a fallback that shows the question and severity rather than
+  asserting something false about a rule it does not know.
+- **`flagged_high_severity` is renamed `flagged_blocking`.** The name was
+  accurate until a rule could override its severity's default. A medium flag
+  displaying as "FLAGGED HIGH SEVERITY" is the kind of small wrongness that
+  teaches a reviewer to distrust the labels. Named for what it does.
+
+### Two wrong turns, both caught by real documents
+- **Frequency-based header suppression was wrong.** Ignoring types that appear
+  on most pages looks sensible and hides exactly the boundary being looked
+  for: in a real bundle the larger document's own running header legitimately
+  appears on most pages of the whole file. Stapling a real FSG to a real ROA
+  showed it — `roa` covered 9 of 11 pages and the boundary at page 3
+  disappeared.
+- **The excursion rule needed both halves.** `unisuper-flexi-pension-pds.pdf`
+  reads `pds -> risk_profile -> pds`, because a PDS describes the risk profile
+  of its investment options. Suppressing only the departure left the RETURN
+  reported as the start of a new document.
+
+### Validated against every real document available
+- 25 files, no mismatches. Five are genuine bundles, twenty are not.
+- **Three findings that correct earlier claims, all raised separately:**
+  - `asic-cp284-example-soa-attachment.pdf` (p56) and
+    `asic-rg90-example-soa-2013.pdf` (p40) **do** carry an appended Authority
+    to Proceed. An earlier note on #19 said no real SOA+ATP case existed in
+    the set — wrong; it was in different files from the one named for it.
+  - `Example SOA.pdf` in the working copy is byte-identical to
+    `samples/soa_atp/asic-rg90-example-soa-with-atp.pdf`.
+  - **`PDS.pdf` is a bundle nobody had noticed** — an AustralianSuper PDS
+    (pp1-18) with five appended forms: Join, Pay my super into, Combine your
+    super twice, and a binding death benefit nomination. Native text, not
+    scanned. See #23.
+
+### Not done here
+- #19's checkbox 4 (propose a split for approval as an action) and checkbox 5
+  (`atp_without_advice_record` must not fire on an unsplit bundle) are
+  separate. The second is stateful and waits on #8.
+- The title signal's known weakness is recorded in the knowledge base rather
+  than left to be discovered: a heading naming another type that never returns
+  to the parent still reads as a boundary. Candidates are evidence for a
+  human, so a wrong one costs a look rather than a record.
+
 ## Session 17-09-2026 — three ROA situations, not four
 
 ### Decided (issue #33)

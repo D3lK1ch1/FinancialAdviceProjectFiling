@@ -494,28 +494,58 @@ function render(data) {
   // "unsure". Where the tool can propose an answer it shows what it matched,
   // so a reviewer corrects one thing instead of starting from scratch. There
   // is no approve action here — that is the Approve/Edit/Reject work.
-  function flagBlock(flag) {
-    let body;
-    if (flag.determination === 'proposed') {
-      const evidence = (flag.matched_signals || [])
-        .map(s => `<li>${escapeHtml(s)}</li>`).join('');
-      body = `<div class="flag-basis">Reads as <strong>${escapeHtml(flag.proposed_basis_name)}</strong>
-                <code>${escapeHtml(flag.proposed_basis_provision)}</code></div>
-              ${evidence ? `<ul class="flag-evidence">${evidence}</ul>` : ''}`;
-    } else {
+  // One renderer per rule, chosen by id, with a fallback that always shows
+  // something truthful. Keying the whole block on `determination` was wrong:
+  // that field belongs to roa_basis_unconfirmed alone, so a multi_doc_bundle
+  // flag fell through to "The document does not say which:" followed by an
+  // empty list — nonsense, and it hid the evidence. The flag engine is
+  // general; the display has to be too, or every new rule breaks this.
+  const FLAG_BODIES = {
+    roa_basis_unconfirmed(flag) {
+      if (flag.determination === 'proposed') {
+        const evidence = (flag.matched_signals || [])
+          .map(s => `<li>${escapeHtml(s)}</li>`).join('');
+        return `<div class="flag-basis">Reads as <strong>${escapeHtml(flag.proposed_basis_name)}</strong>
+                  <code>${escapeHtml(flag.proposed_basis_provision)}</code></div>
+                ${evidence ? `<ul class="flag-evidence">${evidence}</ul>` : ''}`;
+      }
       const lead = flag.determination === 'ambiguous'
         ? 'The document reads as more than one:'
         : 'The document does not say which:';
       const candidates = (flag.candidates || [])
         .map(x => `<li>${escapeHtml(x.name)} <code>${escapeHtml(x.provision)}</code></li>`)
         .join('');
-      body = `<div class="flag-basis">${lead}</div>
+      return `<div class="flag-basis">${lead}</div>
               <ul class="flag-evidence">${candidates}</ul>`;
-    }
+    },
+
+    multi_doc_bundle(flag) {
+      // The page ranges are the useful part: a reviewer checks the boundary,
+      // not the adjective. Nothing is split — this is a proposal.
+      const ranges = (flag.proposed_split || [])
+        .map(r => r.from_page === r.to_page ? `p${r.from_page}` : `p${r.from_page}\u2013${r.to_page}`)
+        .join('  +  ');
+      const evidence = (flag.candidate_boundaries || []).map(c =>
+        `<li>page ${c.page} — ${escapeHtml(c.detail)}
+           <code>${escapeHtml(c.evidence.replace(/_/g, ' '))}, ${escapeHtml(c.strength)}</code></li>`
+      ).join('');
+      return `<div class="flag-basis">${flag.page_count} pages, reading as
+                <strong>${(flag.proposed_split || []).length} documents</strong>:
+                <code>${escapeHtml(ranges)}</code></div>
+              <ul class="flag-evidence">${evidence}</ul>
+              <div class="flag-basis" style="margin-top:8px">Nothing has been split. A person confirms the boundary.</div>`;
+    },
+  };
+
+  function flagBlock(flag) {
+    const render = FLAG_BODIES[flag.id];
+    // A rule with no renderer still shows its question and its severity
+    // rather than rendering something untrue about itself.
+    const body = render ? render(flag) : '';
     return `<div class="flag ${escapeHtml(flag.severity)}">
               <div class="flag-head">
-                <div class="flag-asks">${escapeHtml(flag.asks.split('?')[0])}?</div>
-                <div class="flag-severity">${escapeHtml(flag.severity)} · review</div>
+                <div class="flag-asks">${escapeHtml((flag.asks || '').split('?')[0])}?</div>
+                <div class="flag-severity">${escapeHtml(flag.severity)} \u00b7 ${flag.forces_review ? 'blocks' : 'review'}</div>
               </div>
               ${body}
             </div>`;
