@@ -30,6 +30,21 @@ a finished step (see Contributing in `README.md`). Newest at top.
   `roa_basis_unconfirmed` stays non-blocking, so the queue does not fill with
   every ROA.
 
+### Shown in the UI, and two things that fixing it exposed
+- The result card renders the bundle flag: page count, the proposed ranges as
+  `p1-18 + p19-24 + ...`, each boundary with its evidence and strength, and a
+  line saying nothing has been split.
+- **The flag renderer was keyed to one rule.** It branched on
+  `determination`, which belongs to `roa_basis_unconfirmed` alone, so a
+  bundle flag fell through to "The document does not say which:" followed by
+  an empty list — untrue, and it hid the evidence. Now one renderer per rule
+  id with a fallback that shows the question and severity rather than
+  asserting something false about a rule it does not know.
+- **`flagged_high_severity` is renamed `flagged_blocking`.** The name was
+  accurate until a rule could override its severity's default. A medium flag
+  displaying as "FLAGGED HIGH SEVERITY" is the kind of small wrongness that
+  teaches a reviewer to distrust the labels. Named for what it does.
+
 ### Two wrong turns, both caught by real documents
 - **Frequency-based header suppression was wrong.** Ignoring types that appear
   on most pages looks sensible and hides exactly the boundary being looked

@@ -132,7 +132,7 @@ def test_a_bundle_forces_review_despite_being_medium():
         flags=[flag],
     )
     assert result["needs_review"] is True
-    assert "flagged_high_severity" in [r["code"] for r in result["reasons"]]
+    assert "flagged_blocking" in [r["code"] for r in result["reasons"]]
 
 
 def test_a_medium_flag_without_the_override_still_does_not_block():

@@ -112,7 +112,7 @@ def assess(
     if blocking:
         reasons.append(
             _reason(
-                "flagged_high_severity",
+                "flagged_blocking",
                 ", ".join(sorted(f["id"] for f in blocking)),
             )
         )

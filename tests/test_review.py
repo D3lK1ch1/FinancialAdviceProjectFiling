@@ -115,7 +115,7 @@ def test_a_high_severity_flag_forces_review_on_its_own():
     )
 
     assert result["needs_review"] is True
-    assert _codes(result) == ["flagged_high_severity"]
+    assert _codes(result) == ["flagged_blocking"]
     assert "atp_without_advice_record" in result["reasons"][0]["detail"]
 
 
@@ -144,7 +144,7 @@ def test_reasons_accumulate_rather_than_short_circuit():
         flags=[{"id": "risk_mismatch", "severity": "high"}],
     )
 
-    assert _codes(result) == ["low_confidence", "flagged_high_severity"]
+    assert _codes(result) == ["low_confidence", "flagged_blocking"]
 
 
 def test_a_type_with_no_entry_falls_back_to_the_default():
@@ -190,7 +190,7 @@ def test_advice_records_are_held_to_the_highest_bar():
 
 
 @pytest.mark.parametrize("code", ["out_of_scope", "unknown_type", "low_confidence",
-                                  "classifier_unavailable", "flagged_high_severity"])
+                                  "classifier_unavailable", "flagged_blocking"])
 def test_every_reason_code_explains_itself_from_the_knowledge_base(code):
     """Ground rule #1: the explanation a reviewer reads is data, not a string
     in Python.

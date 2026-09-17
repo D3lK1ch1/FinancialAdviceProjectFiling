@@ -652,7 +652,7 @@
       "unknown_type": "The classifier returned no type. Distinct from out_of_scope: the title gate DID match something, so the document looks like one of ours and the classifier still could not name it.",
       "low_confidence": "The classifier named a type but below that type's threshold. The proposal and its reasoning are still returned — a reviewer confirming a correct low-confidence answer is useful failure-log data.",
       "classifier_unavailable": "The classifier could not be reached at all. Not a property of the document, and must never be recorded as a classification failure against it.",
-      "flagged_high_severity": "A high-severity edge-case flag fired. See severity_forces_review in edge_case_flags."
+      "flagged_blocking": "A flag fired that blocks on its own. Usually high severity, but a rule may override its severity’s default — multi_doc_bundle is medium and blocks, because filing a two-document bundle as one document destroys a record rather than mislabelling one. Named for what it does rather than for its severity, because those came apart the moment overrides existed."
     },
     "destination": "_Needs review",
     "open_question": "Only HIGH severity forces review today. Medium is deliberately left not-forcing, because roa_basis_unconfirmed fires on every ROA and a queue that asks about every document gets ignored — see the direction note on #20. But multi_doc_bundle is also medium, and filing a two-document bundle as one document is not something to wave through. That probably wants a per-rule forces_review override rather than a severity-wide rule. Left as a question because no real case has forced it yet."
