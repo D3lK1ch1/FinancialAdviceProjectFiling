@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from classifier import classify
 from flags import evaluate_flags
 from parser import parse_pdf
+from review import assess
 from scope_gate import check_scope
 
 app = FastAPI(title="Advice Document Filing — POC")
@@ -54,4 +55,13 @@ async def ingest(file: UploadFile):
     # matches a title pattern, so a document that merely mentions an ROA would
     # otherwise be asked which legislative basis it is.
     result["flags"] = evaluate_flags(doc_type, result["extracted_text"])
+    # Whether this can stand on its own, and why not if it can't. Out of scope
+    # is a review reason here rather than the end of the road: the document
+    # keeps its working either way, because a reviewer confirming a correct
+    # low-confidence answer is the failure-log evidence ground rule #6 wants.
+    result["review"] = assess(
+        in_scope=result["in_scope"],
+        classification=result.get("classification"),
+        flags=result["flags"],
+    )
     return result

@@ -606,6 +606,57 @@
       "sequencing": "Do not build this until classification and grouping are reliable. A summary built on mis-grouped documents is confidently wrong."
     }
   },
+  "review_policy": {
+    "purpose": "Decides whether a classification is confident enough to act on, or must go to a human first. Ground rule #2: nothing files silently, and a document that cannot be placed confidently routes to _Needs review WITH A REASON rather than leaving the pipeline. The reason is the point — 'needs review' on its own tells a reviewer nothing about what to look at.",
+    "threshold_meaning": "The classifier's confidence must MEET OR EXCEED the type's threshold for the proposal to stand on its own. Below it, the document still gets its proposed type and its reasoning — it is not discarded — but it is marked needs_review with the low_confidence reason.",
+    "calibration_status": "These numbers are a first domain judgement, not a measurement. Nothing has been measured against a scored sample set yet, because the classifier is not wired to one. They are set by the COST OF BEING WRONG per document type, which is knowable now, rather than by observed accuracy, which is not. Expect to move them once the failure log has entries.",
+    "why_per_type": "A single global threshold treats every document as equally expensive to misplace, and they are not. Misfiling a PDS puts a product brochure in the wrong folder. Misfiling an SOA puts the advice record — the centre of the advice event, the thing every other document links to — under the wrong client or the wrong event.",
+    "default_threshold": 0.70,
+    "default_note": "Applies to any document type without its own entry, so adding a type to `documents` needs no edit here (ground rule #1). A new type starts cautious and earns a lower bar once its behaviour is known.",
+    "thresholds": {
+      "soa": {
+        "value": 0.8,
+        "why": "The advice record, and the centre of an advice event — version status, superseding, event grouping and every links_to relationship key on finding the right one. A wrong SOA is not one misfiled document; it is an advice event assembled around the wrong document."
+      },
+      "roa": {
+        "value": 0.8,
+        "why": "Also an advice record (advice_record_role is true), with the same event-grouping weight as an SOA. It carries the roa_basis_unconfirmed question regardless of confidence, so a low-confidence ROA is a document a reviewer is already being asked about — no reason to let a shaky type through underneath a question."
+      },
+      "authority_to_proceed": {
+        "value": 0.75,
+        "why": "A signed client authorisation, and the link between advice and what was actually implemented. atp_without_advice_record is the highest-severity flag in the set, so a misread ATP either fires it wrongly or hides a genuine gap."
+      },
+      "fee_disclosure_statement": {
+        "value": 0.75,
+        "why": "Fee disclosure and ongoing-fee consent carry their own compliance exposure, and fds_era_mismatch depends on this type being identified correctly before the pre/post-DBFO check can run at all."
+      },
+      "fact_find": {
+        "value": 0.7,
+        "why": "An input document evidencing safe harbour steps 1-2. Wrong placement is recoverable and visible — a fact find in the wrong folder is obvious to the next person who opens it — but fact_find_after_soa sequencing depends on it."
+      },
+      "risk_profile": {
+        "value": 0.7,
+        "why": "Input document, pairs with the fact find. risk_mismatch is high severity but compares CONTENT to an SOA's recommendations, so it needs the type read correctly first."
+      },
+      "fsg": {
+        "value": 0.6,
+        "why": "Licensee-wide and not client-specific: the same edition is given to every client, so a misfiled FSG misplaces a copy of a document the firm holds many identical copies of. Lowest cost of error in the set, and highly standardised titling, so a lower bar costs little."
+      },
+      "pds": {
+        "value": 0.6,
+        "why": "Issued by the product provider, not the firm, and not client-specific. Reference material rather than a record of anything the firm did. Same reasoning as the FSG."
+      }
+    },
+    "reason_codes": {
+      "out_of_scope": "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see.",
+      "unknown_type": "The classifier returned no type. Distinct from out_of_scope: the title gate DID match something, so the document looks like one of ours and the classifier still could not name it.",
+      "low_confidence": "The classifier named a type but below that type's threshold. The proposal and its reasoning are still returned — a reviewer confirming a correct low-confidence answer is useful failure-log data.",
+      "classifier_unavailable": "The classifier could not be reached at all. Not a property of the document, and must never be recorded as a classification failure against it.",
+      "flagged_high_severity": "A high-severity edge-case flag fired. See severity_forces_review in edge_case_flags."
+    },
+    "destination": "_Needs review",
+    "open_question": "Only HIGH severity forces review today. Medium is deliberately left not-forcing, because roa_basis_unconfirmed fires on every ROA and a queue that asks about every document gets ignored — see the direction note on #20. But multi_doc_bundle is also medium, and filing a two-document bundle as one document is not something to wave through. That probably wants a per-rule forces_review override rather than a severity-wide rule. Left as a question because no real case has forced it yet."
+  },
   "edge_case_flags": {
     "purpose": "Rules that route a document to the internal human-review queue instead of forcing a category. Each fires a flag; it does not silently reclassify.",
     "evaluation_values": {
@@ -613,6 +664,12 @@
       "stateful": "Needs other documents for the same client — a prior SOA, an earlier fact find, a competing current version. Not answerable until documents persist across requests."
     },
     "evaluation_note": "Every rule declares which it is, so the flagging engine can never claim to have evaluated a rule whose evidence it does not hold. Declaring a rule stateless says it CAN be answered at ingest, not that it is implemented yet.",
+    "severity_forces_review": {
+      "high": true,
+      "medium": false,
+      "low": false
+    },
+    "severity_note": "Whether a flag on its own sends a document to _Needs review. A flag is always SHOWN; this decides whether it blocks. High severity means the document cannot be acted on until a person looks. Medium and low attach a question to a proposal that still stands on its own confidence — see review_policy.open_question for why that is not obviously right for every medium rule.",
     "rules": [
       {"id": "roa_basis_unconfirmed", "evaluation": "stateless", "trigger": "Any document classified as an ROA. Fires on every one, not on an anomaly.", "why": "An ROA is permitted in three situations — further advice (reg 7.7.10AE), no buy or sell (reg 7.7.10AAA), small investment (s946AA) — and which one applies changes the content the record must contain and whether a prior SOA is required at all. The document type does not settle it, so filing an ROA without recording its basis loses the fact that determines what a compliant record looks like. This is a confirmation, never an error: all three are valid.", "severity": "medium", "asks": "Which of the three situations is this? Where the text supports exactly one, the flag proposes it with the phrases it matched, so a reviewer confirms or corrects one thing rather than starting from scratch.", "determination_values": {"proposed": "Signals for exactly one basis. The flag names it and cites the matched phrases.", "ambiguous": "Signals for more than one basis. The flag lists the candidates; it does not pick.", "absent": "No basis signal found. The honest default — the flag asks which kind, and proposes nothing."}, "signal_source": "documents[roa].legislation.situations[].basis_signals", "not_to_be_confused_with": "roa_without_soa asks a cross-document question (is there a prior SOA on file?) and needs state this rule does not. They can both fire on the same document and they are asking different things."},
       {"id": "roa_without_soa", "evaluation": "stateful", "trigger": "Further-advice-style ROA identified but no prior SOA on file for the client", "why": "A further-advice ROA (notional s946B(2)-(3) / reg 7.7.10AE) depends on an existing SOA. The other two situations — no buy or sell (reg 7.7.10AAA) and small investment (s946AA) — do not, so this is a 'confirm which kind', not an automatic error.", "severity": "medium"},
