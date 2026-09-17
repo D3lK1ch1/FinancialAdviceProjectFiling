@@ -3,6 +3,72 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 17-09-2026 — the ROA basis flag
+
+### Done
+- `flags.py` — the first flagging rule, and the seam the rest land in.
+  `evaluate_flags(doc_type, text)` reads `edge_case_flags` from the knowledge
+  base and returns the flags a document earns from its own contents. Wired
+  into `/ingest`, which now always returns a `flags` list, and rendered in the
+  result card so a flag that fires is a flag a person sees.
+- `knowledge_base.json` — `roa_basis_unconfirmed`, medium severity. An ROA has
+  four legislative bases — further advice (reg 7.7.10AE), hold/no-action
+  (s946B(7)), small investment (s946AA), no buy/sell (reg 7.7.10AAA) — and
+  which one applies decides what the record must contain and whether a prior
+  SOA is required at all. Classifying a document as an ROA does not record
+  that, so the question has to be asked.
+- **It fires on every ROA, and it is the only rule in the set that works that
+  way.** The others fire on an anomaly. This one fires on a property of the
+  type, which is what `advice_classification_reference.md` §6 already says
+  against the ROA row: "Medium: confirm which of 4 bases".
+- **It proposes rather than asks blankly.** Where the text supports exactly one
+  basis the flag names it and cites the phrases it matched, so a reviewer
+  confirms or corrects one thing. Where it supports several, or none, it says
+  so and proposes nothing — `determination` is `proposed`, `ambiguous` or
+  `absent`, so the queue stays sortable.
+- **Signals are split into `declared` and `inferred`,** and a declared basis
+  wins. A document naming the situation it was written under outranks a basis
+  read off the shape of the recommendation.
+
+### Calibrated against a real document, not invented
+- Run against ASIC INFO 266 attachment 1 (further advice), the first version
+  returned **ambiguous** — the most canonical further-advice example in the
+  public set, unreadable. Two real causes, both now fixed in the knowledge
+  base and pinned by tests:
+  - *"you will retain your existing policy features and benefits"* describes a
+    **consequence** of advice, not a recommendation to hold. Retain- and
+    continue-to-hold phrasing is gone from `hold_no_action` entirely; it is
+    compatible with further advice that changes something else.
+  - That ROA's own words include *"My advice is to make no changes to your XYZ
+    Superannuation Fund"* while it increases the client's insurance cover. **No
+    change to one holding, inside advice that changes another, is not a
+    s946B(7) no-action ROA** — that basis needs the advice overall to be to
+    take no action. Phrase matching cannot tell those apart, which is why the
+    declared/inferred split exists and why this flag proposes rather than
+    decides.
+- After the fix the same document reads `proposed: further_advice`.
+- Every rule in `edge_case_flags` now declares `"evaluation": "stateless"` or
+  `"stateful"`, and a test asserts the engine only ever runs rules the
+  knowledge base calls stateless. It cannot report having checked something it
+  had no evidence for.
+
+### Not done here
+- **The failure log has nowhere to put a corrected basis.** `log_failure()`
+  records `predicted_type` / `correct_type` — document type, not basis — and
+  `tests/test_failure_log.py` asserts the exact field set on purpose, so the
+  schema cannot grow quietly. A reviewer correcting a basis is a real
+  correction that ground rule #6 wants captured, and it needs a decision
+  before any field is added. Raised on #12 rather than settled here.
+- **The other ten rules are declared, not implemented.** Five are stateful and
+  wait on persistence (#8). `multi_doc_bundle` is stateless and belongs to
+  #19, which now has the page boundaries it needs.
+- **No review threshold.** The flag says "review" and nothing routes on it yet
+  — that is #4's own checkbox, and `_Needs review` filing is #10.
+- **Nothing fires end to end without Ollama.** The rule keys on the classified
+  type, deliberately, so that a document merely mentioning an ROA is not asked
+  which legislative basis it is. With the classifier unreachable there is no
+  type, so no flag. Verified with the classifier stubbed.
+
 ## Session 10-09-2026 — knowledge base
 
 ### Done

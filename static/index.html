@@ -245,6 +245,51 @@
     border-left: 2px solid var(--accent-soft-border);
   }
 
+  /* A flag is a question a reviewer answers, not an error. Severity tints it;
+     it never reads as a failure, because all four ROA bases are valid. */
+  .flag {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--medium-border);
+    background: var(--medium-bg);
+  }
+  .flag.high { border-color: var(--low-border); background: var(--low-bg); }
+  .flag.low { border-color: var(--idle-border); background: var(--idle-bg); }
+  .flag-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .flag-asks { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .flag-severity {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--medium);
+    white-space: nowrap;
+  }
+  .flag.high .flag-severity { color: var(--low); }
+  .flag.low .flag-severity { color: var(--idle); }
+  .flag-basis { font-size: 13.5px; color: var(--ink-soft); }
+  .flag-basis strong { color: var(--ink); }
+  .flag-basis code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+  .flag-evidence { margin: 8px 0 0; padding: 0; list-style: none; }
+  .flag-evidence li {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    padding-left: 12px;
+    border-left: 2px solid var(--medium-border);
+    margin-top: 4px;
+  }
+
   .out-of-scope, .error-block {
     padding: 16px 20px;
     font-size: 14px;
@@ -413,6 +458,39 @@ function render(data) {
     return;
   }
 
+  // Flags render as questions with the reasoning shown, never as a bare
+  // "unsure". Where the tool can propose an answer it shows what it matched,
+  // so a reviewer corrects one thing instead of starting from scratch. There
+  // is no approve action here — that is the Approve/Edit/Reject work.
+  function flagBlock(flag) {
+    let body;
+    if (flag.determination === 'proposed') {
+      const evidence = (flag.matched_signals || [])
+        .map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      body = `<div class="flag-basis">Reads as <strong>${escapeHtml(flag.proposed_basis_name)}</strong>
+                <code>${escapeHtml(flag.proposed_basis_provision)}</code></div>
+              ${evidence ? `<ul class="flag-evidence">${evidence}</ul>` : ''}`;
+    } else {
+      const lead = flag.determination === 'ambiguous'
+        ? 'The document reads as more than one:'
+        : 'The document does not say which:';
+      const candidates = (flag.candidates || [])
+        .map(x => `<li>${escapeHtml(x.name)} <code>${escapeHtml(x.provision)}</code></li>`)
+        .join('');
+      body = `<div class="flag-basis">${lead}</div>
+              <ul class="flag-evidence">${candidates}</ul>`;
+    }
+    return `<div class="flag ${escapeHtml(flag.severity)}">
+              <div class="flag-head">
+                <div class="flag-asks">${escapeHtml(flag.asks.split('?')[0])}?</div>
+                <div class="flag-severity">${escapeHtml(flag.severity)} · review</div>
+              </div>
+              ${body}
+            </div>`;
+  }
+
+  const flags = (data.flags || []).map(flagBlock).join('');
+
   const pct = Math.round((c.confidence || 0) * 100);
   const tier = confidenceTier(c.confidence || 0);
   const tierLabel = tier === 'high' ? 'High confidence' : tier === 'medium' ? 'Medium confidence' : 'Needs review';
@@ -433,6 +511,7 @@ function render(data) {
         </div>
         <div class="proposal-note">Proposed classification — confirm before filing.</div>
         ${signals}
+        ${flags}
       </div>
       ${metaGrid(data)}
     </div>`;
