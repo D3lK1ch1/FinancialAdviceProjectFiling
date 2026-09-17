@@ -245,3 +245,19 @@ def test_every_rule_declares_how_it_can_be_evaluated():
     allowed = set(_KB["edge_case_flags"]["evaluation_values"])
     for rule in _KB["edge_case_flags"]["rules"]:
         assert rule.get("evaluation") in allowed, rule["id"]
+
+
+def test_every_basis_says_whether_a_real_example_exists():
+    """Three of the four bases have no real document to test against, and a
+    signal list looks equally authoritative whether or not anything checked
+    it. `example_status` makes the difference visible instead of leaving it to
+    be inferred from silence. See issue #33.
+    """
+    roa = next(d for d in _KB["documents"] if d["id"] == "roa")
+    kinds = roa["legislation"]["four_kinds"]
+
+    for kind in kinds:
+        assert kind["example_status"].strip(), kind["id"]
+
+    untested = [k["id"] for k in kinds if k["example_status"].startswith("NO REAL EXAMPLE")]
+    assert set(untested) == {"hold_no_action", "small_investment", "no_buy_sell"}

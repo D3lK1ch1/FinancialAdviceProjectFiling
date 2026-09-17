@@ -139,11 +139,13 @@
       "advice_record_role": true,
       "legislation": {
         "primary": "s946B — situations in which an SOA is not required (the ROA pathway)",
+        "evidence_note": "ONLY THE FURTHER-ADVICE BASIS HAS BEEN MATCHED AGAINST REAL TEXT. Each kind carries an `example_status` saying whether a real document of that kind exists to test against. Three of the four have none, so their signals are a reading of the legislation rather than anything measured, and should be treated as a starting point to correct against real firm files — not as calibrated. Stated here rather than left to be inferred from silence, because a signal list looks equally authoritative whether or not anything checked it.",
         "signal_note": "Each kind carries `basis_signals`, split into `declared` and `inferred`. DECLARED phrases are the document stating its own basis — naming the situation or citing the provision. INFERRED phrases describe the shape of the recommendation, which suggests a basis without asserting one. Where any kind is declared, only declared signals decide: a document that says which situation it was written under outranks a basis guessed from how the advice reads. Inferred signals decide only when nothing is declared anywhere. Signals are deliberately narrow, because a signal that fires wrongly produces a confident wrong proposal while one that fails to fire produces \"which kind is this?\" — the honest answer, and this flag's default.",
         "calibration_note": "Measured against ASIC INFO 266 attachment 1 (further advice; retain existing products and increase insurance cover). Two lessons, both from real text. First, \"you will retain your existing policy features and benefits\" describes a CONSEQUENCE of advice, not a recommendation to hold — so retain/continue-to-hold phrasing was removed from hold_no_action entirely. Second, that ROA's own words include \"My advice is to make no changes to your XYZ Superannuation Fund\" while it also increases insurance cover: no change to ONE holding, inside advice that changes another, is not a s946B(7) no-action ROA, which needs the advice overall to be to take no action. Phrase matching alone cannot tell those apart, which is why the declared/inferred split exists and why this flag proposes rather than decides.",
         "four_kinds": [
           {
             "id": "further_advice",
+            "example_status": "Real text available. All three ASIC INFO 266 example ROAs cite notional s946B(2) and reg 7.7.10AE, and none cites any other basis. Whether that makes all three further-advice ROAs is the question in issue #33 — the citations are fact, the reading is not yet settled.",
             "kind": "Further advice",
             "basis": "s946B(1)-(3A) + reg 7.7.10AE",
             "when": "Existing SOA client; no material change in circumstances or basis of advice.",
@@ -164,6 +166,7 @@
           },
           {
             "id": "hold_no_action",
+            "example_status": "NO REAL EXAMPLE. These signals are written from the legislation and have never been matched against a document of this kind, because none is available — INFO 266 attachment 2 is titled 'No change advice' but cites reg 7.7.10AE, not s946B(7). See issue #33.",
             "kind": "No-action / 'hold' recommendation",
             "basis": "s946B(7)",
             "when": "Advice to take no action; no prior SOA required.",
@@ -185,6 +188,7 @@
           },
           {
             "id": "small_investment",
+            "example_status": "NO REAL EXAMPLE. Written from the legislation only. INFO 266 attachment 3 (stockbroker) contains neither 's946AA' nor 'small investment' anywhere in its text. See issue #33.",
             "kind": "Small investment advice",
             "basis": "s946AA + reg 7.7.09A",
             "when": "Advice value under the threshold; timing rules in reg 7.7.09A(10)-(12).",
@@ -201,6 +205,7 @@
           },
           {
             "id": "no_buy_sell",
+            "example_status": "NO REAL EXAMPLE, and none is expected: advice_classification_reference.md §4 records this as a known gap and says not to source one artificially — let a low-confidence flag catch it if it appears in real data.",
             "kind": "No recommendation to buy/sell",
             "basis": "reg 7.7.10AAA",
             "when": "Personal advice with no purchase/sell recommendation; content per reg 7.7.10AAA.",
