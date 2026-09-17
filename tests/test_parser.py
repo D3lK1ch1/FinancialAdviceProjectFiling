@@ -70,7 +70,33 @@ def test_parse_pdf_returns_expected_keys():
         "has_selectable_text",
         "extracted_text",
         "pages",
+        # Present whether or not parsing worked, so callers never branch on
+        # the shape of the result — only on its contents. None here.
+        "parse_error",
     }
+    assert result["parse_error"] is None
+
+
+def test_a_file_that_cannot_be_opened_does_not_raise():
+    """#36. An unreadable PDF used to escape as an unhandled exception and
+    return HTTP 500 — a stack trace where a document should have been. The
+    same defect as #22, except worse: it wasn't treated as anything.
+    """
+    result = parse_pdf(BytesIO(b"this is not a PDF at all"), "junk.pdf")
+
+    assert result["parse_error"], "the reason must be carried, not swallowed"
+    assert result["page_count"] == 0
+    assert result["extracted_text"] == ""
+    assert result["pages"] == []
+    assert result["has_selectable_text"] is False
+    assert result["filename"] == "junk.pdf", "the filename survives a failure"
+
+
+def test_an_empty_stream_does_not_raise():
+    result = parse_pdf(BytesIO(b""), "empty.pdf")
+
+    assert result["parse_error"]
+    assert result["page_count"] == 0
 
 
 def test_pages_are_returned_one_per_page():
