@@ -3,6 +3,46 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 17-09-2026 — recording corrections other than the document type
+
+### Decided (issue #12)
+- **A generic `corrections` list, not a second pair of fields.**
+  `predicted_type`/`correct_type` record one kind of correction: the tool said
+  PDS, it was a file note. Reviewers make others — which of the three ROA
+  situations a record sits on, and the confidence the system acted on versus
+  what a person judged. A field pair per kind means a schema change for every
+  future flag, so corrections are `{kind, predicted, correct}` entries in a
+  list instead.
+
+### Done
+- `failure_log.py` — `log_failure()` takes an optional `corrections` list.
+  Always written, empty when the document type was the only thing corrected,
+  so no reader branches on whether the key exists.
+- **The de-identification rule is expressed as a shape, not a warning.**
+  `corrections` is the extension point every future flag will use, which makes
+  it precisely where a client name would eventually be written by somebody
+  being helpful at the end of the day. So: `kind` must be one of a known set,
+  the only other fields are `predicted` and `correct`, **and there is no
+  free-text field at all**. An unknown kind or an extra field raises and
+  nothing is written.
+- Three kinds to start: `doc_type`, `roa_situation`, `confidence`. Adding one
+  is a deliberate act with a test behind it, not something a caller can
+  invent — a log that silently accepts anything stops being evidence of
+  anything.
+- `tests/test_failure_log.py` — the exact-field-set guard now applies one
+  level down, to each correction record, for the same reason it applies to the
+  entry.
+
+### Why this was blocking two things
+- #12's ROA basis flag had nowhere to record a corrected situation.
+- #37 keeps `confidence_raw` specifically so model drift is visible, and that
+  comparison needs somewhere to live.
+
+### Not done here
+- **Nothing writes a correction yet**, because no approve/edit/reject action
+  exists — that is #4's fifth checkbox and build step 5. This is the slot,
+  ready for it.
+
 ## Session 17-09-2026 — three ROA situations, not four
 
 ### Decided (issue #33)
