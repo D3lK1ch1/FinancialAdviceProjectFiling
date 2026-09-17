@@ -39,7 +39,10 @@ async def ingest(file: UploadFile):
     # response: echoing it alongside extracted_text would roughly double the
     # payload for a consumer that does not exist yet. The PR that consumes it
     # can decide whether the API should expose it.
-    result.pop("pages")
+    # Kept locally for bundle detection and dropped from the response: echoing
+    # per-page text alongside extracted_text would roughly double the payload
+    # for a consumer that does not exist yet.
+    pages = result.pop("pages")
     result.update(check_scope(result["extracted_text"]))
     result["likely_type_name"] = _DOC_NAMES.get(result["likely_type"])
     doc_type = None
@@ -54,7 +57,7 @@ async def ingest(file: UploadFile):
     # Keyed on the CLASSIFIED type, not the scope gate's likely_type: the gate
     # matches a title pattern, so a document that merely mentions an ROA would
     # otherwise be asked which legislative basis it is.
-    result["flags"] = evaluate_flags(doc_type, result["extracted_text"])
+    result["flags"] = evaluate_flags(doc_type, result["extracted_text"], pages)
     # Whether this can stand on its own, and why not if it can't. Out of scope
     # is a review reason here rather than the end of the road: the document
     # keeps its working either way, because a reviewer confirming a correct

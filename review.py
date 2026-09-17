@@ -97,7 +97,18 @@ def assess(
             )
         )
 
-    blocking = [f for f in flags if _FORCES_REVIEW.get(f.get("severity"), False)]
+    # A rule may override its severity's default. multi_doc_bundle is medium,
+    # which normally attaches a question without blocking — but filing a
+    # two-document bundle as one document destroys a record rather than
+    # mislabelling one, and cannot be corrected later from what was filed.
+    # The override lives on the rule in the knowledge base, not here.
+    def _blocks(flag: dict) -> bool:
+        override = flag.get("forces_review")
+        if override is not None:
+            return bool(override)
+        return bool(_FORCES_REVIEW.get(flag.get("severity"), False))
+
+    blocking = [f for f in flags if _blocks(f)]
     if blocking:
         reasons.append(
             _reason(
