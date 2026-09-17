@@ -139,26 +139,79 @@
       "advice_record_role": true,
       "legislation": {
         "primary": "s946B — situations in which an SOA is not required (the ROA pathway)",
-        "four_kinds": [
+        "situation_count_note": "THREE situations, not four. ASIC's own FAQ (Table 1) lists three, and s946B(7) is not a separate 'hold / no action' basis: the Act's s946B(7) is the no-buy/sell provision, and reg 7.7.10AAA is the regulation that substitutes a notional version of it and sets its content requirements — its title is literally 'Record of advice without a recommendation to purchase or sell'. Carrying them as two bases counted one situation twice. Advice to HOLD is not a basis at all: it is what the advice recommends, and it sits under further advice where there is a prior SOA, or under no buy or sell where there is not. Decided 17 Sep 2026; see issue #33.",
+        "unresolved": "ASIC's 2021 media release describes INFO 266 as explaining 'four exemptions from providing a statement of advice'. Only three ROA situations have been found. The fourth may be a different exemption entirely rather than a fourth ROA basis. Recorded so nobody re-derives the question from scratch; it does not change the three below.",
+        "evidence_note": "ONLY THE FURTHER-ADVICE SITUATION HAS BEEN MATCHED AGAINST REAL TEXT. Each situation carries an `example_status` saying whether a real document of that kind exists to test against. Two of the three have none, so their signals are a reading of the legislation rather than anything measured, and should be treated as a starting point to correct against real firm files — not as calibrated. Stated here rather than left to be inferred from silence, because a signal list looks equally authoritative whether or not anything checked it.",
+        "signal_note": "Each situation carries `basis_signals`, split into `declared` and `inferred`. DECLARED phrases are the document stating its own basis — naming the situation or citing the provision. INFERRED phrases describe the shape of the recommendation, which suggests a basis without asserting one. Where any situation is declared, only declared signals decide: a document that says which situation it was written under outranks a basis guessed from how the advice reads. Inferred signals decide only when nothing is declared anywhere. Signals are deliberately narrow, because a signal that fires wrongly produces a confident wrong proposal while one that fails to fire produces \"which kind is this?\" — the honest answer, and this flag's default.",
+        "calibration_note": "Measured against ASIC INFO 266 attachment 1 (further advice; retain existing products and increase insurance cover). Two lessons, both from real text. First, \"you will retain your existing policy features and benefits\" describes a CONSEQUENCE of advice, not a recommendation to hold — so retain/continue-to-hold phrasing was removed entirely. Second, that ROA's own words include \"My advice is to make no changes to your XYZ Superannuation Fund\" while it also increases insurance cover. Under the three-situation model that document is further advice whose RECOMMENDATION is partly no-change, which is exactly the distinction the old four-basis list could not express.",
+        "situations": [
           {
+            "id": "further_advice",
             "kind": "Further advice",
-            "basis": "s946B(1)-(3A) + reg 7.7.10AE",
-            "when": "Existing SOA client; no material change in circumstances or basis of advice."
+            "basis": "notional s946B(2)-(3), as substituted by reg 7.7.10AE",
+            "when": "The client has a previous SOA (or pre-licensing advice), their relevant circumstances are not significantly different from when that advice was given, and the basis of the further advice is not significantly different either.",
+            "example_status": "Real text available, and it is the only situation with any. All three ASIC INFO 266 example ROAs cite notional s946B(2) and reg 7.7.10AE — including attachment 2, titled 'No change advice', which relies on this situation because the client had an SOA from 2018.",
+            "basis_signals": {
+              "declared": [
+                "further advice",
+                "further personal advice",
+                "no material change",
+                "your circumstances have not changed",
+                "basis of advice has not changed"
+              ],
+              "inferred": [
+                "Statement of Advice dated",
+                "prior Statement of Advice",
+                "previous Statement of Advice"
+              ]
+            }
           },
           {
-            "kind": "No-action / 'hold' recommendation",
-            "basis": "s946B(7)",
-            "when": "Advice to take no action; no prior SOA required."
+            "id": "no_buy_sell",
+            "kind": "No buy or sell product advice",
+            "basis": "notional s946B(7)-(8), as substituted by reg 7.7.10AAA",
+            "when": "The advice does not recommend or state an opinion on acquiring or disposing of a specific financial product, and does not recommend modifying an investment strategy or a contribution level for a product the client holds.",
+            "further_conditions": "AND the provider and certain associates receive no remuneration or benefit in relation to the advice, and conflicts are disclosed to the client. This limb is easy to miss and it is decisive: for a client on an ongoing fee arrangement it will usually fail, which is why an annual-review 'no change' recommendation is normally documented as FURTHER advice rather than under this situation. Content alone never establishes this basis.",
+            "absorbed": "This entry previously appeared twice — as 'hold / no-action (s946B(7))' and as 'no buy/sell (reg 7.7.10AAA)'. They are one situation. See situation_count_note and issue #33.",
+            "example_status": "NO REAL EXAMPLE. Written from the legislation only. ASIC published no example of this situation, and advice_classification_reference.md records it as a known gap with the instruction not to source one artificially.",
+            "basis_signals": {
+              "declared": [
+                "7.7.10AAA",
+                "s946B(7)",
+                "946B(7)",
+                "no recommendation to acquire or dispose",
+                "no recommendation to buy or sell",
+                "not a recommendation to acquire or dispose"
+              ],
+              "inferred": [
+                "does not recommend that you acquire",
+                "does not recommend that you dispose",
+                "take no action",
+                "no action is required",
+                "no action at this time",
+                "make no changes",
+                "no changes are recommended",
+                "we recommend no change",
+                "remain invested"
+              ]
+            }
           },
           {
+            "id": "small_investment",
             "kind": "Small investment advice",
             "basis": "s946AA + reg 7.7.09A",
-            "when": "Advice value under the threshold; timing rules in reg 7.7.09A(10)-(12)."
-          },
-          {
-            "kind": "No recommendation to buy/sell",
-            "basis": "reg 7.7.10AAA",
-            "when": "Personal advice with no purchase/sell recommendation; content per reg 7.7.10AAA."
+            "when": "Advice relating to financial investments in certain products not exceeding $15,000. Timing rules in reg 7.7.09A(10)-(12).",
+            "example_status": "NO REAL EXAMPLE. INFO 266 attachment 3 was assumed to be this one from its 'Stockbroker' title; its text contains neither 's946AA' nor 'small investment', and it cites reg 7.7.10AE. See issue #33.",
+            "basis_signals": {
+              "declared": [
+                "small investment advice",
+                "s946AA",
+                "946AA",
+                "reg 7.7.09A",
+                "7.7.09A"
+              ],
+              "inferred": []
+            }
           }
         ],
         "retention": "7 years after the day the further advice is provided (reg 7.7.09(3); reg 7.7.05; reg 7.7.08)",
@@ -166,7 +219,7 @@
       },
       "teaching": {
         "what_it_is": "A shorter record of personal advice used in place of a full SOA in specific situations the Act allows.",
-        "why_it_exists": "Reduces paperwork for routine or narrow advice while keeping a durable record. There are four distinct legislative bases — it's cleanest to think of four kinds of ROA.",
+        "why_it_exists": "Reduces paperwork for routine or narrow advice while keeping a durable record. There are three situations in which it is allowed, and which one applies changes what the record must contain. Note that what the advice RECOMMENDS — increase cover, switch, no change — is a separate thing from which situation permits the ROA. Conflating the two is the mistake issue #33 was about.",
         "where_it_sits": "Advice delivery and ongoing review (stages 4-6).",
         "two_weeks_in_note": "The most common kind (further advice) points back to an earlier SOA. An ROA with no prior SOA on file isn't automatically wrong — the 'hold', small-investment, and no-buy/sell kinds don't need one — but it's worth flagging to confirm which kind it is."
       },
@@ -205,7 +258,7 @@
           "note": "Where the ROA advises an action the client then authorises."
         }
       ],
-      "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the four kinds — it changes both content expectations and whether a prior SOA is required."
+      "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the three situations — it changes both content expectations and whether a prior SOA is required."
     },
     {
       "id": "authority_to_proceed",
@@ -555,18 +608,24 @@
   },
   "edge_case_flags": {
     "purpose": "Rules that route a document to the internal human-review queue instead of forcing a category. Each fires a flag; it does not silently reclassify.",
+    "evaluation_values": {
+      "stateless": "Everything the rule needs is inside the one document. Answerable at ingest, with no other file on record.",
+      "stateful": "Needs other documents for the same client — a prior SOA, an earlier fact find, a competing current version. Not answerable until documents persist across requests."
+    },
+    "evaluation_note": "Every rule declares which it is, so the flagging engine can never claim to have evaluated a rule whose evidence it does not hold. Declaring a rule stateless says it CAN be answered at ingest, not that it is implemented yet.",
     "rules": [
-      {"id": "roa_without_soa", "trigger": "Further-advice-style ROA identified but no prior SOA on file for the client", "why": "Further-advice ROA (s946B(1)-(3A)/reg 7.7.10AE) depends on an existing SOA. BUT hold (s946B(7)), small-investment (s946AA), and no-buy/sell (reg 7.7.10AAA) ROAs do not — so this is a 'confirm which kind', not an automatic error.", "severity": "medium"},
-      {"id": "atp_without_advice_record", "trigger": "Authority to Proceed with no matching SOA/ROA on file", "why": "An authorisation to implement advice that isn't on file — either a bundle-split miss or a genuine gap.", "severity": "high"},
-      {"id": "fact_find_after_soa", "trigger": "Fact Find dated later than the SOA it should underpin", "why": "Advice may predate the information it was supposedly based on (best-interests concern).", "severity": "medium"},
-      {"id": "risk_mismatch", "trigger": "Risk Profile category not reflected in SOA recommendations", "why": "Possible best-interests/suitability gap (s961B).", "severity": "high"},
-      {"id": "multi_doc_bundle", "trigger": "Single file appears to contain more than one document type (classic: SOA + appended Authority to Proceed)", "why": "Needs splitting before records and links are accurate.", "severity": "medium"},
-      {"id": "advice_record_label_shift", "trigger": "Document plays the advice-record role but titling is ambiguous between SOA and CAR", "why": "During the DBFO transition both may appear; capture the correct statutory label. DORMANT: 'car' is not a document type while DBFO Tranche 2 is unlegislated, so nothing fires this today. Kept because the rule becomes live the moment the successor type is added back — see reform_watch.", "severity": "low", "status": "dormant"},
-      {"id": "fds_era_mismatch", "trigger": "Fee/consent document format doesn't match the expected pre/post-DBFO-Tranche-1 era for its date", "why": "Ongoing-fee consent mechanics changed under DBFO; wrong-era format may indicate a compliance gap.", "severity": "medium"},
-      {"id": "no_date", "trigger": "No date extractable from a document type that requires one for sequencing", "why": "Version tracking and advice-timing checks impossible without a date.", "severity": "medium"},
-      {"id": "low_confidence", "trigger": "Classifier confidence below threshold", "why": "Ambiguous or poor-quality document; needs a human eye.", "severity": "medium"},
-      {"id": "unknown_type", "trigger": "No document type matched with sufficient confidence", "why": "Possibly out-of-scope or a novel/edge document.", "severity": "low"},
-      {"id": "superseding_ambiguity", "trigger": "Two candidate 'current' documents of the same type and scope for one client", "why": "Cannot determine which is in force.", "severity": "high"}
+      {"id": "roa_basis_unconfirmed", "evaluation": "stateless", "trigger": "Any document classified as an ROA. Fires on every one, not on an anomaly.", "why": "An ROA is permitted in three situations — further advice (reg 7.7.10AE), no buy or sell (reg 7.7.10AAA), small investment (s946AA) — and which one applies changes the content the record must contain and whether a prior SOA is required at all. The document type does not settle it, so filing an ROA without recording its basis loses the fact that determines what a compliant record looks like. This is a confirmation, never an error: all three are valid.", "severity": "medium", "asks": "Which of the three situations is this? Where the text supports exactly one, the flag proposes it with the phrases it matched, so a reviewer confirms or corrects one thing rather than starting from scratch.", "determination_values": {"proposed": "Signals for exactly one basis. The flag names it and cites the matched phrases.", "ambiguous": "Signals for more than one basis. The flag lists the candidates; it does not pick.", "absent": "No basis signal found. The honest default — the flag asks which kind, and proposes nothing."}, "signal_source": "documents[roa].legislation.situations[].basis_signals", "not_to_be_confused_with": "roa_without_soa asks a cross-document question (is there a prior SOA on file?) and needs state this rule does not. They can both fire on the same document and they are asking different things."},
+      {"id": "roa_without_soa", "evaluation": "stateful", "trigger": "Further-advice-style ROA identified but no prior SOA on file for the client", "why": "A further-advice ROA (notional s946B(2)-(3) / reg 7.7.10AE) depends on an existing SOA. The other two situations — no buy or sell (reg 7.7.10AAA) and small investment (s946AA) — do not, so this is a 'confirm which kind', not an automatic error.", "severity": "medium"},
+      {"id": "atp_without_advice_record", "evaluation": "stateful", "trigger": "Authority to Proceed with no matching SOA/ROA on file", "why": "An authorisation to implement advice that isn't on file — either a bundle-split miss or a genuine gap.", "severity": "high"},
+      {"id": "fact_find_after_soa", "evaluation": "stateful", "trigger": "Fact Find dated later than the SOA it should underpin", "why": "Advice may predate the information it was supposedly based on (best-interests concern).", "severity": "medium"},
+      {"id": "risk_mismatch", "evaluation": "stateful", "trigger": "Risk Profile category not reflected in SOA recommendations", "why": "Possible best-interests/suitability gap (s961B).", "severity": "high"},
+      {"id": "multi_doc_bundle", "evaluation": "stateless", "trigger": "Single file appears to contain more than one document type (classic: SOA + appended Authority to Proceed)", "why": "Needs splitting before records and links are accurate.", "severity": "medium"},
+      {"id": "advice_record_label_shift", "evaluation": "stateless", "trigger": "Document plays the advice-record role but titling is ambiguous between SOA and CAR", "why": "During the DBFO transition both may appear; capture the correct statutory label. DORMANT: 'car' is not a document type while DBFO Tranche 2 is unlegislated, so nothing fires this today. Kept because the rule becomes live the moment the successor type is added back — see reform_watch.", "severity": "low", "status": "dormant"},
+      {"id": "fds_era_mismatch", "evaluation": "stateless", "trigger": "Fee/consent document format doesn't match the expected pre/post-DBFO-Tranche-1 era for its date", "why": "Ongoing-fee consent mechanics changed under DBFO; wrong-era format may indicate a compliance gap.", "severity": "medium"},
+      {"id": "no_date", "evaluation": "stateless", "trigger": "No date extractable from a document type that requires one for sequencing", "why": "Version tracking and advice-timing checks impossible without a date.", "severity": "medium"},
+      {"id": "low_confidence", "evaluation": "stateless", "trigger": "Classifier confidence below threshold", "why": "Ambiguous or poor-quality document; needs a human eye.", "severity": "medium"},
+      {"id": "unknown_type", "evaluation": "stateless", "trigger": "No document type matched with sufficient confidence", "why": "Possibly out-of-scope or a novel/edge document.", "severity": "low"},
+      {"id": "superseding_ambiguity", "evaluation": "stateful", "trigger": "Two candidate 'current' documents of the same type and scope for one client", "why": "Cannot determine which is in force.", "severity": "high"}
     ]
   }
 }

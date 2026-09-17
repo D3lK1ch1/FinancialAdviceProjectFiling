@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from classifier import classify
+from flags import evaluate_flags
 from parser import parse_pdf
 from scope_gate import check_scope
 
@@ -40,7 +41,17 @@ async def ingest(file: UploadFile):
     result.pop("pages")
     result.update(check_scope(result["extracted_text"]))
     result["likely_type_name"] = _DOC_NAMES.get(result["likely_type"])
+    doc_type = None
     if result["in_scope"]:
         result["classification"] = classify(result["extracted_text"])
         result["classification"]["doc_type_name"] = _DOC_NAMES.get(result["classification"].get("doc_type"))
+        doc_type = result["classification"].get("doc_type")
+    # Always present, even when nothing fired and even out of scope — a
+    # missing key and an empty list read the same to a caller that has to
+    # branch on both, and "no flags" is a result worth stating.
+    #
+    # Keyed on the CLASSIFIED type, not the scope gate's likely_type: the gate
+    # matches a title pattern, so a document that merely mentions an ROA would
+    # otherwise be asked which legislative basis it is.
+    result["flags"] = evaluate_flags(doc_type, result["extracted_text"])
     return result
