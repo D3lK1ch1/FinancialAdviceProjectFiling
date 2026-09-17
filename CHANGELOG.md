@@ -112,6 +112,64 @@ a finished step (see Contributing in `README.md`). Newest at top.
   which legislative basis it is. With the classifier unreachable there is no
   type, so no flag. Verified with the classifier stubbed.
 
+## Session 17-09-2026 — verifying the classifier's confidence
+
+### Done
+- `confidence.py` — #4's third checkbox. The model's self-reported confidence
+  is now checked before anything acts on it, and `/ingest` returns both
+  numbers: `confidence_raw` as the model gave it, `confidence` as the system
+  will act on it. `review_policy`'s thresholds are applied to the verified
+  figure.
+- **The number was a claim by the model about itself**, produced by the same
+  process that produced the answer, and nothing independent had looked at it.
+  Two things can be checked without trusting the model at all:
+  - **Every phrase in `matched_signals`** is supposed to be text found in the
+    document. Whether it is there is a fact about the document. The proportion
+    that are becomes a multiplier.
+  - **The scope gate's independent read.** It is not smarter than the
+    classifier — it matches title strings — but it cannot be wrong in the same
+    way a language model is wrong, and that independence is what makes
+    agreement worth more than either alone. Same argument
+    `filing_model.accuracy_mechanism` already makes about two axes agreeing.
+- **Verification can only lower, never raise.** Accurate quoting shows the
+  model told the truth about its reasoning; it does not show the answer is
+  right. Letting evidence inflate a figure the model invented would launder a
+  guess into a measurement. There is a test over the whole input space
+  asserting the result never exceeds the raw number.
+- **A silent scope gate is not disagreement.** It reads only the first 500
+  characters, so a document whose title sits below that window leaves it with
+  no opinion — absence of evidence, which must not be scored as evidence of
+  absence.
+- **An answer with no quotes at all is halved, not rejected.** No working is
+  not the same as fabrication, and the flag and the review threshold should
+  still see the proposal.
+
+### The bit that was wrong first
+- Matching started out whitespace-*collapsed*, and a test written against the
+  real ASIC samples caught that this does not work. PDF extraction splits
+  words **internally** — those files produce "A ustralian S ecurities" and
+  "h is advice" — so the space sits inside the word and collapsing runs of
+  spaces does not help. An accurate quote from such a page still read as
+  fabricated, which would have marked down almost every real PDF and made the
+  check noise rather than signal.
+- Now all whitespace is removed from both sides before comparing. The cost is
+  looser matching — a short signal can match inside an unrelated word, "ROA"
+  sits inside "BROADWAY" — and that is tolerable **here** in a way it is not
+  in `scope_gate.py`, because this only decides whether to LOWER confidence.
+  A loose match declines to penalise; it never promotes anything. Recorded as
+  `matching_trade_off` in the knowledge base rather than left in a comment.
+
+### Not done here
+- **The two factors are judgements, not fitted values.** 0.5 for an answer
+  with no quotes, 0.6 for disagreeing with the scope gate. Nothing has been
+  measured against a scored sample set because the classifier is not wired to
+  one. They encode a direction and a rough weight, not an observed error rate,
+  and `calibration_status` says so.
+- **Nothing compares the two numbers yet.** Keeping `confidence_raw` is what
+  makes model drift visible and lets the failure log show where the model was
+  overconfident — but the failure log has no field for it, which is the same
+  schema question raised on #12.
+
 ## Session 17-09-2026 — the review threshold
 
 ### Done
