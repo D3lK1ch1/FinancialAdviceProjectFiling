@@ -4,9 +4,9 @@ All plain text, no `samples/` needed, so they run on a bare clone.
 
 The ROA texts here are written to the four bases described in
 knowledge_base.json and advice_classification_reference.md §4, not copied from
-the sample set: the public sample set covers three of the four (INFO 266 att 1
-further advice, att 2 no-action, att 3 small-investment flavour) and has no
-no-buy/sell example at all, so a fourth case has to be written to be tested.
+the sample set: all three INFO 266 attachments cite the further-advice
+situation, so the other two have no real example at all and their cases have
+to be written to be tested. See issue #33.
 """
 
 import json
@@ -27,8 +27,8 @@ def _roa_flag(text):
     return flags[0]
 
 
-# One text per legislative basis, each stating its basis the way a real record
-# of that kind does.
+# One text per situation, each stating its basis the way a real record of that
+# kind does. Three, not four — see issue #33.
 BASES = [
     (
         "further_advice",
@@ -36,12 +36,6 @@ BASES = [
         "prior Statement of Advice dated 14 March 2024. Recommendation: increase "
         "life cover following the birth of a child. No material change in the "
         "basis of advice. Date: 10 September 2025.",
-    ),
-    (
-        "hold_no_action",
-        "Record of Advice. Client: A Patel. We have reviewed your portfolio "
-        "against your objectives and recommend you take no action at this time. "
-        "You remain invested in your current options. Date: 2 February 2025.",
     ),
     (
         "small_investment",
@@ -86,7 +80,7 @@ def test_no_basis_signal_proposes_nothing_and_says_so():
 
     assert flag["determination"] == "absent"
     assert flag["proposed_basis"] is None
-    assert len(flag["candidates"]) == 4, "all four bases stay open"
+    assert len(flag["candidates"]) == 3, "all three situations stay open"
     assert all(c["matched_signals"] == [] for c in flag["candidates"])
 
 
@@ -131,8 +125,12 @@ def test_a_declared_basis_beats_a_basis_inferred_from_the_recommendation():
 
 
 def test_an_inferred_basis_still_decides_when_nothing_is_declared():
-    """The split must not mute the inferred signals — most hold/no-action ROAs
-    never cite s946B(7) by name, so inference is all there is for them.
+    """The split must not mute the inferred signals — a no-buy/sell ROA rarely
+    cites reg 7.7.10AAA by name, so inference is all there is for it.
+
+    Note what this does NOT establish: situation 2 also requires that no
+    remuneration was received, which content alone can never show. The flag
+    proposes; a person confirms.
     """
     flag = _roa_flag(
         "Record of Advice. Client: A Patel. Having reviewed your portfolio we "
@@ -140,15 +138,15 @@ def test_an_inferred_basis_still_decides_when_nothing_is_declared():
     )
 
     assert flag["determination"] == "proposed"
-    assert flag["proposed_basis"] == "hold_no_action"
+    assert flag["proposed_basis"] == "no_buy_sell"
 
 
-def test_consequences_of_advice_are_not_hold_signals():
+def test_consequences_of_advice_are_not_no_buy_sell_signals():
     """Regression from INFO 266 attachment 1: "you will retain your existing
     policy features and benefits" describes what follows from the advice, not
     a recommendation to hold. Retain/continue-to-hold phrasing is compatible
     with further advice that changes something else, so it is not a signal for
-    any basis.
+    any situation.
     """
     flag = _roa_flag(
         "Record of Advice. The premium remains competitive and you will retain "
@@ -210,7 +208,7 @@ def test_a_new_basis_signal_needs_no_code_change(tmp_path, monkeypatch):
 
     kb = json.loads(json.dumps(_KB))
     roa = next(d for d in kb["documents"] if d["id"] == "roa")
-    kind = next(k for k in roa["legislation"]["four_kinds"] if k["id"] == "no_buy_sell")
+    kind = next(k for k in roa["legislation"]["situations"] if k["id"] == "no_buy_sell")
     kind["basis_signals"]["declared"].append("nil-transaction basis")
     (tmp_path / "knowledge_base.json").write_text(json.dumps(kb))
 
@@ -248,16 +246,16 @@ def test_every_rule_declares_how_it_can_be_evaluated():
 
 
 def test_every_basis_says_whether_a_real_example_exists():
-    """Three of the four bases have no real document to test against, and a
+    """Two of the three situations have no real document to test against, and a
     signal list looks equally authoritative whether or not anything checked
     it. `example_status` makes the difference visible instead of leaving it to
     be inferred from silence. See issue #33.
     """
     roa = next(d for d in _KB["documents"] if d["id"] == "roa")
-    kinds = roa["legislation"]["four_kinds"]
+    kinds = roa["legislation"]["situations"]
 
     for kind in kinds:
         assert kind["example_status"].strip(), kind["id"]
 
     untested = [k["id"] for k in kinds if k["example_status"].startswith("NO REAL EXAMPLE")]
-    assert set(untested) == {"hold_no_action", "small_investment", "no_buy_sell"}
+    assert set(untested) == {"small_investment", "no_buy_sell"}

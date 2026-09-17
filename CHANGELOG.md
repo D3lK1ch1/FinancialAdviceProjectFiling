@@ -3,6 +3,49 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 17-09-2026 — three ROA situations, not four
+
+### Decided (issue #33)
+- **An ROA is permitted in THREE situations, not four.** The old list carried
+  "hold / no-action (s946B(7))" and "no buy/sell (reg 7.7.10AAA)" as separate
+  legislative bases. They are one situation: the Act's s946B(7) *is* the
+  no-buy/sell provision, and reg 7.7.10AAA substitutes a notional version of
+  it and sets its content requirements — the regulation's own title is "Record
+  of advice without a recommendation to purchase or sell". ASIC's FAQ lists
+  three. The old list counted one situation twice.
+- **"Hold" is not a basis at all — it is what the advice recommends.** Which
+  situation permits the ROA and what the advice says are two different things,
+  and collapsing them is what made the old list wrong. An ROA can be *further
+  advice* whose *recommendation* is no change, which is exactly what INFO 266
+  attachment 2 is. The old four-entry list could not express that sentence.
+- **Situation 2 carries a limb that is easy to miss:** no remuneration or
+  benefit received, and conflicts disclosed. For a client on an ongoing fee
+  arrangement that usually fails, which is why an annual-review "no change"
+  recommendation is normally documented as further advice. Content alone never
+  establishes that basis, and the knowledge base now says so.
+
+### Changed
+- `knowledge_base.json` — `legislation.four_kinds` becomes
+  `legislation.situations`, three entries. `hold_no_action` is absorbed into
+  `no_buy_sell`, which keeps the "take no action" phrasing as INFERRED signals
+  while recording that content alone cannot establish the situation.
+- `CLAUDE.md` — the domain-facts entry rewritten, including the correction
+  that an earlier version said attachment 2 was "not further advice". It cites
+  the further-advice situation, as do attachments 1 and 3.
+- `flags.py`, `tests/test_flags.py` — three situations throughout.
+
+### Recorded, not resolved
+- **ASIC's 2021 media release describes INFO 266 as explaining "four
+  exemptions".** Only three ROA situations have been found. The fourth may be
+  a different exemption entirely rather than a fourth ROA basis. Kept in the
+  knowledge base as `unresolved` so nobody re-derives the question from
+  scratch — it does not change the three.
+
+### What the sample set actually covers
+- One situation, three times. All three INFO 266 attachments cite notional
+  s946B(2) and reg 7.7.10AE. `example_status` on the other two situations says
+  plainly that no real document of that kind exists to test against.
+
 ## Session 17-09-2026 — the ROA basis flag
 
 ### Done

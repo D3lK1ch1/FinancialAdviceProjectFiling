@@ -3,7 +3,7 @@ Flagging engine — the first rule that routes a document to human review.
 
 Every rule lives in knowledge_base.json's `edge_case_flags` (CLAUDE.md rule
 #1). This module holds the mechanics of evaluating them and nothing about what
-any particular document means: the ROA's four legislative bases and the
+any particular document means: the three situations permitting an ROA and the
 phrases that indicate each are data in the knowledge base, and adding a fifth
 basis — or correcting a signal that misfires on real files — is an edit there,
 not here.
@@ -24,9 +24,9 @@ with open("knowledge_base.json") as f:
 
 _RULES = {rule["id"]: rule for rule in _KB["edge_case_flags"]["rules"]}
 
-_ROA_KINDS = [
+_ROA_SITUATIONS = [
     doc for doc in _KB["documents"] if doc["id"] == "roa"
-][0]["legislation"]["four_kinds"]
+][0]["legislation"]["situations"]
 
 
 # Signals are body phrases, not title acronyms, so all of them match
@@ -47,23 +47,27 @@ _KIND_MATCHERS = {
         strength: [(phrase, _matcher(phrase)) for phrase in phrases]
         for strength, phrases in kind["basis_signals"].items()
     }
-    for kind in _ROA_KINDS
+    for kind in _ROA_SITUATIONS
 }
 
-_KIND_BY_ID = {kind["id"]: kind for kind in _ROA_KINDS}
+_KIND_BY_ID = {kind["id"]: kind for kind in _ROA_SITUATIONS}
 
 
 def _roa_basis_unconfirmed(doc_type: str, text: str) -> dict | None:
     """
-    Which of the ROA's four bases this is. Fires on every ROA.
+    Which of the ROA's three situations this is. Fires on every ROA.
 
     That is deliberate and it is the one flag in the set that works this way.
     The others fire on an anomaly; this one fires on a property of the type.
     An ROA's basis is not recorded anywhere by classifying it as an ROA, and
     the basis is what decides the content the record must carry and whether a
     prior SOA is required at all — so there is no such thing as an ROA that
-    doesn't need the question asked. advice_classification_reference.md §6
-    lists exactly this against the ROA row: "Medium: confirm which of 4 bases".
+    doesn't need the question asked.
+
+    THREE situations, not four: s946B(7) is the no-buy/sell provision and reg
+    7.7.10AAA substitutes a notional version of it, so carrying them
+    separately counted one situation twice. "Hold" is what the advice
+    recommends, not why an ROA is allowed. Decided on issue #33.
 
     What varies is how much of the answer the flag can offer. Where the text
     supports exactly one basis it proposes it and cites the phrases it
@@ -124,7 +128,7 @@ def _roa_basis_unconfirmed(doc_type: str, text: str) -> dict | None:
                 "provision": kind["basis"],
                 "matched_signals": [],
             }
-            for kind in _ROA_KINDS
+            for kind in _ROA_SITUATIONS
         ],
     }
 
