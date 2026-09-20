@@ -286,3 +286,75 @@ def test_more_matched_patterns_wins_a_position_tie():
 
     assert len(matched) >= 2, "fsg should match on more than one pattern here"
     assert check_scope(text)["likely_type"] == "fsg"
+
+
+FILE_NOTES = [
+    (
+        "normal case",
+        "File note\nClient meeting 14 March 2024.\nExplained that a Statement of "
+        "Advice will be prepared and a Product Disclosure Statement provided.",
+    ),
+    (
+        "subject after a dash",
+        "File Note - AMP Super\n12 May 2025. Called AMP to confirm the balance and "
+        "the rollover process for the client. Discussed the Product Disclosure "
+        "Statement for the receiving fund.",
+    ),
+    (
+        "all caps",
+        "FILE NOTE\nCLIENT MEETING. DISCUSSED THE STATEMENT OF ADVICE AND THE "
+        "PRODUCT DISCLOSURE STATEMENT.",
+    ),
+    ("meeting note", "Meeting Note\nSpoke with the client about their Statement of Advice."),
+]
+
+
+@pytest.mark.parametrize("case, text", FILE_NOTES, ids=[c for c, _ in FILE_NOTES])
+def test_a_file_note_is_not_the_documents_it_names(case, text):
+    """#23: a document type the knowledge base doesn't model doesn't come back
+    as unknown — it comes back as whatever it mentions.
+
+    A file note routinely names the documents it is about ("an SOA will be
+    prepared", "the PDS was provided") and, when it records a call to a
+    provider, that provider's name too. With no file_note type the only
+    patterns that could match were the cited ones, so a meeting note was filed
+    as a Product Disclosure Statement.
+
+    The fix is a knowledge-base entry and no Python — ground rule #1.
+    """
+    assert check_scope(text)["likely_type"] == "file_note"
+
+
+def test_a_file_note_naming_a_provider_is_not_that_providers_document():
+    """The title commonly carries the subject after a dash — "File Note - <fund>".
+    That names who was CONTACTED, not who issued the document. The subject must
+    not become the type.
+    """
+    text = (
+        "File Note - AMP\n3 June 2025. Called AMP regarding the client's existing "
+        "account before recommending a rollover."
+    )
+    assert check_scope(text)["likely_type"] == "file_note"
+
+
+@pytest.mark.parametrize(
+    "expected_type, text",
+    [
+        (
+            "soa",
+            "Statement of Advice\nPrepared for the client. This Statement of Advice "
+            "sets out our recommendations. Refer to the Product Disclosure Statement.",
+        ),
+        (
+            "pds",
+            "Product Disclosure Statement\nPersonal Account. This PDS describes the "
+            "product and its fees.",
+        ),
+    ],
+    ids=["soa", "pds"],
+)
+def test_adding_file_note_does_not_capture_real_advice_documents(expected_type, text):
+    """A new type widens what can match, so the regression that matters is the
+    genuine document still winning its own title.
+    """
+    assert check_scope(text)["likely_type"] == expected_type
