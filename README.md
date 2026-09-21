@@ -1,7 +1,11 @@
 # Advice Document Classifier & Filing System
+Classifies and files financial-advice documents for Australian advice firms.
 
-Source of truth for **how to run this project**. For what it does and why, see
-`CLAUDE.md` (ground rules) and `docs/SYSTEM.md` (spec). For what's already been done, see `CHANGELOG.md`
+A public demonstration of where the pipeline and review UI are heading:
+**https://advice-document-classifier.vercel.app**, built from
+[`ahaythorpe/advice-document-classifier`](https://github.com/ahaythorpe/advice-document-classifier)
+
+The purpose of this project is to build upon the referred public demo from pilot stage to an actual product.
 
 > **`docs/` and `samples/` are not in this git repo.** They're gitignored on purpose since planning docs and sample documents are client/collaborator-sourced material, not cleared for public repo (in discussion). A fresh clone will build and pass most tests but won't have them.
 
@@ -26,8 +30,11 @@ Ollama is used for the purposes of this project, but API keys from LLMs such as 
 ## Run the tests
 
 ```
+python -m pip install -r requirements-dev.txt
 python -m pytest
 ```
+
+`requirements-dev.txt` is `requirements.txt` plus `pytest` and `httpx`.
 
 Use the `python -m pytest` form, not bare `pytest` — on Windows the bare
 command depends on Python's `Scripts/` folder being on `PATH`, which isn't
@@ -46,8 +53,10 @@ directly — no package/src layout needed.
 | `tests/test_e2e.py` | Full `POST /ingest` pipeline (parse → scope_gate → classify), one real sample per doc type, plus an out-of-scope (text-less) PDF. **Needs Ollama running with `llama3.1` pulled — hits it for real, not mocked.** On a misclassification, also writes a `failure_log.jsonl` entry |
 | `tests/test_failure_log.py` | `log_failure()` appends correctly-shaped JSON Lines records; handles `None` predicted type; appends without overwriting; the record carries **only** the five de-identified fields, and `logged_at` is UTC |
 
-42 tests total. More test files land as the suite grows — see `docs/TO_DO_LIST.md`
-for what's still open.
+**On a bare clone** (no `samples/`, no `docs/`) the tests that read real PDFs are
+marked `@pytest.mark.samples` and skip with a reason; everything else runs. Expect
+skips, not failures. Once `samples/` is in place they run. `tests/test_e2e.py`'s
+sample tests additionally need Ollama with `llama3.1`, as above.
 
 ## Failure log
 
@@ -101,6 +110,7 @@ python -m pip install -r requirements.txt
 | `fastapi` | 0.128.0 | `app.py` |
 | `uvicorn` | 0.39.0 | running the app |
 | `pypdf` | 6.15.0 | `parser.py` |
+| `python-multipart` | 0.0.22 | `app.py` — FastAPI cannot declare the upload endpoint without it |
 | `requests` | 2.32.4 | `classifier.py` (talks to Ollama's HTTP API) |
 
 **Python 3.10 or newer.** `failure_log.py` annotates a parameter `str | None`,
@@ -108,8 +118,8 @@ which is a `TypeError` at import time on 3.9 — the failure is an import error
 with no obvious link to the Python version, so it's worth stating here.
 
 Test-only dependencies (`pytest`, and `httpx` for FastAPI's `TestClient`) are
-deliberately not in `requirements.txt` — they belong with contributor-runnable
-tests and CI.
+deliberately not in `requirements.txt` — the app doesn't run them. They live in
+`requirements-dev.txt`, which CI installs.
 
 Plus a running Ollama instance with `llama3.1` pulled (see above).
 
@@ -170,10 +180,14 @@ a PR, not after.
   PRs over one large one — same logic as the commit hygiene rule.
 
 **Before opening a PR:**
-- `python -m pytest` passes. Most of the suite needs your local `samples/` and
-  `docs/sample_documents.labelling.md` in place first (see below) — they're not in
-  git, so a bare clone won't have them. `tests/test_e2e.py` also needs Ollama
-  running locally with `llama3.1` pulled — see Run it, above.
+- `python -m pytest` runs with no failures. On a bare clone the sample-backed tests
+  skip with a reason — put `samples/` and `docs/sample_documents.labelling.md` in
+  place (see below) to run them; they're not in git. `tests/test_e2e.py`'s sample
+  tests also need Ollama running locally with `llama3.1` pulled — see Run it, above.
+- CI (`.github/workflows/tests.yml`) runs the same `python -m pytest` on Python 3.10
+  and 3.12 for every PR and every push to `main`, from a fresh install of
+  `requirements-dev.txt`. It has no `samples/`, so the sample-backed tests skip
+  there — that is expected. Nothing in CI calls Ollama.
 - If your change touches document classification rules, the rule lives in
   `knowledge_base.json`, not hardcoded in Python (ground rule #1).
 - If you hit a misclassification while testing, it's logged to `failure_log.jsonl`
