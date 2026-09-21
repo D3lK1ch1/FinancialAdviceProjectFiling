@@ -22,6 +22,7 @@ def _extract_text(pdf_path: Path) -> str:
         return parse_pdf(f, pdf_path.name)["extracted_text"]
 
 
+@pytest.mark.samples
 @pytest.mark.parametrize("pdf_path", SAMPLE_PDFS, ids=lambda p: p.name)
 def test_check_scope_matches_filename_prefix(pdf_path):
     expected_type = pdf_path.name.split("_")[0].lower()
@@ -31,6 +32,7 @@ def test_check_scope_matches_filename_prefix(pdf_path):
     assert result["likely_type"] == expected_type
 
 
+@pytest.mark.samples
 def test_fsg_is_not_misread_as_soa():
     """Regression test for the 2026-08-22 bug: an FSG's body text explains
     what an SOA is ("you should already have a Statement of Advice..."),

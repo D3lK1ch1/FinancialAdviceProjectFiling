@@ -32,6 +32,7 @@ ONE_SAMPLE_PER_TYPE = [
 ]
 
 
+@pytest.mark.samples
 @pytest.mark.parametrize("expected_type, filename", ONE_SAMPLE_PER_TYPE, ids=[t for t, _ in ONE_SAMPLE_PER_TYPE])
 def test_ingest_full_pipeline_in_scope(expected_type, filename):
     pdf_path = SAMPLES_DIR / filename
