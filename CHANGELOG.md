@@ -3,6 +3,59 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 22-09-2026 — CI workflow, and the runtime dependency it found missing
+
+### Done
+- `.github/workflows/tests.yml` — runs `python -m pytest -rs` on every PR and every
+  push to `main`, on Python 3.10 (the documented floor) and 3.12, from a fresh
+  install. `-rs` prints the skip reasons in the log, so a skipped test is never
+  silent. No Ollama, no `samples/`: it runs the no-documents tier only.
+- `requirements-dev.txt` — `requirements.txt` plus `pytest` and `httpx`, pinned.
+  The README already said test-only dependencies belonged with CI; this is where.
+- **`requirements.txt` was missing `python-multipart`.** FastAPI cannot declare an
+  `UploadFile` endpoint without it, so in a fresh environment `import app` raised
+  `Form data requires "python-multipart"` — and so did the README's own
+  `pip install -r requirements.txt` followed by `uvicorn app:app`. It never showed
+  because every machine that had run the project already had the package. Found by
+  installing into an empty virtualenv, which is what CI does on every run.
+  Pinned at `0.0.22`, the version already working alongside `fastapi==0.128.0`.
+- README: the install step before `pytest`, the new dependency row, and what CI does.
+
+### Not done here
+- **The workflow has not run on GitHub.** Its YAML parses and its steps were run by
+  hand in fresh virtualenvs on 3.11 and 3.12 (60 passed, 7 skipped on both), but a
+  workflow is only really tested by running. Python 3.10 could not be tried locally
+  (the launcher's 3.10 entry points at a folder that no longer exists), so 3.10's
+  first real run is CI's.
+- **The file-hygiene check** (#9, fourth checkbox): fail any PR that adds a
+  `*.pdf`/`*.docx`/`*.doc`/`*.zip`.
+- **`main` is not protected**, so CI reports but blocks nothing.
+
+## Session 21-09-2026 — CI test tiers
+
+### Done
+- **A bare clone no longer fails.** Baseline on `origin/main` with no `samples/`:
+  5 failed, 60 passed, 2 skipped. The five were the four `test_e2e.py` sample
+  tests and `test_fsg_is_not_misread_as_soa`, all `FileNotFoundError` — a missing
+  input reading as a broken change. Now: 0 failed, 60 passed, 7 skipped.
+- `@pytest.mark.samples` marks the 25 tests that read real PDFs; `conftest.py`
+  skips them with a reason when `samples/` has no PDFs, and says where to get
+  them. `pytest.ini` registers the marker.
+- The two old skips said only `got empty parameter set` — true, and no help to
+  anyone. The skip mark is added ahead of pytest's own so the useful reason wins.
+- With `samples/` present nothing changes: 80 passed excluding `test_e2e.py`.
+
+### Not done here
+- **`llm` marker and default deselect** (#9, second checkbox). `test_e2e.py`'s
+  docstring chooses to fail loudly rather than skip when Ollama is missing, and
+  that choice is being reversed in part — it needs its own decision, so it is its
+  own unit.
+- The **file-hygiene check** (fourth checkbox). CI itself is the entry above.
+- A `samples/` folder with only *some* of the files still fails on the missing
+  one. That is left loud on purpose: an incomplete folder is a real problem.
+- `test_e2e.py`'s four sample tests were not run with `samples/` present — they
+  need `llama3.1`, and this machine's Ollama has `qwen2.5:3b`.
+
 ## Session 10-09-2026 — file notes
 
 ### Done
