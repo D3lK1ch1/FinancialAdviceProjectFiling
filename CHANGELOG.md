@@ -3,6 +3,53 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 24-09-2026 — date extraction, and closing GH#9 honestly
+
+### Done
+- `dates.py` / `tests/test_dates.py` (23 tests) — date extraction (GH#8 box 2 / unit 5).
+  Four units: `find_date_candidates` (date-shaped substrings + page + context, no
+  validity judgement yet), `parse_day_first` (explicit day-first — `03/04/2025` → 3
+  April — rejects invalid dates and 2-digit years rather than reordering or guessing),
+  `select_date` (`declared`/`inferred`/`ambiguous`/`absent`, mirroring #32's ROA-basis
+  flag *engine shape* only — checked against a live review comment on #32 first, which
+  confirms the engine itself is unaffected by that PR's disputed legislative content),
+  `extract_dates(parsed)` (integration against `parser.py`'s real return shape).
+- **Empirically checked before designing `select_date`, not assumed:** ran the real
+  `samples/*.pdf` text through candidate-matching first. Bare `Month YYYY` dates
+  ("Issued: November 2021 Updated: November 2024", repeated per-page ASIC footers) are
+  template publication stamps, never the client's advice date — confirms Unit 1's regex
+  was already right to exclude them.
+- **A real bug found by the real-sample spot-check, not by unit tests:** two mentions of
+  the identical date in different sentences were miscounted as competing candidates,
+  returning `ambiguous` on 2 of 3 single-date FSGs (`FSG_AustralianSuper`, `FSG_UniSuper`).
+  Fixed by grouping non-boilerplate candidates by resolved date value instead of raw
+  candidate count. Pinned by
+  `test_same_date_confirmed_by_multiple_mentions_is_not_ambiguous`. Final read across all
+  10 real samples: 3 `declared`, 3 `inferred`, 4 genuinely `ambiguous` (two documents have
+  no declared date label at all, two have multiple real competing dates in the text).
+- **GH#9's two undone boxes are now actually true**, without touching the closed issue
+  (still closed, boxes still ticked — the record is honest because the work exists, not
+  because the record was edited). `llm` marker + default deselect: `pytest.ini` sets
+  `addopts = -m "not llm"`, `test_ingest_full_pipeline_in_scope` (the one test that hits
+  live Ollama) carries the marker. Verified: default run shows `4 deselected`, `pytest -m
+  llm` overrides it and still fails loudly on an unreachable model. Side effect: bare
+  `pytest` is now safe to run on this machine despite the `qwen2.5:3b`/`llama3.1`
+  mismatch — the suite as a whole no longer needs 0.3 done first, only `pytest -m llm`
+  does. File-hygiene CI job: new `file-hygiene` job in `.github/workflows/tests.yml`,
+  `pull_request`-only, diffs base→head for added `*.pdf`/`*.docx`/`*.doc`/`*.zip`, fails
+  with an explicit error. Verified both directions in a throwaway repo before trusting it.
+  Points at README.md's "Client documents never enter git" — the original issue text said
+  "Contributing", but no `CONTRIBUTING.md` exists in this repo.
+
+### Not done here
+- Date extraction is not wired into `/ingest` — `extract_dates()` exists standalone,
+  nothing calls it from the live app yet.
+- The KB's existing `no_date` edge-case-flag rule is not fired by this work — the output
+  is shaped for a future flag-engine unit to consume, not wired to it.
+- `docs/sample_documents.labelling.md` still has zero hand-labelled expected dates for
+  the real samples. The real-PDF check this session stayed eyeball-only by design;
+  building actual ground truth is still a separate, undecided future task.
+
 ## Session 22-09-2026 — CI workflow, and the runtime dependency it found missing
 
 ### Done
