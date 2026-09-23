@@ -33,3 +33,24 @@ jobs:
             requirements-dev.txt
       - run: python -m pip install -r requirements-dev.txt
       - run: python -m pytest -rs
+
+  file-hygiene:
+    name: file hygiene (no client documents)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Block added PDF/Word/zip files
+        run: |
+          added=$(git diff --name-status --diff-filter=A \
+            "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+            -- '*.pdf' '*.docx' '*.doc' '*.zip')
+          if [ -n "$added" ]; then
+            echo "::error::This PR adds a file type that never enters git (README.md, 'Client documents never enter git'):"
+            echo "$added"
+            exit 1
+          fi
