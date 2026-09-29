@@ -89,10 +89,11 @@ until the first misclassification happens; that's expected, not a bug.
    count, `has_selectable_text`, extracted text.
 2. **`scope_gate.py`** — `check_scope()`. Deterministic title-pattern check against
    `knowledge_base.json`, first 500 chars only (not whole-document — see bug #2 in
-   the same session note for why). Only SOA/ROA/FSG/PDS are in scope; anything else
-   gets `in_scope: false` and stops here.
-3. **`classifier.py`** — `classify()`, only if in scope. Sends the text + the four
-   document types' `classifier_hints` from `knowledge_base.json` to a local Ollama
+   the same session note for why). In scope means a title pattern of any
+   document type in `knowledge_base.json` matched; anything else gets
+   `in_scope: false`.
+3. **`classifier.py`** — `classify()`, only if in scope. Sends the text + every
+   document type's `classifier_hints` from `knowledge_base.json` to a local Ollama
    `llama3.1` model, expects strict JSON back: `{doc_type, confidence,
    matched_signals}`.
 
