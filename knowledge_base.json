@@ -51,8 +51,9 @@
     {
       "id": "further_advice",
       "name": "Further advice",
-      "provision": "s946B(1)-(3A); reg 7.7.10AE",
-      "plain": "Subsequent personal advice to a client with an existing SOA, where there is no material change in circumstances or basis of advice. May be recorded via ROA instead of a fresh SOA.",
+      "provision": "notional s946B(2)-(3), as substituted by reg 7.7.10AE",
+      "plain": "Subsequent personal advice to a client with an existing SOA, where their circumstances and the basis of advice are not significantly different. May be recorded via ROA instead of a fresh SOA.",
+      "same_as": "documents[roa].legislation.situations[further_advice]. This entry is the TYPE of advice; that one is the ROA SITUATION it permits. Same id on purpose — they are the same thing seen from two sides. The other two ROA situations (no_buy_sell, small_investment) have no advice_types entry because they describe when an ROA is allowed, not a kind of advice.",
       "documents": [
         "roa"
       ]
@@ -69,7 +70,7 @@
     {"stage": 1, "name": "Engagement & disclosure", "plain": "The relationship is established; the client is told who the provider is, what they offer, and how they're paid — before any service is provided.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg"]},
     {"stage": 2, "name": "Discovery / fact-find", "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile"]},
     {"stage": 3, "name": "Advice construction", "plain": "Recommendations are formed and the reasoning/basis for advice is documented.", "governing_provisions": ["s961B", "s961G (appropriate advice)"], "typical_docs": ["soa"]},
-    {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B + reg 7.7.10AE (ROA path)"], "typical_docs": ["soa", "roa"]},
+    {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa"]},
     {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "application_forms"]},
     {"stage": 6, "name": "Ongoing service & review", "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement"]}
   ],
@@ -173,7 +174,7 @@
             "when": "The advice does not recommend or state an opinion on acquiring or disposing of a specific financial product, and does not recommend modifying an investment strategy or a contribution level for a product the client holds.",
             "further_conditions": "AND the provider and certain associates receive no remuneration or benefit in relation to the advice, and conflicts are disclosed to the client. This limb is easy to miss and it is decisive: for a client on an ongoing fee arrangement it will usually fail, which is why an annual-review 'no change' recommendation is normally documented as FURTHER advice rather than under this situation. Content alone never establishes this basis.",
             "absorbed": "This entry previously appeared twice — as 'hold / no-action (s946B(7))' and as 'no buy/sell (reg 7.7.10AAA)'. They are one situation. See situation_count_note and issue #33.",
-            "example_status": "NO REAL EXAMPLE. Written from the legislation only. ASIC published no example of this situation, and advice_classification_reference.md records it as a known gap with the instruction not to source one artificially.",
+            "example_status": "NO REAL EXAMPLE. Written from the legislation only. ASIC published no example of this situation. Recorded as a known gap on issues #33 and #35, with the decision not to source one artificially.",
             "basis_signals": {
               "declared": [
                 "7.7.10AAA",
@@ -221,7 +222,7 @@
         "what_it_is": "A shorter record of personal advice used in place of a full SOA in specific situations the Act allows.",
         "why_it_exists": "Reduces paperwork for routine or narrow advice while keeping a durable record. There are three situations in which it is allowed, and which one applies changes what the record must contain. Note that what the advice RECOMMENDS — increase cover, switch, no change — is a separate thing from which situation permits the ROA. Conflating the two is the mistake issue #33 was about.",
         "where_it_sits": "Advice delivery and ongoing review (stages 4-6).",
-        "two_weeks_in_note": "The most common kind (further advice) points back to an earlier SOA. An ROA with no prior SOA on file isn't automatically wrong — the 'hold', small-investment, and no-buy/sell kinds don't need one — but it's worth flagging to confirm which kind it is."
+        "two_weeks_in_note": "The most common kind (further advice) points back to an earlier SOA. An ROA with no prior SOA on file isn't automatically wrong — the no-buy/sell and small-investment situations don't need one — but it's worth flagging to confirm which kind it is."
       },
       "classifier_hints": {
         "title_patterns": [
@@ -232,7 +233,7 @@
           "client name",
           "adviser",
           "reference to prior SOA (for further-advice kind)",
-          "the further advice / change / hold recommendation",
+          "the recommendation — a change, or no change (what it recommends is separate from which situation permits the ROA)",
           "basis on which recommendations are made",
           "date"
         ],
@@ -250,7 +251,7 @@
         {
           "doc": "soa",
           "relationship": "references_prior",
-          "note": "The further-advice ROA depends on an existing SOA; the other three kinds do not."
+          "note": "The further-advice ROA depends on an existing SOA; the other two situations do not."
         },
         {
           "doc": "authority_to_proceed",
