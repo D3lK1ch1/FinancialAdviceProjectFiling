@@ -624,7 +624,7 @@
       },
       "authority_to_proceed": {
         "value": 0.75,
-        "why": "A signed client authorisation, and the link between advice and what was actually implemented. atp_without_advice_record is the highest-severity flag in the set, so a misread ATP either fires it wrongly or hides a genuine gap."
+        "why": "A signed client authorisation, and the link between advice and what was actually implemented. atp_without_advice_record is one of the three high-severity flags in the set, so a misread ATP either fires it wrongly or hides a genuine gap."
       },
       "fee_disclosure_statement": {
         "value": 0.75,
