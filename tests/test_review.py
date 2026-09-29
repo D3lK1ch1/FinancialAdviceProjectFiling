@@ -123,7 +123,7 @@ def test_a_medium_flag_attaches_a_question_without_blocking():
     """roa_basis_unconfirmed fires on EVERY ROA. If medium blocked, every ROA
     would need review and the queue would be ignored — the failure mode named
     in #20's direction note. The question still travels with the document; it
-    just doesn't gate it. See review_policy.open_question.
+    just doesn't gate it. See review_policy.forces_review_decision.
     """
     result = assess(
         in_scope=True,

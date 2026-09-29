@@ -119,7 +119,7 @@ def test_it_proposes_ranges_and_never_splits():
 
 def test_a_bundle_forces_review_despite_being_medium():
     """The per-rule override, and the real case that resolves
-    review_policy.open_question. Medium normally attaches a question without
+    review_policy.forces_review_decision. Medium normally attaches a question without
     blocking — but this one destroys a record rather than mislabelling one.
     """
     flag = _bundle([SOA_PAGE, SOA_PAGE, ATP_PAGE])
