@@ -45,6 +45,7 @@ def _pdf_with_pages(*page_texts: str) -> BytesIO:
     return buf
 
 
+@pytest.mark.samples
 @pytest.mark.parametrize("pdf_path", SAMPLE_PDFS, ids=lambda p: p.name)
 def test_parse_pdf_extracts_selectable_text(pdf_path):
     with open(pdf_path, "rb") as f:
