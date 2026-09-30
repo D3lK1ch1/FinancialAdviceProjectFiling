@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from classifier import classify
+from confidence import verify
 from flags import evaluate_flags
 from parser import parse_pdf
 from review import assess
@@ -44,7 +45,17 @@ async def ingest(file: UploadFile):
     result["likely_type_name"] = _DOC_NAMES.get(result["likely_type"])
     doc_type = None
     if result["in_scope"]:
-        result["classification"] = classify(result["extracted_text"])
+        # The model's own confidence is a claim about itself. Check the
+        # phrases it says it matched, and compare its answer against the scope
+        # gate's independent read, BEFORE anything acts on the number — the
+        # review threshold below is applied to the verified figure, not the
+        # reported one. The model's original number survives as
+        # confidence_raw.
+        result["classification"] = verify(
+            classify(result["extracted_text"]),
+            result["extracted_text"],
+            result["likely_type"],
+        )
         result["classification"]["doc_type_name"] = _DOC_NAMES.get(result["classification"].get("doc_type"))
         doc_type = result["classification"].get("doc_type")
     # Always present, even when nothing fired and even out of scope — a
