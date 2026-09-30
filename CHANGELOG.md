@@ -102,7 +102,350 @@ a finished step (see Contributing in `README.md`). Newest at top.
   one. That is left loud on purpose: an incomplete folder is a real problem.
 - `test_e2e.py`'s four sample tests were not run with `samples/` present — they
   need `llama3.1`, and this machine's Ollama has `qwen2.5:3b`.
+## Session 17-09-2026 — bundle detection
 
+### Done
+- `flags.py` — `multi_doc_bundle` now fires. #19's checkboxes 2 and 3: detect
+  from the knowledge base, flag before splitting. `/ingest` passes per-page
+  text (from #21) to the flag engine, which is why that had to land first —
+  joined text cannot show where one document ends and the next begins.
+- **Two signals, and the strong one needs no notion of type.** A page-number
+  marker reading "page 1 of N" on any page but the first is direct evidence of
+  a boundary. The example SOA inside ASIC's RG 90 file restarts at "Page 1 of
+  23" on page 31 of 53, and that is what finds it.
+- **The type signal is a TRANSITION, not a presence.** Every page of a real
+  SOA carries its own title in a running header, so a second type's name
+  appearing somewhere means nothing; the change from one type to another is
+  the signal.
+- **Nothing is ever split.** Candidate boundaries and proposed page ranges go
+  to a human. A missed bundle is a flag nobody actioned; a wrong split cuts a
+  record in half and nothing downstream can tell it happened.
+- **`review_policy.open_question` is resolved, by a real case.** It asked
+  whether medium severity should force review, given `roa_basis_unconfirmed`
+  fires on every ROA. The answer is a per-rule override rather than a
+  severity-wide rule: `multi_doc_bundle` sets `forces_review: true` because
+  filing a two-document bundle as one document destroys a record rather than
+  mislabelling one, and cannot be corrected later from what was filed.
+  `roa_basis_unconfirmed` stays non-blocking, so the queue does not fill with
+  every ROA.
+
+### Shown in the UI, and two things that fixing it exposed
+- The result card renders the bundle flag: page count, the proposed ranges as
+  `p1-18 + p19-24 + ...`, each boundary with its evidence and strength, and a
+  line saying nothing has been split.
+- **The flag renderer was keyed to one rule.** It branched on
+  `determination`, which belongs to `roa_basis_unconfirmed` alone, so a
+  bundle flag fell through to "The document does not say which:" followed by
+  an empty list — untrue, and it hid the evidence. Now one renderer per rule
+  id with a fallback that shows the question and severity rather than
+  asserting something false about a rule it does not know.
+- **`flagged_high_severity` is renamed `flagged_blocking`.** The name was
+  accurate until a rule could override its severity's default. A medium flag
+  displaying as "FLAGGED HIGH SEVERITY" is the kind of small wrongness that
+  teaches a reviewer to distrust the labels. Named for what it does.
+
+### Two wrong turns, both caught by real documents
+- **Frequency-based header suppression was wrong.** Ignoring types that appear
+  on most pages looks sensible and hides exactly the boundary being looked
+  for: in a real bundle the larger document's own running header legitimately
+  appears on most pages of the whole file. Stapling a real FSG to a real ROA
+  showed it — `roa` covered 9 of 11 pages and the boundary at page 3
+  disappeared.
+- **The excursion rule needed both halves.** `unisuper-flexi-pension-pds.pdf`
+  reads `pds -> risk_profile -> pds`, because a PDS describes the risk profile
+  of its investment options. Suppressing only the departure left the RETURN
+  reported as the start of a new document.
+
+### Validated against every real document available
+- 25 files, no mismatches. Five are genuine bundles, twenty are not.
+- **Three findings that correct earlier claims, all raised separately:**
+  - `asic-cp284-example-soa-attachment.pdf` (p56) and
+    `asic-rg90-example-soa-2013.pdf` (p40) **do** carry an appended Authority
+    to Proceed. An earlier note on #19 said no real SOA+ATP case existed in
+    the set — wrong; it was in different files from the one named for it.
+  - `Example SOA.pdf` in the working copy is byte-identical to
+    `samples/soa_atp/asic-rg90-example-soa-with-atp.pdf`.
+  - **`PDS.pdf` is a bundle nobody had noticed** — an AustralianSuper PDS
+    (pp1-18) with five appended forms: Join, Pay my super into, Combine your
+    super twice, and a binding death benefit nomination. Native text, not
+    scanned. See #23.
+
+### Not done here
+- #19's checkbox 4 (propose a split for approval as an action) and checkbox 5
+  (`atp_without_advice_record` must not fire on an unsplit bundle) are
+  separate. The second is stateful and waits on #8.
+- The title signal's known weakness is recorded in the knowledge base rather
+  than left to be discovered: a heading naming another type that never returns
+  to the parent still reads as a boundary. Candidates are evidence for a
+  human, so a wrong one costs a look rather than a record.
+## Session 17-09-2026 — an unreadable file stops being a crash
+
+### Done
+- `parser.py` — `parse_pdf()` no longer raises on a file it cannot open. It
+  returns the same shape either way, with `parse_error` carrying the reason,
+  so no caller has to branch on whether parsing worked.
+- **`/ingest` returned HTTP 500 on any unreadable PDF.** Encrypted with a user
+  password, corrupt, truncated, or not a PDF at all — all of them escaped as
+  an unhandled exception, and a reviewer got a stack trace where a document
+  should have been. Part of #36; the two missing dependency pins in that issue
+  are left for #9.
+- **The same defect as #22, in a different code path** — *"a document we
+  cannot read is treated the same as a document that is not advice"* — except
+  worse: it was not treated as anything. `parser.py`'s own docstring already
+  stated the principle it was breaking.
+- **Three situations that were being collapsed, now distinct**, because a
+  reviewer acts on each differently:
+
+  | reason | meaning | what a person does |
+  |---|---|---|
+  | `unreadable` | nothing was read | chase the file or the password |
+  | `no_selectable_text` | it opened and held no text | send it to OCR (#5) |
+  | `out_of_scope` | read in full, matched nothing | confirm it is not advice |
+
+- **A scanned Statement of Advice is still a Statement of Advice.** It was
+  coming back `out_of_scope`, which is the #22 defect surviving in the review
+  layer. `has_selectable_text` existed and was returned explicitly for exactly
+  this purpose — nothing had ever read it.
+- The catch is deliberately broad. pypdf raises `DependencyError` for AES
+  without `cryptography`, `PdfReadError` for corruption,
+  `FileNotDecryptedError` for a user password, and plain `ValueError`/`OSError`
+  for things that are not PDFs. Enumerating them would leave the next kind of
+  bad file crashing, and the response is the same for all of them: hand it to
+  a person and say why.
+
+### Not done here
+- **The two dependency pins stay with #9.** `python-multipart` (without which
+  the test suite cannot even be collected) and `cryptography` (without which
+  every AES-encrypted PDF fails) are one line each, but they are that issue's
+  subject matter and it is unassigned.
+- Failing soft means the three UniSuper PDS files now route to review with a
+  reason instead of crashing. They still do not get read — that needs the
+  `cryptography` pin. Correct behaviour in the meantime rather than a fix.
+
+## Session 17-09-2026 — three ROA situations, not four
+
+### Decided (issue #33)
+- **An ROA is permitted in THREE situations, not four.** The old list carried
+  "hold / no-action (s946B(7))" and "no buy/sell (reg 7.7.10AAA)" as separate
+  legislative bases. They are one situation: the Act's s946B(7) *is* the
+  no-buy/sell provision, and reg 7.7.10AAA substitutes a notional version of
+  it and sets its content requirements — the regulation's own title is "Record
+  of advice without a recommendation to purchase or sell". ASIC's FAQ lists
+  three. The old list counted one situation twice.
+- **"Hold" is not a basis at all — it is what the advice recommends.** Which
+  situation permits the ROA and what the advice says are two different things,
+  and collapsing them is what made the old list wrong. An ROA can be *further
+  advice* whose *recommendation* is no change, which is exactly what INFO 266
+  attachment 2 is. The old four-entry list could not express that sentence.
+- **Situation 2 carries a limb that is easy to miss:** no remuneration or
+  benefit received, and conflicts disclosed. For a client on an ongoing fee
+  arrangement that usually fails, which is why an annual-review "no change"
+  recommendation is normally documented as further advice. Content alone never
+  establishes that basis, and the knowledge base now says so.
+
+### Changed
+- `knowledge_base.json` — `legislation.four_kinds` becomes
+  `legislation.situations`, three entries. `hold_no_action` is absorbed into
+  `no_buy_sell`, which keeps the "take no action" phrasing as INFERRED signals
+  while recording that content alone cannot establish the situation.
+- `CLAUDE.md` — the domain-facts entry rewritten, including the correction
+  that an earlier version said attachment 2 was "not further advice". It cites
+  the further-advice situation, as do attachments 1 and 3.
+- `flags.py`, `tests/test_flags.py` — three situations throughout.
+
+### Recorded, not resolved
+- **ASIC's 2021 media release describes INFO 266 as explaining "four
+  exemptions".** Only three ROA situations have been found. The fourth may be
+  a different exemption entirely rather than a fourth ROA basis. Kept in the
+  knowledge base as `unresolved` so nobody re-derives the question from
+  scratch — it does not change the three.
+
+### What the sample set actually covers
+- One situation, three times. All three INFO 266 attachments cite notional
+  s946B(2) and reg 7.7.10AE. `example_status` on the other two situations says
+  plainly that no real document of that kind exists to test against.
+
+## Session 17-09-2026 — the ROA basis flag
+
+### Done
+- `flags.py` — the first flagging rule, and the seam the rest land in.
+  `evaluate_flags(doc_type, text)` reads `edge_case_flags` from the knowledge
+  base and returns the flags a document earns from its own contents. Wired
+  into `/ingest`, which now always returns a `flags` list, and rendered in the
+  result card so a flag that fires is a flag a person sees.
+- `knowledge_base.json` — `roa_basis_unconfirmed`, medium severity. An ROA has
+  four legislative bases — further advice (reg 7.7.10AE), hold/no-action
+  (s946B(7)), small investment (s946AA), no buy/sell (reg 7.7.10AAA) — and
+  which one applies decides what the record must contain and whether a prior
+  SOA is required at all. Classifying a document as an ROA does not record
+  that, so the question has to be asked.
+- **It fires on every ROA, and it is the only rule in the set that works that
+  way.** The others fire on an anomaly. This one fires on a property of the
+  type, which is what `advice_classification_reference.md` §6 already says
+  against the ROA row: "Medium: confirm which of 4 bases".
+- **It proposes rather than asks blankly.** Where the text supports exactly one
+  basis the flag names it and cites the phrases it matched, so a reviewer
+  confirms or corrects one thing. Where it supports several, or none, it says
+  so and proposes nothing — `determination` is `proposed`, `ambiguous` or
+  `absent`, so the queue stays sortable.
+- **Signals are split into `declared` and `inferred`,** and a declared basis
+  wins. A document naming the situation it was written under outranks a basis
+  read off the shape of the recommendation.
+
+### Calibrated against a real document, not invented
+- Run against ASIC INFO 266 attachment 1 (further advice), the first version
+  returned **ambiguous** — the most canonical further-advice example in the
+  public set, unreadable. Two real causes, both now fixed in the knowledge
+  base and pinned by tests:
+  - *"you will retain your existing policy features and benefits"* describes a
+    **consequence** of advice, not a recommendation to hold. Retain- and
+    continue-to-hold phrasing is gone from `hold_no_action` entirely; it is
+    compatible with further advice that changes something else.
+  - That ROA's own words include *"My advice is to make no changes to your XYZ
+    Superannuation Fund"* while it increases the client's insurance cover. **No
+    change to one holding, inside advice that changes another, is not a
+    s946B(7) no-action ROA** — that basis needs the advice overall to be to
+    take no action. Phrase matching cannot tell those apart, which is why the
+    declared/inferred split exists and why this flag proposes rather than
+    decides.
+- After the fix the same document reads `proposed: further_advice`.
+- Every rule in `edge_case_flags` now declares `"evaluation": "stateless"` or
+  `"stateful"`, and a test asserts the engine only ever runs rules the
+  knowledge base calls stateless. It cannot report having checked something it
+  had no evidence for.
+
+### Not done here
+- **The failure log has nowhere to put a corrected basis.** `log_failure()`
+  records `predicted_type` / `correct_type` — document type, not basis — and
+  `tests/test_failure_log.py` asserts the exact field set on purpose, so the
+  schema cannot grow quietly. A reviewer correcting a basis is a real
+  correction that ground rule #6 wants captured, and it needs a decision
+  before any field is added. Raised on #12 rather than settled here.
+- **The other ten rules are declared, not implemented.** Five are stateful and
+  wait on persistence (#8). `multi_doc_bundle` is stateless and belongs to
+  #19, which now has the page boundaries it needs.
+- **No review threshold.** The flag says "review" and nothing routes on it yet
+  — that is #4's own checkbox, and `_Needs review` filing is #10.
+- **Nothing fires end to end without Ollama.** The rule keys on the classified
+  type, deliberately, so that a document merely mentioning an ROA is not asked
+  which legislative basis it is. With the classifier unreachable there is no
+  type, so no flag. Verified with the classifier stubbed.
+
+## Session 17-09-2026 — verifying the classifier's confidence
+
+### Done
+- `confidence.py` — #4's third checkbox. The model's self-reported confidence
+  is now checked before anything acts on it, and `/ingest` returns both
+  numbers: `confidence_raw` as the model gave it, `confidence` as the system
+  will act on it. `review_policy`'s thresholds are applied to the verified
+  figure.
+- **The number was a claim by the model about itself**, produced by the same
+  process that produced the answer, and nothing independent had looked at it.
+  Two things can be checked without trusting the model at all:
+  - **Every phrase in `matched_signals`** is supposed to be text found in the
+    document. Whether it is there is a fact about the document. The proportion
+    that are becomes a multiplier.
+  - **The scope gate's independent read.** It is not smarter than the
+    classifier — it matches title strings — but it cannot be wrong in the same
+    way a language model is wrong, and that independence is what makes
+    agreement worth more than either alone. Same argument
+    `filing_model.accuracy_mechanism` already makes about two axes agreeing.
+- **Verification can only lower, never raise.** Accurate quoting shows the
+  model told the truth about its reasoning; it does not show the answer is
+  right. Letting evidence inflate a figure the model invented would launder a
+  guess into a measurement. There is a test over the whole input space
+  asserting the result never exceeds the raw number.
+- **A silent scope gate is not disagreement.** It reads only the first 500
+  characters, so a document whose title sits below that window leaves it with
+  no opinion — absence of evidence, which must not be scored as evidence of
+  absence.
+- **An answer with no quotes at all is halved, not rejected.** No working is
+  not the same as fabrication, and the flag and the review threshold should
+  still see the proposal.
+
+### The bit that was wrong first
+- Matching started out whitespace-*collapsed*, and a test written against the
+  real ASIC samples caught that this does not work. PDF extraction splits
+  words **internally** — those files produce "A ustralian S ecurities" and
+  "h is advice" — so the space sits inside the word and collapsing runs of
+  spaces does not help. An accurate quote from such a page still read as
+  fabricated, which would have marked down almost every real PDF and made the
+  check noise rather than signal.
+- Now all whitespace is removed from both sides before comparing. The cost is
+  looser matching — a short signal can match inside an unrelated word, "ROA"
+  sits inside "BROADWAY" — and that is tolerable **here** in a way it is not
+  in `scope_gate.py`, because this only decides whether to LOWER confidence.
+  A loose match declines to penalise; it never promotes anything. Recorded as
+  `matching_trade_off` in the knowledge base rather than left in a comment.
+
+### Not done here
+- **The two factors are judgements, not fitted values.** 0.5 for an answer
+  with no quotes, 0.6 for disagreeing with the scope gate. Nothing has been
+  measured against a scored sample set because the classifier is not wired to
+  one. They encode a direction and a rough weight, not an observed error rate,
+  and `calibration_status` says so.
+- **Nothing compares the two numbers yet.** Keeping `confidence_raw` is what
+  makes model drift visible and lets the failure log show where the model was
+  overconfident — but the failure log has no field for it, which is the same
+  schema question raised on #12.
+
+## Session 17-09-2026 — the review threshold
+
+### Done
+- `review.py` — `needs_review` with a reason, per #4's fourth checkbox.
+  `/ingest` now returns a `review` block on every document: whether it can
+  stand on its own, what threshold it was held to, and if it cannot, why not.
+- `knowledge_base.json` — `review_policy`. A threshold per document type with
+  the reasoning written next to it, a `default_threshold` for any type without
+  its own entry, and the five reason codes a reviewer can be shown.
+- **The only thresholds in the system were two numbers in a browser file.**
+  `static/index.html` had `confidence >= 0.75` and `>= 0.5` and nothing else
+  did — so the rule deciding whether a person looks at a client's advice
+  record was a presentational detail of one page, applied to every document
+  type equally, with no reasoning attached and invisible to the API. Moved to
+  the knowledge base (ground rule #1); the page now colours the bar against
+  the threshold the server sends and no longer decides anything.
+- **Per type, because the cost of being wrong is not uniform.** Misfiling a
+  PDS moves a product brochure. Misfiling an SOA builds an advice event around
+  the wrong document. Advice records (`soa`, `roa`) sit at 0.80, the ATP and
+  FDS at 0.75, inputs at 0.70, and the FSG and PDS at 0.60 — licensee- and
+  issuer-wide documents that are not client-specific and are highly
+  standardised in their titling. There is a test asserting advice records are
+  held to the highest bar in the set, so the domain claim is pinned rather
+  than implied.
+- **Out of scope is a review reason, not a dead end.** It used to leave the
+  pipeline with no type, no confidence and no flag — indistinguishable from an
+  unreadable file. `unknown_type` is kept distinct from it: out of scope means
+  nothing looked like ours, unknown type means the title gate matched and the
+  classifier still could not name it.
+- **A low-confidence document keeps its working.** It is not discarded and not
+  blanked: the proposed type, the confidence and the matched signals all still
+  come back, because a reviewer confirming a correct low-confidence answer is
+  exactly the failure-log evidence ground rule #6 wants.
+- `classifier_unavailable` is its own reason. An unreachable classifier is a
+  property of the runtime, and must never be recorded against the document as
+  a classification failure it did not cause.
+- Reasons accumulate rather than short-circuit — two things wrong with a
+  document is two things a reviewer should see.
+
+### Open question, recorded rather than settled
+- **Only high severity forces review.** Medium deliberately does not, because
+  `roa_basis_unconfirmed` fires on every ROA and a queue that asks about every
+  document gets ignored — the failure mode named in #20's direction note. But
+  `multi_doc_bundle` is also medium, and filing a two-document bundle as one
+  document is not something to wave through. That probably wants a per-rule
+  `forces_review` override rather than a severity-wide rule. Left as
+  `review_policy.open_question` because no real case has forced it yet.
+
+### Not done here
+- **The numbers are a judgement, not a measurement**, and `calibration_status`
+  in the knowledge base says so in as many words. Nothing has been scored
+  against a labelled sample set, because the classifier is not wired to one.
+  They are set by the cost of being wrong per type, which is knowable now,
+  rather than by observed accuracy, which is not. They should move once the
+  failure log has entries.
+- Nothing routes anywhere yet. `_Needs review` is returned as a proposed
+  destination; filing itself is #10.
 ## Session 10-09-2026 — file notes
 
 ### Done
