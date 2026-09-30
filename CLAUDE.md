@@ -40,13 +40,29 @@ app runs, data it reads (`knowledge_base.json`), or sample input (`samples/`).
    one-line why. This is the improvement loop and the proof of accuracy.
 
 ## Domain facts that are easy to get wrong
-- **ROAs have four legislative bases, not one:** further advice (reg 7.7.10AE), hold/no-action
-  (s946B(7)), small investment (s946AA), no buy/sell (reg 7.7.10AAA). So an ROA is a
+- **An ROA is permitted in three situations, not one:** further advice (notional s946B(2)-(3)
+  via reg 7.7.10AE), no buy or sell product advice (notional s946B(7)-(8) via reg 7.7.10AAA),
+  and small investment advice under $15,000 (s946AA + reg 7.7.09A). So an ROA is a
   medium-severity "confirm which kind" flag, **not** a high-severity error.
+- **Three, not four — this was corrected on 17 Sep 2026 (issue #33).** The old list carried
+  "hold/no-action (s946B(7))" and "no buy/sell (reg 7.7.10AAA)" as separate bases. They are
+  one situation: s946B(7) *is* the no-buy/sell provision, and reg 7.7.10AAA substitutes a
+  notional version of it and sets its content rules. ASIC's own FAQ lists three.
+- **"Hold" is not a basis. It is what the advice recommends.** Which situation permits the
+  ROA and what the advice says are two different things, and collapsing them is the mistake
+  that made the old list wrong. An ROA can be *further advice* whose *recommendation* is no
+  change — which is exactly what INFO 266 attachment 2 is.
+- **Situation 2 has a limb people forget:** no remuneration or benefit received, and
+  conflicts disclosed. For a client on an ongoing fee arrangement that usually fails, which
+  is why an annual-review "no change" recommendation is normally documented as further
+  advice. Content alone never establishes that basis.
 - **`advice_record_role`** in the data model is the DBFO SOA→CAR seam. It is load-bearing.
   Do not delete it as unused.
-- In the sample set, **INFO 266 attachment 2 is a "no change" ROA, not "further advice."**
-  Att 1 = further advice, att 2 = no-action, att 3 = stockbroker. Keep the labels straight.
+- **All three INFO 266 example ROAs cite the further-advice situation** — including
+  attachment 2, titled "No change advice", which relies on it because the client had an SOA
+  from 2018, and attachment 3 ("Stockbroker"), which mentions neither s946AA nor "small
+  investment". The sample set covers one situation three times, not three situations once.
+  An earlier version of this file said att 2 was "not further advice"; that was wrong.
 
 ## What NOT to do
 - Do not build the AI summary feature until classification + event-grouping are reliable.
