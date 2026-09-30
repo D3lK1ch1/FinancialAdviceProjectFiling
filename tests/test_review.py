@@ -196,3 +196,59 @@ def test_every_reason_code_explains_itself_from_the_knowledge_base(code):
     in Python.
     """
     assert _POLICY["reason_codes"][code].strip()
+
+
+# --- #36: three ways a document fails to be readable, and they are different ---
+
+def test_a_file_that_could_not_be_opened_is_its_own_reason():
+    """Not out of scope and not empty: nothing was read, so nothing else can
+    be said about it. Before this the pipeline raised and returned HTTP 500,
+    so a reviewer got a stack trace instead of a document.
+    """
+    result = assess(in_scope=False, classification=None,
+                    parse_error="PdfReadError: EOF marker not found")
+
+    assert _codes(result) == ["unreadable"]
+    assert "EOF marker" in result["reasons"][0]["detail"], "the reason must reach the reviewer"
+    assert result["destination"] == _POLICY["destination"]
+
+
+def test_a_scanned_document_is_not_out_of_scope():
+    """The #22 principle, applied where it had not been. A scanned Statement
+    of Advice is still a Statement of Advice — it just cannot be read without
+    OCR (#5). Calling it 'not advice' is the defect that issue was about.
+    """
+    result = assess(in_scope=False, classification=None, has_selectable_text=False)
+
+    assert _codes(result) == ["no_selectable_text"]
+    assert _codes(result) != ["out_of_scope"]
+
+
+def test_the_three_unreadable_cases_stay_distinct():
+    """Nothing read, versus read and empty, versus read in full and matching
+    nothing. A reviewer acts on each differently — chase the file, send it to
+    OCR, or confirm it is not advice at all.
+    """
+    could_not_open = assess(in_scope=False, classification=None, parse_error="boom")
+    no_text = assess(in_scope=False, classification=None, has_selectable_text=False)
+    nothing_matched = assess(in_scope=False, classification=None)
+
+    codes = [_codes(r)[0] for r in (could_not_open, no_text, nothing_matched)]
+    assert codes == ["unreadable", "no_selectable_text", "out_of_scope"]
+    assert len(set(codes)) == 3
+
+
+def test_a_parse_failure_outranks_everything_else():
+    """Most specific first. A file that never opened has no text and no type
+    either, and saying so adds nothing a reviewer can use.
+    """
+    result = assess(in_scope=False, classification=None,
+                    parse_error="DependencyError: cryptography>=3.1 is required",
+                    has_selectable_text=False)
+
+    assert _codes(result) == ["unreadable"]
+
+
+def test_a_readable_document_is_unaffected():
+    """The new checks must not touch the ordinary path."""
+    assert _ok("soa", 0.95)["needs_review"] is False
