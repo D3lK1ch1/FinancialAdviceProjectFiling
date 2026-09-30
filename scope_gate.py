@@ -1,7 +1,7 @@
 """
 Scope gate — not a classifier. Just checks whether the parsed text contains
-any title_pattern for the four document types this POC supports, reusing
-knowledge_base.json so the type list isn't hardcoded here (CLAUDE.md rule #1).
+any title_pattern for the document types knowledge_base.json defines, reading
+the list from there so it isn't hardcoded here (CLAUDE.md rule #1).
 No confidence score, no matched_signals, no edge_case_flags — that's the
 real classifier, later.
 """

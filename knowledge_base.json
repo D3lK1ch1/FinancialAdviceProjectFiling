@@ -4,7 +4,7 @@
     "framework": "Corporations Act 2001 (Cth), Chapter 7 (Pt 7.7 Financial Services Disclosure; Pt 7.9 Financial Product Disclosure), and Corporations Regulations 2001",
     "regulator": "ASIC",
     "version": "0.3",
-    "legislative_currency_note": "Provisions verified against AustLII / ASIC sources as at 2026-08. The SOA regime (s946A) is current but has a legislated-in-principle successor: under DBFO Tranche 2 the SOA is slated to be replaced by a Client Advice Record (CAR). Tranche 2 was not yet passed as at this build. See 'reform_watch'. Do not hardcode 'SOA' as the only advice-record type — classify by role in the advice process, carry the statutory label as an attribute.",
+    "legislative_currency_note": "Provisions verified against AustLII / ASIC sources as at 2026-08. The SOA regime (s946A) is current but has a proposed successor: under DBFO Tranche 2 the SOA is slated to be replaced by a Client Advice Record (CAR). Tranche 2 was not yet passed as at this build. See 'reform_watch'. Do not hardcode 'SOA' as the only advice-record type — classify by role in the advice process, carry the statutory label as an attribute.",
     "not_legal_advice": "This maps documents to provisions to drive classification. It is not legal advice and does not substitute for a financial-services lawyer's sign-off, especially on the AFSL boundary and on reform timing.",
     "consumers": "Each document entry feeds: (1) new-to-industry teaching layer, (2) classifier identification hints, (3) version-tracking logic. Single source of truth — do not fork copies into the UI or classifier."
   },
@@ -24,8 +24,7 @@
       "plain": "Advice given where the provider has considered one or more of the client's objectives, financial situation or needs (or a reasonable person would expect them to have). Triggers the SOA/ROA regime and the best-interests duty (s961B).",
       "documents": [
         "soa",
-        "roa",
-        "car"
+        "roa"
       ]
     },
     {
@@ -34,8 +33,9 @@
       "provision": "s766B(4)",
       "plain": "Financial product advice that is not personal advice. No SOA; instead a general-advice warning is required.",
       "provision_warning": "s949A",
-      "documents": [
-        "general_advice_warning"
+      "documents": [],
+      "not_yet_document_types": [
+        "general advice warning — usually a paragraph inside another document rather than a file of its own; not modelled as a type (see #23)"
       ]
     },
     {
@@ -71,7 +71,7 @@
     {"stage": 2, "name": "Discovery / fact-find", "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile"]},
     {"stage": 3, "name": "Advice construction", "plain": "Recommendations are formed and the reasoning/basis for advice is documented.", "governing_provisions": ["s961B", "s961G (appropriate advice)"], "typical_docs": ["file_note", "soa"]},
     {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa"]},
-    {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "application_forms"]},
+    {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed"], "not_yet_document_types": ["product application forms — not yet a document type (see #23)"]},
     {"stage": 6, "name": "Ongoing service & review", "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement"]}
   ],
   "version_status_values": {
@@ -547,8 +547,16 @@
         ]
       },
       "links_to": [
-        "soa — evidences the research and reasoning behind the advice record it precedes",
-        "fact_find — records inquiries made where the fact find was incomplete (safe harbour step 2)"
+        {
+          "doc": "soa",
+          "relationship": "evidences",
+          "note": "Evidences the research and reasoning behind the advice record it precedes."
+        },
+        {
+          "doc": "fact_find",
+          "relationship": "supplements",
+          "note": "Records inquiries made where the fact find was incomplete (safe harbour step 2)."
+        }
       ],
       "version_notes": "Per interaction, not per client or per event. A client accumulates many; they are discrete records, never superseded — a later note does not replace an earlier one."
     },
@@ -610,7 +618,7 @@
       }
     },
     "advice_event": {
-      "definition": "A single advisory decision and all documents that belong to it: the advice record (SOA/ROA/CAR), the inputs that fed it (fact find, risk profile), the implementation (authority to proceed), and supporting product disclosure (PDS) used for that decision.",
+      "definition": "A single advisory decision and all documents that belong to it: the advice record (SOA or ROA), the inputs that fed it (fact find, risk profile), the implementation (authority to proceed), and supporting product disclosure (PDS) used for that decision.",
       "identity": "Derived from the advice record at its centre. Keyed on client + advice-record date + subject matter/scope.",
       "naming_pattern": "YYYY-MM — <subject matter> [<record type> · <sub-kind if ROA>]",
       "examples": [
@@ -760,7 +768,7 @@
       {"id": "fds_era_mismatch", "evaluation": "stateless", "trigger": "Fee/consent document format doesn't match the expected pre/post-DBFO-Tranche-1 era for its date", "why": "Ongoing-fee consent mechanics changed under DBFO; wrong-era format may indicate a compliance gap.", "severity": "medium"},
       {"id": "no_date", "evaluation": "stateless", "trigger": "No date extractable from a document type that requires one for sequencing", "why": "Version tracking and advice-timing checks impossible without a date.", "severity": "medium"},
       {"id": "low_confidence", "evaluation": "stateless", "trigger": "Classifier confidence below threshold", "why": "Ambiguous or poor-quality document; needs a human eye.", "severity": "medium"},
-      {"id": "unknown_type", "evaluation": "stateless", "trigger": "No document type matched with sufficient confidence", "why": "Possibly out-of-scope or a novel/edge document.", "severity": "low"},
+      {"id": "unknown_type", "evaluation": "stateless", "trigger": "The classifier returned no document type at all. Distinct from low_confidence, where it named a type below that type's threshold.", "why": "Possibly out-of-scope or a novel/edge document.", "severity": "low"},
       {"id": "superseding_ambiguity", "evaluation": "stateful", "trigger": "Two candidate 'current' documents of the same type and scope for one client", "why": "Cannot determine which is in force.", "severity": "high"}
     ]
   }
