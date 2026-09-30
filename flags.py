@@ -28,6 +28,10 @@ _ROA_SITUATIONS = [
     doc for doc in _KB["documents"] if doc["id"] == "roa"
 ][0]["legislation"]["situations"]
 
+_BUNDLE = _RULES["multi_doc_bundle"]["detection"]
+_PAGINATION = re.compile(_BUNDLE["pagination_restart"]["pattern"], re.IGNORECASE)
+_LEADING = _BUNDLE["leading_region_chars"]
+
 
 # Signals are body phrases, not title acronyms, so all of them match
 # case-insensitively — unlike scope_gate.py, which keeps all-caps patterns
@@ -133,25 +137,143 @@ def _roa_basis_unconfirmed(doc_type: str, text: str) -> dict | None:
     }
 
 
+
+
+def _page_types(pages: list[str]) -> list[str | None]:
+    """The type each page's leading region reads as, by the scope gate's own
+    title patterns — imported rather than re-derived, so a knowledge-base edit
+    moves both together.
+    """
+    from scope_gate import _MATCHERS  # noqa: PLC0415 — same KB data, one source
+
+    types = []
+    for page in pages:
+        head = page[:_LEADING]
+        best = None
+        for doc_id, matchers in _MATCHERS.items():
+            positions = [f.start() for _p, rx in matchers if (f := rx.search(head))]
+            if positions:
+                candidate = (min(positions), -len(positions), doc_id)
+                if best is None or candidate < best:
+                    best = candidate
+        types.append(best[2] if best else None)
+    return types
+
+
+def _pagination_restarts(pages: list[str]) -> list[dict]:
+    """Pages where a document's own numbering starts over.
+
+    The strong signal, and the one that needs no notion of type at all: "page
+    1 of N" on page 31 of a 53-page file says a second document begins there
+    whatever either document is about.
+    """
+    found = []
+    for number, page in enumerate(pages, start=1):
+        if number == 1:
+            continue
+        for match in _PAGINATION.finditer(page):
+            if match.group(1) == "1":
+                found.append({"page": number, "marker": " ".join(match.group(0).split())})
+                break
+    return found
+
+
+def _title_transitions(pages: list[str]) -> list[dict]:
+    """Pages where the type implied by the heading changes and does not change back.
+
+    A running header gives the same type on every page, so presence of a
+    second type's name is not the signal — the CHANGE is. And a change that
+    hands the file back to the earlier type was a section inside one document,
+    not an appended one: that is what separates a PDS with a "risk profile"
+    section from a PDS with something genuinely stapled to it.
+    """
+    seen = [(number, t) for number, t in enumerate(_page_types(pages), start=1) if t]
+
+    transitions = []
+    for index in range(1, len(seen)):
+        page, doc_type = seen[index]
+        previous = seen[index - 1][1]
+        if doc_type == previous:
+            continue
+        if previous in {t for _n, t in seen[index:]}:
+            continue  # the earlier type comes back: an excursion, not a boundary
+        if doc_type in {t for _n, t in seen[:index]}:
+            continue  # and the file handing itself back to a type it already
+            # was is the end of that excursion, not the start of a document
+        transitions.append({"page": page, "from": previous, "to": doc_type})
+    return transitions
+
+
+def _multi_doc_bundle(doc_type: str, text: str, pages: list[str] | None) -> dict | None:
+    """Whether this file looks like more than one document.
+
+    Needs page boundaries, which is why #21 had to land first: joined text
+    cannot show where one document ends and the next begins.
+
+    It proposes candidates and never splits. A missed bundle is a flag nobody
+    actioned; a wrong split cuts a record in half and nothing downstream can
+    tell that it happened.
+    """
+    if not pages or len(pages) < 2:
+        return None
+
+    restarts = _pagination_restarts(pages)
+    transitions = _title_transitions(pages)
+    if not restarts and not transitions:
+        return None
+
+    candidates = sorted(
+        [{"page": r["page"], "evidence": "pagination_restart", "detail": r["marker"],
+          "strength": _BUNDLE["pagination_restart"]["strength"]} for r in restarts]
+        + [{"page": t["page"], "evidence": "title_transition",
+            "detail": f'{t["from"]} -> {t["to"]}',
+            "strength": _BUNDLE["title_transition"]["strength"]} for t in transitions],
+        key=lambda c: (c["page"], c["evidence"]),
+    )
+
+    return {
+        "page_count": len(pages),
+        "candidate_boundaries": candidates,
+        "proposed_split": [
+            {"from_page": start, "to_page": end}
+            for start, end in zip(
+                [1] + [c["page"] for c in candidates],
+                [c["page"] - 1 for c in candidates] + [len(pages)],
+            )
+        ],
+        "split_performed": False,
+        "never_split_automatically": _RULES["multi_doc_bundle"]["never_split_automatically"],
+    }
+
 # A rule is evaluated only if it appears here. Everything else in
 # edge_case_flags is recorded and not yet checked, which is the honest state
 # and is visible rather than implied.
 EVALUATORS = {
     "roa_basis_unconfirmed": _roa_basis_unconfirmed,
+    "multi_doc_bundle": _multi_doc_bundle,
 }
 
 
-def evaluate_flags(doc_type: str | None, text: str) -> list[dict]:
+_NEEDS_PAGES = {"multi_doc_bundle"}
+
+
+def evaluate_flags(doc_type: str | None, text: str, pages: list[str] | None = None) -> list[dict]:
     """
     Flags for one document, from its own contents only.
 
-    Returns a list so the shape doesn't change when the second rule lands.
+    `pages` is per-page text from parse_pdf. Bundle detection needs it —
+    joined text cannot show where one document ends and the next begins — and
+    rules that do not care about page structure ignore it.
     Never reclassifies and never files: a flag is a question attached to a
     proposal a human answers (CLAUDE.md rule #2).
     """
     flags = []
     for rule_id, evaluate in EVALUATORS.items():
-        result = evaluate(doc_type, text)
+        result = (
+            evaluate(doc_type, text, pages)
+            if rule_id in _NEEDS_PAGES
+            else evaluate(doc_type, text)
+        )
         if result is None:
             continue
         rule = _RULES[rule_id]
@@ -159,6 +281,7 @@ def evaluate_flags(doc_type: str | None, text: str) -> list[dict]:
             {
                 "id": rule_id,
                 "severity": rule["severity"],
+                "forces_review": rule.get("forces_review"),
                 "why": rule["why"],
                 "asks": rule["asks"],
                 **result,

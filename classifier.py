@@ -5,7 +5,7 @@ classifier_hints (not guessed). Runs only on text scope_gate.py already
 passed — this is the probabilistic step layered on top of that deterministic
 pre-filter (§7), not a replacement for it.
 
-Deliberately does NOT resolve ROA's four legislative bases (CLAUDE.md: that's
+Deliberately does NOT resolve which of the ROA's three situations applies (that's
 a "confirm which kind" flag for the flagging engine, not a classifier job).
 """
 

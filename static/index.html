@@ -245,8 +245,29 @@
     border-left: 2px solid var(--accent-soft-border);
   }
 
+  .review-reasons { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .review-reason {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    background: var(--surface-sunken);
+    border: 1px solid var(--border-soft);
+  }
+  .review-code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--low);
+    white-space: nowrap;
+  }
+  .review-detail { color: var(--ink-soft); }
+
   /* A flag is a question a reviewer answers, not an error. Severity tints it;
-     it never reads as a failure, because all four ROA bases are valid. */
+     it never reads as a failure, because all three ROA situations are valid. */
   .flag {
     margin-top: 18px;
     padding: 14px 16px;
@@ -405,9 +426,20 @@ fileInput.addEventListener('change', () => {
   if (fileInput.files.length) sendFile(fileInput.files[0]);
 });
 
-function confidenceTier(confidence) {
-  if (confidence >= 0.75) return 'high';
-  if (confidence >= 0.5) return 'medium';
+// The review decision is the server's, not this page's. These two numbers
+// used to live here as `>= 0.75` and `>= 0.5` — which put the rule deciding
+// whether a person looks at a client's advice record inside one browser
+// file, applied to every document type equally, with no reasoning attached
+// and invisible to the API. They are now per-type thresholds in
+// knowledge_base.json, with the cost of being wrong written next to each.
+//
+// All this does is colour the bar: at or above the type's threshold reads as
+// settled, comfortably under it reads as weak. `needs_review` is the answer;
+// the tier is only how it looks.
+function confidenceTier(confidence, threshold) {
+  if (threshold === null || threshold === undefined) return 'low';
+  if (confidence >= threshold) return 'high';
+  if (confidence >= threshold * 0.75) return 'medium';
   return 'low';
 }
 
@@ -462,28 +494,58 @@ function render(data) {
   // "unsure". Where the tool can propose an answer it shows what it matched,
   // so a reviewer corrects one thing instead of starting from scratch. There
   // is no approve action here — that is the Approve/Edit/Reject work.
-  function flagBlock(flag) {
-    let body;
-    if (flag.determination === 'proposed') {
-      const evidence = (flag.matched_signals || [])
-        .map(s => `<li>${escapeHtml(s)}</li>`).join('');
-      body = `<div class="flag-basis">Reads as <strong>${escapeHtml(flag.proposed_basis_name)}</strong>
-                <code>${escapeHtml(flag.proposed_basis_provision)}</code></div>
-              ${evidence ? `<ul class="flag-evidence">${evidence}</ul>` : ''}`;
-    } else {
+  // One renderer per rule, chosen by id, with a fallback that always shows
+  // something truthful. Keying the whole block on `determination` was wrong:
+  // that field belongs to roa_basis_unconfirmed alone, so a multi_doc_bundle
+  // flag fell through to "The document does not say which:" followed by an
+  // empty list — nonsense, and it hid the evidence. The flag engine is
+  // general; the display has to be too, or every new rule breaks this.
+  const FLAG_BODIES = {
+    roa_basis_unconfirmed(flag) {
+      if (flag.determination === 'proposed') {
+        const evidence = (flag.matched_signals || [])
+          .map(s => `<li>${escapeHtml(s)}</li>`).join('');
+        return `<div class="flag-basis">Reads as <strong>${escapeHtml(flag.proposed_basis_name)}</strong>
+                  <code>${escapeHtml(flag.proposed_basis_provision)}</code></div>
+                ${evidence ? `<ul class="flag-evidence">${evidence}</ul>` : ''}`;
+      }
       const lead = flag.determination === 'ambiguous'
         ? 'The document reads as more than one:'
         : 'The document does not say which:';
       const candidates = (flag.candidates || [])
         .map(x => `<li>${escapeHtml(x.name)} <code>${escapeHtml(x.provision)}</code></li>`)
         .join('');
-      body = `<div class="flag-basis">${lead}</div>
+      return `<div class="flag-basis">${lead}</div>
               <ul class="flag-evidence">${candidates}</ul>`;
-    }
+    },
+
+    multi_doc_bundle(flag) {
+      // The page ranges are the useful part: a reviewer checks the boundary,
+      // not the adjective. Nothing is split — this is a proposal.
+      const ranges = (flag.proposed_split || [])
+        .map(r => r.from_page === r.to_page ? `p${r.from_page}` : `p${r.from_page}\u2013${r.to_page}`)
+        .join('  +  ');
+      const evidence = (flag.candidate_boundaries || []).map(c =>
+        `<li>page ${c.page} — ${escapeHtml(c.detail)}
+           <code>${escapeHtml(c.evidence.replace(/_/g, ' '))}, ${escapeHtml(c.strength)}</code></li>`
+      ).join('');
+      return `<div class="flag-basis">${flag.page_count} pages, reading as
+                <strong>${(flag.proposed_split || []).length} documents</strong>:
+                <code>${escapeHtml(ranges)}</code></div>
+              <ul class="flag-evidence">${evidence}</ul>
+              <div class="flag-basis" style="margin-top:8px">Nothing has been split. A person confirms the boundary.</div>`;
+    },
+  };
+
+  function flagBlock(flag) {
+    const render = FLAG_BODIES[flag.id];
+    // A rule with no renderer still shows its question and its severity
+    // rather than rendering something untrue about itself.
+    const body = render ? render(flag) : '';
     return `<div class="flag ${escapeHtml(flag.severity)}">
               <div class="flag-head">
-                <div class="flag-asks">${escapeHtml(flag.asks.split('?')[0])}?</div>
-                <div class="flag-severity">${escapeHtml(flag.severity)} · review</div>
+                <div class="flag-asks">${escapeHtml((flag.asks || '').split('?')[0])}?</div>
+                <div class="flag-severity">${escapeHtml(flag.severity)} \u00b7 ${flag.forces_review ? 'blocks' : 'review'}</div>
               </div>
               ${body}
             </div>`;
@@ -492,8 +554,19 @@ function render(data) {
   const flags = (data.flags || []).map(flagBlock).join('');
 
   const pct = Math.round((c.confidence || 0) * 100);
-  const tier = confidenceTier(c.confidence || 0);
-  const tierLabel = tier === 'high' ? 'High confidence' : tier === 'medium' ? 'Medium confidence' : 'Needs review';
+  const review = data.review || {};
+  const tier = review.needs_review ? 'low' : confidenceTier(c.confidence || 0, review.threshold);
+  const tierLabel = review.needs_review ? 'Needs review' : 'Ready to confirm';
+
+  // Why it needs review, in the reviewer's words rather than a bare flag.
+  // "Needs review" on its own tells somebody nothing about what to look at.
+  const reviewReasons = (review.reasons || []).length
+    ? `<div class="review-reasons">${(review.reasons || []).map(r => `
+        <div class="review-reason">
+          <span class="review-code">${escapeHtml(r.code.replace(/_/g, ' '))}</span>
+          <span class="review-detail">${escapeHtml(r.detail)}</span>
+        </div>`).join('')}</div>`
+    : '';
   const signals = (c.matched_signals && c.matched_signals.length)
     ? `<div class="signals-label">Why</div><ul class="signals">${c.matched_signals.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>`
     : '';
@@ -509,7 +582,14 @@ function render(data) {
           <div class="meter ${tier}"><div style="width:${pct}%"></div></div>
           <div class="n">${pct}%</div>
         </div>
-        <div class="proposal-note">Proposed classification — confirm before filing.</div>
+        <div class="proposal-note">${
+          review.needs_review
+            ? `Goes to <code>${escapeHtml(review.destination || '')}</code> until a person confirms it.`
+            : 'Proposed classification — confirm before filing.'
+        }${
+          review.threshold != null ? ` This type has to reach ${Math.round(review.threshold * 100)}%.` : ''
+        }</div>
+        ${reviewReasons}
         ${signals}
         ${flags}
       </div>
