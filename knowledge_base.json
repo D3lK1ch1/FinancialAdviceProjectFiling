@@ -742,6 +742,17 @@
       "flagged_blocking": "A flag fired that blocks on its own. Usually high severity, but a rule may override its severity’s default — multi_doc_bundle is medium and blocks, because filing a two-document bundle as one document destroys a record rather than mislabelling one. Named for what it does rather than for its severity, because those came apart the moment overrides existed."
     },
     "destination": "_Needs review",
+    "correction_reasons": {
+      "purpose": "Why a reviewer's answer differs from the tool's — or that it does not. The failure log's one-line why (ground rule #6) is built from one of these codes, never typed: a free-text box at the end of a review is exactly where a client name gets written by somebody being helpful. Adding a reason is a knowledge-base edit, not a code change.",
+      "codes": {
+        "confirmed": "The tool's type was right; the document was held for review anyway — low confidence, a blocking flag, or out of scope. Logged because thresholds are calibrated from confirmations as much as from corrections: a type a reviewer confirms nearly every time it is held is being held too often.",
+        "lookalike": "The document quotes, cites or resembles another type and was read as that one — an SOA that refers to a PDS, an ROA read as an SOA, an FSG section inside an SOA.",
+        "non_standard_title": "The document's own title is missing, firm-branded or worded differently from the title patterns, so the tool had no title to go on.",
+        "poor_text": "The text the tool read was incomplete or garbled — a scan, a partial extraction, a redacted or image-heavy page. A property of the file rather than of the rules.",
+        "bundle": "One file holds more than one document, and the tool named only one of them.",
+        "knowledge_base_gap": "None of the above: the knowledge base is missing a rule. The record says a gap exists; what the gap is belongs in an issue, not in the log."
+      }
+    },
     "forces_review_decision": "RESOLVED by multi_doc_bundle. Severity sets the default (edge_case_flags.severity_forces_review: only high blocks). A rule may override it with its own `forces_review`. Medium stays non-blocking by default because roa_basis_unconfirmed fires on every ROA and a queue that asks about every document gets ignored — see the direction note on #20. multi_doc_bundle is medium and overrides to blocking, because filing a two-document bundle as one document destroys a record rather than mislabelling one. It is the only override today."
   },
   "edge_case_flags": {

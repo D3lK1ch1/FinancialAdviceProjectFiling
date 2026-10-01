@@ -32,10 +32,11 @@ The leaking one was written by somebody being helpful at the end of the day,
 not somebody being careless. That is the realistic failure mode, and the
 reason this rule is written down instead of left to judgement.
 
-No review UI exists yet to capture human corrections (unit #12), so the
-current caller is tests/test_e2e.py: it has both a real classifier
-prediction and a hand-labelled correct answer for every sample, which is
-exactly the comparison this log exists to record.
+Two callers. A reviewer's verdict arrives through review.record_correction()
+(POST /review/correction), with document_id the SHA-256 /ingest returned and
+note a reason code from knowledge_base.json — never typed. tests/test_e2e.py
+is the other: it has a real classifier prediction and a hand-labelled correct
+answer for every public sample.
 
 CORRECTIONS BEYOND THE DOCUMENT TYPE. predicted_type/correct_type record one
 kind of correction: the tool said PDS, it was a file note. Reviewers make

@@ -3,18 +3,20 @@ API layer — Phase 1: /ingest only. Nothing is persisted; each request parses
 and returns the result in-memory. No classifier/filing/flagging yet.
 """
 
+import hashlib
 import json
 from io import BytesIO
 
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from classifier import classify
 from confidence import verify
 from flags import evaluate_flags
 from parser import parse_pdf
-from review import assess
+from review import CorrectionRejected, assess, record_correction
 from scope_gate import check_scope
 
 app = FastAPI(title="Advice Document Filing — POC")
@@ -35,6 +37,10 @@ def root():
 async def ingest(file: UploadFile):
     contents = await file.read()
     result = parse_pdf(BytesIO(contents), file.filename)
+    # The identity a reviewer's correction is recorded against. A hash of the
+    # bytes rather than the filename, which is routinely the client's name —
+    # see the de-identification rule in failure_log.py.
+    result["document_id"] = hashlib.sha256(contents).hexdigest()
     # Per-page text is for server-side work (bundle detection — see the
     # multi_doc_bundle rule in knowledge_base.json). It is not part of the
     # response: echoing it alongside extracted_text would roughly double the
@@ -81,3 +87,25 @@ async def ingest(file: UploadFile):
         has_selectable_text=result["has_selectable_text"],
     )
     return result
+
+
+class Correction(BaseModel):
+    document_id: str
+    predicted_type: str | None
+    correct_type: str
+    reason: str
+    corrections: list[dict] = []
+
+
+@app.post("/review/correction", status_code=201)
+def review_correction(correction: Correction):
+    """A reviewer's verdict on one document, written to the failure log.
+
+    What the Approve/Edit/Reject screen calls (#4). It records a judgement and
+    files nothing — filing is #10.
+    """
+    try:
+        record_correction(**correction.model_dump())
+    except CorrectionRejected as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    return {"recorded": True, "document_id": correction.document_id}
