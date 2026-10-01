@@ -17,16 +17,28 @@ a finished step (see Contributing in `README.md`). Newest at top.
   usable date → no name. GH#10 box 2.
 - Issues closed: GH#12, GH#36, GH#41. GH#23 corrected to 4/5.
 
-### Ready, awaiting merge
+### Ready, awaiting merge (#47 and the list below)
 - **#47** `filing.proposed_event_folder()` / `advice_subject()`: subject read from the advice
   record's scope statement, never the whole document (it reads the client's circumstances and
   the "does not cover" list). Areas in `filing_model.advice_event.subject`. Domain-approved.
+
+- **#50** One firm-safe review level, 0.90, for every type, set once for the domain;
+  `review_policy.screening_model` (screen, then confirm — the health model).
+- **#51** Teach mode (#11 boxes 1–2): `settings` block; `/ingest?display=teach|off` adds the
+  KB `teaching` note; independence test. Five teaching notes corrected (Bella approved).
+- **#53** Bundle split counts a boundary once and names each part (fixes #52, #19 box 4).
+- **#54** `approval_policy` for the review screen (roles, approvers, hard stops vs warnings,
+  per-type checks) + stage map fix (PDS was in no stage; file notes in every stage).
 
 ### Decisions recorded (Bella)
 - Document filename: date first, KB `abbrev` (GH#10 comment).
 - Event subject: scope statement only; other areas returned as `also_mentioned` (GH#10 comment).
 - Advice-event date = the **"advice as at" (commencement) date**. Expiry, meeting and
   `PDS … dated` dates are never it (GH#48).
+- Review level: **0.90 for every type**, set once for all firms; no firm or user lowers it.
+- Approvals: adviser or compliance only; advisers for their own clients' advice records;
+  only compliance clears a hard stop (GH#54, posted on GH#4 for the review screen).
+- Firm-specific document types are learned from `knowledge_base_gap` corrections (GH#23).
 
 ### Not done here
 - **GH#48** — `dates.py` returns `ambiguous` on all three real SOAs: "advice as at" isn't a
