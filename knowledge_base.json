@@ -694,42 +694,55 @@
   "review_policy": {
     "purpose": "Decides whether a classification is confident enough to act on, or must go to a human first. Ground rule #2: nothing files silently, and a document that cannot be placed confidently routes to _Needs review WITH A REASON rather than leaving the pipeline. The reason is the point — 'needs review' on its own tells a reviewer nothing about what to look at.",
     "threshold_meaning": "The classifier's confidence must MEET OR EXCEED the type's threshold for the proposal to stand on its own. Below it, the document still gets its proposed type and its reasoning — it is not discarded — but it is marked needs_review with the low_confidence reason.",
-    "calibration_status": "These numbers are a first domain judgement, not a measurement. Nothing has been measured against a scored sample set yet, because the classifier is not wired to one. They are set by the COST OF BEING WRONG per document type, which is knowable now, rather than by observed accuracy, which is not. Expect to move them once the failure log has entries.",
+    "calibration_status": "A domain judgement, not a measurement. Set 1 Oct 2026 by Bella: every type sits in a 0.85–0.90 band, because every document in a client file is critical to accurate documentation — supporting documents included. 100% is the wish and not statistically attainable. The model is diagnostic screening in health: the tool screens, a person confirms, and a high bar means 'when in doubt, refer'. A score only means something once it is validated on real cases: with every document correct, 6 documents only show true accuracy is at least ~61% (95% confidence), 30 show ~89%, 50 show ~93%. Proving 90% per type needs roughly 35–50 consecutive correct real documents of that type. Until the failure log holds that, most documents will go to review, which is intended.",
     "why_per_type": "A single global threshold treats every document as equally expensive to misplace, and they are not. Misfiling a PDS puts a product brochure in the wrong folder. Misfiling an SOA puts the advice record — the centre of the advice event, the thing every other document links to — under the wrong client or the wrong event.",
-    "default_threshold": 0.70,
-    "default_note": "Applies to any document type without its own entry, so adding a type to `documents` needs no edit here (ground rule #1). A new type starts cautious and earns a lower bar once its behaviour is known.",
+    "default_threshold": 0.85,
+    "screening_model": {
+      "principle": "Screen, then confirm — the model from diagnostic screening in health, adopted 1 Oct 2026 (Bella).",
+      "why": "A wrong financial record does real harm: an SOA filed under the wrong client or event, a misread risk profile, a tax or fee document in the wrong file can mislead an adviser, a compliance reviewer or a regulator. The cost of a miss is far higher than the cost of an extra review.",
+      "stage_one": "The tool screens. It is tuned so it rarely lets a wrong answer through unchecked, and accepts sending extra documents to a person to do so.",
+      "stage_two": "A person confirms. The final call on every document is human; the tool's job is to make that call faster, never to replace it.",
+      "consequence": "High bars (0.85–0.90), reasons on every referral, and trust earned per document type from the failure log — not assumed. When in doubt, refer."
+    },
+    "minimum_threshold": 0.85,
+    "minimum_note": "No type may be set below this. A bar is a safety control, not a convenience: lowering it is how a busy queue gets emptied by letting documents through unchecked. Changing the minimum is a compliance decision, recorded here.",
+    "default_note": "Applies to any document type without its own entry, so adding a type to `documents` needs no edit here (ground rule #1). Equal to the minimum: a new type starts at the bottom of the 0.85–0.90 band, never below it.",
     "thresholds": {
       "soa": {
-        "value": 0.8,
-        "why": "The advice record, and the centre of an advice event — version status, superseding, event grouping and every links_to relationship key on finding the right one. A wrong SOA is not one misfiled document; it is an advice event assembled around the wrong document."
+        "value": 0.90,
+        "why": "The advice record, and the centre of an advice event — version status, superseding, event grouping and every links_to relationship key on finding the right one. A wrong SOA is not one misfiled document; it is an advice event assembled around the wrong document. Top of the 0.85–0.90 band."
       },
       "roa": {
-        "value": 0.8,
-        "why": "Also an advice record (advice_record_role is true), with the same event-grouping weight as an SOA. It carries the roa_basis_unconfirmed question regardless of confidence, so a low-confidence ROA is a document a reviewer is already being asked about — no reason to let a shaky type through underneath a question."
+        "value": 0.90,
+        "why": "Also an advice record (advice_record_role is true), with the same event-grouping weight as an SOA. It carries the roa_basis_unconfirmed question regardless of confidence, so a low-confidence ROA is a document a reviewer is already being asked about. Top of the band."
       },
       "authority_to_proceed": {
-        "value": 0.75,
-        "why": "A signed client authorisation, and the link between advice and what was actually implemented. atp_without_advice_record is one of the three high-severity flags in the set, so a misread ATP either fires it wrongly or hides a genuine gap."
+        "value": 0.90,
+        "why": "A signed client authorisation, and the link between advice and what was actually implemented. atp_without_advice_record is one of the three high-severity flags in the set, so a misread ATP either fires it wrongly or hides a genuine gap. Signed authority sits with the advice records at the top of the band."
       },
       "fee_disclosure_statement": {
-        "value": 0.75,
+        "value": 0.85,
         "why": "Fee disclosure and ongoing-fee consent carry their own compliance exposure, and fds_era_mismatch depends on this type being identified correctly before the pre/post-DBFO check can run at all."
       },
       "fact_find": {
-        "value": 0.7,
-        "why": "An input document evidencing safe harbour steps 1-2. Wrong placement is recoverable and visible — a fact find in the wrong folder is obvious to the next person who opens it — but fact_find_after_soa sequencing depends on it."
+        "value": 0.85,
+        "why": "Evidence of safe harbour steps 1-2 — what the adviser knew about the client when advising. A supporting document, but the advice is only as sound as the record of the client it rests on, and fact_find_after_soa sequencing depends on it."
       },
       "risk_profile": {
-        "value": 0.7,
-        "why": "Input document, pairs with the fact find. risk_mismatch is high severity but compares CONTENT to an SOA's recommendations, so it needs the type read correctly first."
+        "value": 0.85,
+        "why": "Key to accurate documentation: the risk profile is what the advice's appropriateness is measured against. risk_mismatch is high severity and compares its CONTENT to an SOA's recommendations, so a misread risk profile undermines the check that matters most."
       },
       "fsg": {
-        "value": 0.6,
-        "why": "Licensee-wide and not client-specific: the same edition is given to every client, so a misfiled FSG misplaces a copy of a document the firm holds many identical copies of. Lowest cost of error in the set, and highly standardised titling, so a lower bar costs little."
+        "value": 0.85,
+        "why": "Evidence of what disclosure the client received, and which edition. The same edition goes to many clients, but filing the wrong edition — or another document as an FSG — leaves the client's file unable to show they were given it. Raised from 0.60 on 1 Oct 2026: no document type is low-stakes."
       },
       "pds": {
-        "value": 0.6,
-        "why": "Issued by the product provider, not the firm, and not client-specific. Reference material rather than a record of anything the firm did. Same reasoning as the FSG."
+        "value": 0.85,
+        "why": "Issued by the product provider, not the firm, and links to the advice event that recommended the product. A misread PDS breaks that link and can hide which product disclosure supported the advice. Raised from 0.60 on 1 Oct 2026: no document type is low-stakes."
+      },
+      "file_note": {
+        "value": 0.85,
+        "why": "Often the only record of a conversation: client instructions, a phone discussion, verbal consent, the reasoning behind advice. In a complaint or review it may be the evidence. It is also the ROA's lookalike — a file note describes advice being discussed or prepared — so a misread one is mistaken for an advice record or loses its place in the event."
       }
     },
     "reason_codes": {

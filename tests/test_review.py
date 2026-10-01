@@ -47,11 +47,11 @@ def test_a_confident_classification_needs_nobody():
 
 def test_the_same_confidence_passes_for_one_type_and_not_another():
     """The whole point of per-type thresholds. A single global number treats
-    every document as equally expensive to misplace: misfiling a PDS moves a
-    product brochure, misfiling an SOA builds an advice event around the wrong
-    document.
+    every document as equally expensive to misplace. Since 1 Oct 2026 every
+    type is in the 0.85–0.90 band, and advice records sit at its top: misfiling
+    an SOA builds an advice event around the wrong document.
     """
-    borderline = 0.72
+    borderline = 0.87
 
     assert _ok("soa", borderline)["needs_review"] is True
     assert _ok("pds", borderline)["needs_review"] is False
@@ -68,17 +68,17 @@ def test_a_low_confidence_document_keeps_its_working():
 
     assert _codes(result) == ["low_confidence"]
     assert result["confidence"] == 0.55
-    assert result["threshold"] == 0.8
+    assert result["threshold"] == 0.9
     assert "0.55" in result["reasons"][0]["detail"]
-    assert "0.80" in result["reasons"][0]["detail"]
+    assert "0.90" in result["reasons"][0]["detail"]
 
 
 def test_confidence_exactly_on_the_threshold_passes():
     """Meets-or-exceeds, as `threshold_meaning` says. Pinned because an
     off-by-one here silently sends a whole type's worth of documents to review.
     """
-    assert _ok("soa", 0.8)["needs_review"] is False
-    assert _ok("soa", 0.79)["needs_review"] is True
+    assert _ok("soa", 0.9)["needs_review"] is False
+    assert _ok("soa", 0.89)["needs_review"] is True
 
 
 def test_an_unnamed_type_is_distinct_from_out_of_scope():
@@ -127,7 +127,7 @@ def test_a_medium_flag_attaches_a_question_without_blocking():
     """
     result = assess(
         in_scope=True,
-        classification={"doc_type": "roa", "confidence": 0.88},
+        classification={"doc_type": "roa", "confidence": 0.93},
         flags=[{"id": "roa_basis_unconfirmed", "severity": "medium"}],
     )
 
@@ -149,12 +149,29 @@ def test_reasons_accumulate_rather_than_short_circuit():
 
 def test_a_type_with_no_entry_falls_back_to_the_default():
     """So adding a document type to the knowledge base needs no edit to
-    review_policy (ground rule #1). `file_note` is the live case — it lands in
-    #23 and has no threshold of its own.
+    review_policy (ground rule #1).
     """
-    assert "file_note" not in _POLICY["thresholds"]
-    assert threshold_for("file_note") == _POLICY["default_threshold"]
+    assert threshold_for("a_type_not_yet_in_the_kb") == _POLICY["default_threshold"]
     assert threshold_for(None) == _POLICY["default_threshold"]
+
+
+def test_no_threshold_is_below_the_minimum():
+    """1 Oct 2026: every document in a client file is critical, supporting
+    documents included, so no type may sit below the minimum — and a new type
+    starts at it. A bar is a safety control; lowering one is how a busy queue
+    gets emptied by letting documents through unchecked.
+    """
+    minimum = _POLICY["minimum_threshold"]
+
+    assert _POLICY["default_threshold"] >= minimum
+    for doc_type in _DOC_IDS:
+        assert threshold_for(doc_type) >= minimum, doc_type
+
+
+def test_every_document_type_has_its_own_reasoned_threshold():
+    """No type rides on the default: each has a recorded reason for its bar."""
+    for doc_type in _DOC_IDS:
+        assert doc_type in _POLICY["thresholds"], doc_type
 
 
 def test_every_threshold_names_a_real_document_type():
