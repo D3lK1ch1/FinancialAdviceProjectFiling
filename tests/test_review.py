@@ -45,18 +45,14 @@ def test_a_confident_classification_needs_nobody():
     assert result["destination"] is None
 
 
-def test_the_same_confidence_passes_for_one_type_and_not_another():
-    """The whole point of per-type thresholds. A single global number treats
-    every document as equally expensive to misplace. Since 1 Oct 2026 every
-    type is in the 0.85–0.90 band, and advice records sit at its top: misfiling
-    an SOA builds an advice event around the wrong document.
+def test_one_firm_safe_level_applies_to_every_type():
+    """1 Oct 2026: one firm-safe level of 0.90, set once for the whole domain.
+    Every document in a client file is critical, supporting documents
+    included, so no type is let through on a lower bar than any other.
     """
-    borderline = 0.87
-
-    assert _ok("soa", borderline)["needs_review"] is True
-    assert _ok("pds", borderline)["needs_review"] is False
-
-    assert threshold_for("soa") > threshold_for("pds")
+    for doc_type in _DOC_IDS:
+        assert _ok(doc_type, 0.89)["needs_review"] is True, doc_type
+        assert _ok(doc_type, 0.90)["needs_review"] is False, doc_type
 
 
 def test_a_low_confidence_document_keeps_its_working():
@@ -127,7 +123,7 @@ def test_a_medium_flag_attaches_a_question_without_blocking():
     """
     result = assess(
         in_scope=True,
-        classification={"doc_type": "roa", "confidence": 0.93},
+        classification={"doc_type": "roa", "confidence": 0.95},
         flags=[{"id": "roa_basis_unconfirmed", "severity": "medium"}],
     )
 
