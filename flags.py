@@ -234,16 +234,36 @@ def _multi_doc_bundle(doc_type: str, text: str, pages: list[str] | None) -> dict
     return {
         "page_count": len(pages),
         "candidate_boundaries": candidates,
-        "proposed_split": [
-            {"from_page": start, "to_page": end}
-            for start, end in zip(
-                [1] + [c["page"] for c in candidates],
-                [c["page"] - 1 for c in candidates] + [len(pages)],
-            )
-        ],
+        "proposed_split": _proposed_split(pages, candidates),
         "split_performed": False,
         "never_split_automatically": _RULES["multi_doc_bundle"]["never_split_automatically"],
     }
+
+def _proposed_split(pages: list[str], candidates: list[dict]) -> list[dict]:
+    """Page ranges for a person to approve, each with the type it reads as.
+
+    Built from DISTINCT boundary pages (#52). A page with both a pagination
+    restart and a title change is one boundary with two pieces of evidence —
+    the strongest there is — not two boundaries with an empty document
+    between them. The evidence stays in candidate_boundaries in full.
+
+    The parts are contiguous, non-empty and cover every page exactly once.
+    likely_type is the first page in the range whose heading reads as a type,
+    or None: a range with no readable heading is still a range a person must
+    look at, and naming a type for it would be a guess.
+    """
+    starts = [1] + sorted({c["page"] for c in candidates if 1 < c["page"] <= len(pages)})
+    ends = [start - 1 for start in starts[1:]] + [len(pages)]
+    page_types = _page_types(pages)
+    return [
+        {
+            "from_page": start,
+            "to_page": end,
+            "likely_type": next((t for t in page_types[start - 1:end] if t), None),
+        }
+        for start, end in zip(starts, ends)
+    ]
+
 
 # A rule is evaluated only if it appears here. Everything else in
 # edge_case_flags is recorded and not yet checked, which is the honest state

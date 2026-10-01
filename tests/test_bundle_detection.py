@@ -112,8 +112,10 @@ def test_it_proposes_ranges_and_never_splits():
     flag = _bundle([SOA_PAGE, SOA_PAGE, ATP_PAGE])
 
     assert flag["split_performed"] is False
-    assert flag["proposed_split"] == [{"from_page": 1, "to_page": 2},
-                                      {"from_page": 3, "to_page": 3}]
+    assert flag["proposed_split"] == [
+        {"from_page": 1, "to_page": 2, "likely_type": "soa"},
+        {"from_page": 3, "to_page": 3, "likely_type": "authority_to_proceed"},
+    ]
     assert flag["never_split_automatically"] == _RULE["never_split_automatically"]
 
 
@@ -157,3 +159,60 @@ def test_detection_rules_and_their_evidence_live_in_the_knowledge_base():
     assert detection["title_transition"]["evidence"].strip()
     assert detection["title_transition"]["known_weakness"].strip()
     assert detection["leading_region_chars"] == 500
+
+
+def test_two_signals_on_one_page_are_one_boundary_not_two():
+    """#52. An appended ATP restarts its numbering AND changes the page type,
+    on the same page. That is one boundary with two pieces of evidence — the
+    strongest there is — not two boundaries with an empty "pages 3 to 2"
+    document between them."""
+    pages = ["STATEMENT OF ADVICE\nPage 1 of 2", "more advice\nPage 2 of 2",
+             "AUTHORITY TO PROCEED\nPage 1 of 1"]
+
+    flag = _bundle(pages)
+
+    assert {c["evidence"] for c in flag["candidate_boundaries"]} == {"pagination_restart", "title_transition"}
+    assert flag["proposed_split"] == [
+        {"from_page": 1, "to_page": 2, "likely_type": "soa"},
+        {"from_page": 3, "to_page": 3, "likely_type": "authority_to_proceed"},
+    ]
+
+
+def test_a_part_with_no_readable_heading_has_no_likely_type():
+    """Naming a type for a range nobody can read would be a guess."""
+    flag = _bundle(["STATEMENT OF ADVICE\nPage 1 of 1", "Page 1 of 3", "body text"])
+
+    assert flag["proposed_split"][-1]["likely_type"] is None
+
+
+_PAGE_KINDS = {
+    "soa": "STATEMENT OF ADVICE",
+    "atp": "AUTHORITY TO PROCEED",
+    "restart": "Page 1 of 4",
+    "plain": "body text continues",
+}
+
+
+@pytest.mark.parametrize("seed", range(40))
+def test_parts_always_cover_every_page_exactly_once(seed):
+    """Property: whatever combination of signals fires, the parts are
+    contiguous, non-empty, non-overlapping and cover pages 1..N exactly."""
+    import random
+
+    rng = random.Random(seed)
+    pages = [
+        "\n".join(rng.sample(list(_PAGE_KINDS.values()), rng.randint(1, 3)))
+        for _ in range(rng.randint(2, 9))
+    ]
+
+    flag = _bundle(pages)
+    if flag is None:
+        return
+    parts = flag["proposed_split"]
+
+    assert parts[0]["from_page"] == 1
+    assert parts[-1]["to_page"] == len(pages)
+    for part in parts:
+        assert part["from_page"] <= part["to_page"], parts
+    for before, after in zip(parts, parts[1:]):
+        assert after["from_page"] == before["to_page"] + 1, parts
