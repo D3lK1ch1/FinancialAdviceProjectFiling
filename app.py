@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from classifier import classify
+from display import DEFAULT_DISPLAY_MODE, DISPLAY_MODES, teaching_for
 from confidence import verify
 from flags import evaluate_flags
 from parser import parse_pdf
@@ -34,7 +35,9 @@ def root():
 
 
 @app.post("/ingest")
-async def ingest(file: UploadFile):
+async def ingest(file: UploadFile, display: str = DEFAULT_DISPLAY_MODE):
+    if display not in DISPLAY_MODES:
+        raise HTTPException(status_code=422, detail=f"display must be one of {sorted(DISPLAY_MODES)}")
     contents = await file.read()
     result = parse_pdf(BytesIO(contents), file.filename)
     # The identity a reviewer's correction is recorded against. A hash of the
@@ -86,6 +89,9 @@ async def ingest(file: UploadFile):
         parse_error=result.get("parse_error"),
         has_selectable_text=result["has_selectable_text"],
     )
+    # Display mode (#11). Added last and from the classified type only, so it
+    # cannot reach back into anything above — the settings independence rule.
+    result["teaching"] = teaching_for(doc_type, display)
     return result
 
 

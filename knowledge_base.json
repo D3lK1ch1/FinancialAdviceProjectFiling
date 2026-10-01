@@ -691,6 +691,36 @@
     "formula": "confidence = confidence_raw x signal_factor x scope_factor, clamped to [0, 1]. Deliberately multiplicative and deliberately simple: a reviewer looking at a lowered number should be able to see which of the two checks lowered it, and by how much, without reading Python.",
     "calibration_status": "The two factors are judgements, not fitted values — nothing has been measured against a scored sample set, because the classifier is not wired to one. They encode a direction (unverified quotes and cross-reading disagreement should both reduce trust) and a rough weight, not an observed error rate."
   },
+  "settings": {
+    "purpose": "Three settings that must not depend on each other (CLAUDE.md ground rule #4, issue #11). Changing one may change only its own part of a result — tests/test_settings.py holds that line. Values live here, not in Python (ground rule #1).",
+    "display_mode": {
+      "value": "teach",
+      "options": {
+        "teach": "Each result carries its document type's `teaching` block from `documents`, for staff new to the industry.",
+        "off": "No teaching text. Classification, flags and review are unchanged."
+      },
+      "implemented": true,
+      "override": "A request may ask for either option (`/ingest?display=off`). It is a reading preference, not a safety control, so a caller choosing it is fine."
+    },
+    "filing_mode": {
+      "value": "client_event",
+      "options": {
+        "client_event": "Client folder, then advice-event folder inside it (filing_model.axes).",
+        "flat": "Client folder only, no event nesting."
+      },
+      "implemented": false,
+      "note": "Declared so the three settings sit together; it has no behaviour until the full proposed path lands (#10). Changes only the proposed path, never classification or confidence."
+    },
+    "classification_engine": {
+      "value": "llm",
+      "options": {
+        "llm": "classifier.py — a model on this machine (Ollama), hints from `classifier_hints`.",
+        "keyword": "harness.py's keyword matcher, same hints. Not wired into the app."
+      },
+      "implemented": false,
+      "note": "Declared, not switchable yet. Making it a setting is how harness.py and the live app can coexist as two engines behind one interface (#3, #11)."
+    }
+  },
   "review_policy": {
     "purpose": "Decides whether a classification is confident enough to act on, or must go to a human first. Ground rule #2: nothing files silently, and a document that cannot be placed confidently routes to _Needs review WITH A REASON rather than leaving the pipeline. The reason is the point — 'needs review' on its own tells a reviewer nothing about what to look at.",
     "threshold_meaning": "The classifier's confidence must MEET OR EXCEED the type's threshold for the proposal to stand on its own. Below it, the document still gets its proposed type and its reasoning — it is not discarded — but it is marked needs_review with the low_confidence reason.",
