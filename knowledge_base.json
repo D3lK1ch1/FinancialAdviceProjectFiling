@@ -67,12 +67,12 @@
     }
   ],
   "advice_process_stages": [
-    {"stage": 1, "name": "Engagement & disclosure", "plain": "The relationship is established; the client is told who the provider is, what they offer, and how they're paid — before any service is provided.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg"]},
-    {"stage": 2, "name": "Discovery / fact-find", "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile"]},
-    {"stage": 3, "name": "Advice construction", "plain": "Recommendations are formed and the reasoning/basis for advice is documented.", "governing_provisions": ["s961B", "s961G (appropriate advice)"], "typical_docs": ["file_note", "soa"]},
-    {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa"]},
-    {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed"], "not_yet_document_types": ["product application forms — not yet a document type (see #23)"]},
-    {"stage": 6, "name": "Ongoing service & review", "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement"]}
+    {"stage": 1, "name": "Engagement & disclosure", "plain": "The relationship is established; the client is told who the provider is, what they offer, and how they're paid — before any service is provided.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg", "file_note"]},
+    {"stage": 2, "name": "Discovery / fact-find", "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile", "file_note"]},
+    {"stage": 3, "name": "Advice construction", "plain": "Recommendations are formed and the reasoning/basis for advice is documented.", "governing_provisions": ["s961B", "s961G (appropriate advice)"], "typical_docs": ["file_note", "soa", "pds"]},
+    {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa", "file_note"]},
+    {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "pds", "file_note"], "not_yet_document_types": ["product application forms — not yet a document type (see #23)"]},
+    {"stage": 6, "name": "Ongoing service & review", "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "file_note"]}
   ],
   "version_status_values": {
     "current": "The live, in-force version of this document for this client (or this edition, for licensee/issuer-wide docs).",
@@ -754,6 +754,107 @@
       }
     },
     "forces_review_decision": "RESOLVED by multi_doc_bundle. Severity sets the default (edge_case_flags.severity_forces_review: only high blocks). A rule may override it with its own `forces_review`. Medium stays non-blocking by default because roa_basis_unconfirmed fires on every ROA and a queue that asks about every document gets ignored — see the direction note on #20. multi_doc_bundle is medium and overrides to blocking, because filing a two-document bundle as one document destroys a record rather than mislabelling one. It is the only override today."
+  },
+  "approval_policy": {
+    "purpose": "Who may approve a filing proposal, what they check, and which flags block approval outright. Decided by Bella on 1 Oct 2026 for the Approve/Edit/Reject screen (build step 5, #4). Read by that screen; never restated in code (ground rule #1).",
+    "default_for_any_firm": "A sensible default for an Australian advice practice. Firms differ — a small practice may have no paraplanner, or an adviser who is also compliance — and adjusting roles per firm waits for a real pilot (#26 rule).",
+    "roles": {
+      "admin": {
+        "who": "Client services / administration.",
+        "can_view": true,
+        "can_edit": true,
+        "can_approve": false,
+        "can_clear_hard_stop": false
+      },
+      "paraplanner": {
+        "who": "Drafts advice and researches products under an adviser; does not sign advice.",
+        "can_view": true,
+        "can_edit": true,
+        "can_approve": false,
+        "can_clear_hard_stop": false
+      },
+      "adviser": {
+        "who": "Authorised representative / relevant provider. Gives and signs the advice and holds the best-interests duty for it.",
+        "can_view": true,
+        "can_edit": true,
+        "can_approve": true,
+        "can_clear_hard_stop": false
+      },
+      "compliance": {
+        "who": "Compliance officer acting for the licensee, which must monitor advice quality.",
+        "can_view": true,
+        "can_edit": true,
+        "can_approve": true,
+        "can_clear_hard_stop": true,
+        "sees_all_clients": true
+      }
+    },
+    "approvers": [
+      "adviser",
+      "compliance"
+    ],
+    "approvers_note": "Only an adviser or a compliance officer approves. Everyone else can prepare and correct a proposal, which saves the adviser time without moving the decision.",
+    "own_clients_only": [
+      "soa",
+      "roa",
+      "authority_to_proceed",
+      "fee_disclosure_statement"
+    ],
+    "own_clients_only_note": "An adviser approves these only for their own clients: one adviser must not sign off another's advice record. Compliance may approve any.",
+    "edit_may_change": [
+      "document type",
+      "client",
+      "advice event",
+      "date",
+      "filename"
+    ],
+    "reviewer_check": "Read the title and skim the content to confirm the name and the filing are right.",
+    "checks_by_type": {
+      "fsg": "Right licensee and edition; dated before the advice was given.",
+      "fact_find": "Right client; dated before the SOA it underpins.",
+      "risk_profile": "Right client; the risk category is stated.",
+      "file_note": "Right client; a note ABOUT advice, never the advice itself.",
+      "pds": "The product is one recommended or considered in the advice.",
+      "soa": "Right client; the advice-as-at (commencement) date; the subject from its own scope.",
+      "roa": "As SOA, plus which of the three ROA situations applies.",
+      "authority_to_proceed": "Signed; links to the SOA or ROA it authorises.",
+      "fee_disclosure_statement": "Right client; the period; consent signed."
+    },
+    "flag_effects": {
+      "hard_stop": "Approve is unavailable until the problem is fixed. Only compliance may clear it.",
+      "warning": "Shown to the approver, who may still approve."
+    },
+    "flag_effect_by_rule": {
+      "atp_without_advice_record": "hard_stop",
+      "risk_mismatch": "hard_stop",
+      "fact_find_after_soa": "hard_stop",
+      "multi_doc_bundle": "hard_stop",
+      "no_date": "warning",
+      "fds_era_mismatch": "warning",
+      "roa_basis_unconfirmed": "warning"
+    },
+    "flag_effect_by_rule_why": {
+      "atp_without_advice_record": "Implementation with no advice on file is a serious compliance gap.",
+      "risk_mismatch": "Goes straight to whether the advice is appropriate.",
+      "fact_find_after_soa": "Suggests the advice was written before the client was understood.",
+      "multi_doc_bundle": "Filing a bundle as one document loses a record; stop until split.",
+      "no_date": "The approver can read the date and enter it.",
+      "fds_era_mismatch": "Often only an old template, but worth a look.",
+      "roa_basis_unconfirmed": "Asks which ROA situation applies; the approver answers it."
+    },
+    "not_yet_decided": [
+      "roa_without_soa",
+      "superseding_ambiguity",
+      "advice_record_label_shift",
+      "low_confidence",
+      "unknown_type"
+    ],
+    "not_yet_decided_note": "Rules Bella has not yet placed as hard stop or warning. Until she does, the screen treats them as warnings — and low_confidence and unknown_type already send the document to review.",
+    "proposed_warnings_not_yet_rules": {
+      "fsg_edition_out_of_date": "The FSG edition was not the one in force at the advice date. Needs edition dates per licensee.",
+      "pds_product_not_in_advice": "The PDS's product is not named in the SOA or ROA. Needs cross-document state (#8).",
+      "file_note_names_provider": "A file note naming a provider is easily mistaken for that provider's document."
+    }
   },
   "edge_case_flags": {
     "purpose": "Rules that route a document to the internal human-review queue instead of forcing a category. Each fires a flag; it does not silently reclassify.",
