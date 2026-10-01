@@ -3,6 +3,38 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 01-10-2026 — reviewer corrections, filing proposals (Bella)
+
+### Done (merged 1 Oct)
+- **#43** `POST /review/correction` → `review.record_correction()` → failure log. `/ingest`
+  now returns `document_id` (SHA-256 of the bytes); only that is accepted, never a filename.
+  Reason codes in `review_policy.correction_reasons`; no free text. GH#4 box 5, server half.
+- **#44** `cryptography==50.0.2` pinned. Without it an owner-locked AES PDS (opens in any
+  viewer) was routed as `unreadable`. Tests per failure mode. Closes GH#36.
+- **#45** `storage.py`: `Storage` protocol + `LocalStorage`; never overwrites; guard test that
+  `classifier.py`/`scope_gate.py`/`app.py` import no file-system libraries. GH#10 boxes 3–4.
+- **#46** `filing.proposed_filename()`: `YYYY-MM-DD <abbrev>[ — <ROA situation>].<ext>`. No
+  usable date → no name. GH#10 box 2.
+- Issues closed: GH#12, GH#36, GH#41. GH#23 corrected to 4/5.
+
+### Ready, awaiting merge
+- **#47** `filing.proposed_event_folder()` / `advice_subject()`: subject read from the advice
+  record's scope statement, never the whole document (it reads the client's circumstances and
+  the "does not cover" list). Areas in `filing_model.advice_event.subject`. Domain-approved.
+
+### Decisions recorded (Bella)
+- Document filename: date first, KB `abbrev` (GH#10 comment).
+- Event subject: scope statement only; other areas returned as `also_mentioned` (GH#10 comment).
+- Advice-event date = the **"advice as at" (commencement) date**. Expiry, meeting and
+  `PDS … dated` dates are never it (GH#48).
+
+### Not done here
+- **GH#48** — `dates.py` returns `ambiguous` on all three real SOAs: "advice as at" isn't a
+  declared label, the footer date is discarded as boilerplate, `"date of advice"` is hardcoded.
+  Blocks SOA folder names. In Delia's `dates.py` (GH#8). One open question back to Bella.
+- **GH#10 last box** — `/ingest` returning the full proposed path + filename. Next up.
+- GH#4 box 5's review-screen half waits on build step 5.
+
 ## Session 24-09-2026 — date extraction, and closing GH#9 honestly
 
 ### Done
