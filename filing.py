@@ -23,6 +23,7 @@ guessed date reorders a client's advice history the moment it is sorted.
 """
 
 import json
+import re
 from pathlib import PurePath
 
 with open("knowledge_base.json") as f:
@@ -83,3 +84,99 @@ def proposed_filename(
     # Only the extension is taken from the upload — never its stem.
     ext = PurePath(original_filename).suffix.lower() or ".pdf"
     return {"filename": name + ext, "reason": date_result["determination"]}
+
+
+# --- Advice event folder -----------------------------------------------------
+#
+#     YYYY-MM — <subject> [<abbrev>[ · <ROA situation>]]
+#     2024-03 — Insurance [SOA]
+#     2025-06 — Superannuation & Insurance [ROA · further advice]
+#
+# The subject is read from the advice record's own statement of scope, never
+# from the whole document: an SOA must set out the client's circumstances, so
+# the whole document reads the client's balance sheet, not the advice. The
+# reasoning and the six-sample evidence are in filing_model.advice_event.subject.
+
+_SUBJECT = _KB["filing_model"]["advice_event"]["subject"]
+_SCOPE_PHRASES = [p.lower() for p in _SUBJECT["scope_phrases"]]
+_AREAS = [
+    (area["name"], [re.compile(r"\b" + re.escape(sig.lower())) for sig in area["signals"]])
+    for area in _SUBJECT["areas"]
+]
+_ADVICE_RECORDS = {doc["id"] for doc in _KB["documents"] if doc.get("advice_record_role")}
+
+# How far a scope statement may run when no full stop ends it — a heading or a
+# table cell can swallow the punctuation in PDF extraction.
+_SCOPE_MAX_CHARS = 300
+
+
+def _areas_in(text: str) -> list[str]:
+    return [name for name, signals in _AREAS if any(rx.search(text) for rx in signals)]
+
+
+def scope_statements(text: str) -> list[str]:
+    """The sentences where the document says what the advice is about."""
+    flat = re.sub(r"\s+", " ", text).lower()
+    statements = []
+    for phrase in _SCOPE_PHRASES:
+        for m in re.finditer(re.escape(phrase), flat):
+            tail = flat[m.end(): m.end() + _SCOPE_MAX_CHARS]
+            statements.append(phrase + tail.split(". ")[0])
+    return statements
+
+
+def advice_subject(text: str) -> dict:
+    """{"subject", "areas", "also_mentioned", "reason"} for an advice record."""
+    statements = scope_statements(text)
+    areas = _areas_in(" ".join(statements))
+    elsewhere = [a for a in _areas_in(re.sub(r"\s+", " ", text).lower()) if a not in areas]
+    if not areas:
+        return {
+            "subject": None,
+            "areas": [],
+            "also_mentioned": elsewhere,
+            "reason": "no scope statement found" if not statements
+            else "scope statement names no known advice area",
+        }
+    return {
+        "subject": _SUBJECT["join"].join(areas),
+        "areas": areas,
+        "also_mentioned": elsewhere,
+        "reason": "from the document's scope statement",
+    }
+
+
+def proposed_event_folder(
+    doc_type: str | None,
+    text: str,
+    date_result: dict,
+    flags: list[dict] | None = None,
+) -> dict:
+    """The advice event folder an advice record would open, or why there isn't one.
+
+    Only an advice record names an event. Every other document belongs to the
+    event of the record it links to, which needs other documents on hand —
+    cross-document grouping, waiting on persistence in #8.
+    """
+    if doc_type not in _ADVICE_RECORDS:
+        return {
+            "folder": None,
+            "subject": None,
+            "reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+        }
+
+    subject = advice_subject(text)
+    chosen = date_result.get("chosen")
+    if date_result.get("determination") not in _USABLE_DATE or not chosen:
+        return {"folder": None, "subject": subject,
+                "reason": f"no usable date ({date_result.get('determination')})"}
+    if subject["subject"] is None:
+        return {"folder": None, "subject": subject,
+                "reason": f"{subject['reason']} — the reviewer supplies the subject"}
+
+    record = _ABBREV[doc_type]
+    qualifier = _qualifier(doc_type, flags or [])
+    if qualifier:
+        record += f" · {qualifier}"
+    folder = f"{chosen['date'].strftime('%Y-%m')} — {subject['subject']} [{record}]"
+    return {"folder": folder, "subject": subject, "reason": subject["reason"]}
