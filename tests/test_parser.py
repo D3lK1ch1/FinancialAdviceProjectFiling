@@ -100,6 +100,45 @@ def test_an_empty_stream_does_not_raise():
     assert result["page_count"] == 0
 
 
+def _encrypted(user_password: str, algorithm: str) -> BytesIO:
+    writer = PdfWriter(clone_from=_pdf_with_pages("Product Disclosure Statement"))
+    writer.encrypt(user_password=user_password, owner_password="issuer", algorithm=algorithm)
+    buf = BytesIO()
+    writer.write(buf)
+    buf.seek(0)
+    return buf
+
+
+@pytest.mark.parametrize("algorithm", ["RC4-128", "AES-128", "AES-256"])
+def test_an_owner_locked_pdf_is_read_not_routed_as_unreadable(algorithm):
+    """#36. Issuers routinely lock a PDS or FSG with an owner password only:
+    no password to open, restrictions on copying or printing. Any PDF viewer
+    opens it. Without `cryptography`, pypdf cannot open the AES ones at all,
+    so a document a person can read was sent to review as unreadable.
+    """
+    result = parse_pdf(_encrypted("", algorithm), "pds.pdf")
+
+    assert result["parse_error"] is None
+    assert "Product Disclosure Statement" in result["extracted_text"]
+
+
+def test_a_pdf_that_needs_a_password_to_open_is_unreadable_and_says_so():
+    result = parse_pdf(_encrypted("client-password", "AES-256"), "locked.pdf")
+
+    assert "FileNotDecryptedError" in result["parse_error"]
+    assert result["extracted_text"] == ""
+
+
+def test_a_truncated_pdf_does_not_raise():
+    """A real PDF cut short — an interrupted upload or a half-synced file."""
+    whole = _pdf_with_pages("Statement of Advice").getvalue()
+
+    result = parse_pdf(BytesIO(whole[: len(whole) // 3]), "truncated.pdf")
+
+    assert result["parse_error"]
+    assert result["page_count"] == 0
+
+
 def test_pages_are_returned_one_per_page():
     """A firm's file is regularly one PDF holding more than one document —
     classically an SOA with the Authority to Proceed appended. Joined text
