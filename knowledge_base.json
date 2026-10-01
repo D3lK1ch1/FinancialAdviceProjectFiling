@@ -625,7 +625,127 @@
         "2024-03 — Retirement & Super Consolidation [SOA]",
         "2025-06 — Insurance Top-Up [ROA · further advice]"
       ],
-      "sequence_note": "A client accumulates multiple advice events over time (e.g. super advice year 1, insurance year 2). Each is its own nested folder. Events are ordered by date but NOT assumed to be related unless documents link them."
+      "subject": {
+      "purpose": "The <subject matter> in the event folder name. Read from the advice record's own statement of scope — what it says the advice is about — never from the whole document. Decided on #10 (1 Oct 2026).",
+      "why_not_whole_document": "An SOA must describe the client's relevant circumstances, so the whole document reads the client's balance sheet ('$100,000 in a superannuation fund', 'a $440,000 mortgage', 'Centrelink Family Tax Benefit'), and its 'what my advice does not cover' section names areas the advice excludes. On the six public SOAs/ROAs the whole document gave 4–7 areas every time; the scope statement gave the right subject every time it found one.",
+      "scope_phrases": [
+        "asked for my advice about",
+        "asked for our advice about",
+        "wanted advice about",
+        "want advice about",
+        "this advice is about",
+        "my advice is about",
+        "my advice is to",
+        "our advice is to"
+      ],
+      "scope_phrases_note": "Each phrase starts a scope statement; the statement runs to the end of its sentence. Taken from the six public samples — firms word it in their own templates, so expect to add phrases from the failure log.",
+      "join": " & ",
+      "no_scope_found": "No subject is proposed; the reviewer supplies it. Never guessed from the rest of the document.",
+      "also_mentioned": "Areas found anywhere else in the document are listed for the reviewer to add, never put in the name automatically.",
+      "areas": [
+        {
+          "name": "Superannuation",
+          "signals": [
+            "superannuation",
+            "super fund",
+            "your super",
+            "rollover",
+            "concessional contribution",
+            "salary sacrifice"
+          ]
+        },
+        {
+          "name": "Retirement",
+          "signals": [
+            "retirement",
+            "account-based pension",
+            "transition to retirement",
+            "pension"
+          ]
+        },
+        {
+          "name": "Insurance",
+          "signals": [
+            "insurance",
+            "life cover",
+            "death cover",
+            "tpd",
+            "total and permanent disab",
+            "income protection",
+            "ip policy",
+            "salary continuance",
+            "trauma",
+            "critical illness",
+            "sum insured",
+            "risk insurance",
+            "personal risk",
+            "risk advice",
+            "risk cover",
+            "risk protection",
+            "risk policy",
+            "risk policies",
+            "protect your family",
+            "protect yourself",
+            "protect yourselves",
+            "protect your income",
+            "die or become",
+            "become sick",
+            "become ill",
+            "sick or injured",
+            "ill or injured",
+            "unable to work"
+          ],
+          "excluded_signals_note": "Bare 'risk', 'protect' and 'cover' are deliberately absent: in real SOAs they mostly mean risk profile, market risk, 'to protect advisers' and 'does not cover'."
+        },
+        {
+          "name": "Investment",
+          "signals": [
+            "invest",
+            "portfolio",
+            "managed fund",
+            "shares"
+          ]
+        },
+        {
+          "name": "Estate planning",
+          "signals": [
+            "estate plan",
+            "your will",
+            "wills",
+            "binding nomination",
+            "binding death benefit",
+            "beneficiar"
+          ],
+          "excluded_signals_note": "Not bare 'will' — it matches the verb."
+        },
+        {
+          "name": "Debt management",
+          "signals": [
+            "debt",
+            "mortgage",
+            "home loan",
+            "gearing"
+          ]
+        },
+        {
+          "name": "Aged care",
+          "signals": [
+            "aged care",
+            "residential care",
+            "home care"
+          ]
+        },
+        {
+          "name": "Centrelink",
+          "signals": [
+            "centrelink",
+            "age pension",
+            "social security"
+          ]
+        }
+      ]
+    },
+    "sequence_note": "A client accumulates multiple advice events over time (e.g. super advice year 1, insurance year 2). Each is its own nested folder. Events are ordered by date but NOT assumed to be related unless documents link them."
     },
     "special_folders": [
       {
