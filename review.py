@@ -21,6 +21,9 @@ ground rule #6 exists to collect.
 """
 
 import json
+import re
+
+from failure_log import log_failure
 
 with open("knowledge_base.json") as f:
     _KB = json.load(f)
@@ -32,6 +35,13 @@ _REASONS = _POLICY["reason_codes"]
 _FORCES_REVIEW = _KB["edge_case_flags"]["severity_forces_review"]
 
 REVIEW_DESTINATION = _POLICY["destination"]
+_CORRECTION_REASONS = _POLICY["correction_reasons"]["codes"]
+_DOC_IDS = {doc["id"] for doc in _KB["documents"]}
+
+# What /ingest hands out as document_id: a SHA-256 of the file's bytes. Only
+# this shape is accepted, because a real filename is not de-identified —
+# "Nguyen SOA 2024.pdf" is a client name with an extension on it.
+_DOCUMENT_ID = re.compile(r"[0-9a-f]{64}")
 
 
 def threshold_for(doc_type: str | None) -> float:
@@ -146,3 +156,76 @@ def _result(reasons: list[dict], threshold: float | None, confidence: float | No
         "confidence": confidence,
         "destination": REVIEW_DESTINATION if reasons else None,
     }
+
+
+class CorrectionRejected(ValueError):
+    """A reviewer's verdict that cannot be written as it stands. Raised rather
+    than written, because a log that accepts anything stops being evidence."""
+
+
+def record_correction(
+    *,
+    document_id: str,
+    predicted_type: str | None,
+    correct_type: str,
+    reason: str,
+    corrections: list[dict] | None = None,
+) -> None:
+    """Write a reviewer's verdict on one document to the failure log.
+
+    The other half of assess(): that decides a person must look, this records
+    what they decided. It records a judgement and files nothing, so it stays
+    available in observe-only mode (#20) — that mode is when the comparison is
+    most worth capturing.
+
+    Confirmations are written too, not only corrections. The thresholds in
+    review_policy are a domain guess until the failure log says otherwise,
+    and a type that is confirmed every time it is held is evidence its
+    threshold is set too high.
+
+    The note is the reason code and nothing else. There is no free-text field
+    anywhere in this path — the reason the de-identification rule in
+    failure_log.py is a shape and not a warning.
+    """
+    if not isinstance(document_id, str) or not _DOCUMENT_ID.fullmatch(document_id):
+        raise CorrectionRejected(
+            "document_id must be the SHA-256 /ingest returned, not a filename "
+            "or a path — a filename can carry a client's name."
+        )
+    if predicted_type is not None and predicted_type not in _DOC_IDS:
+        raise CorrectionRejected(f"unknown predicted_type {predicted_type!r}")
+    if correct_type not in _DOC_IDS:
+        raise CorrectionRejected(
+            f"unknown correct_type {correct_type!r}. A document the knowledge "
+            f"base does not model cannot be recorded against a type it lacks — see #23."
+        )
+    if reason not in _CORRECTION_REASONS:
+        raise CorrectionRejected(
+            f"unknown reason {reason!r}; known reasons are {sorted(_CORRECTION_REASONS)}"
+        )
+
+    corrections = corrections or []
+    same_type = predicted_type == correct_type
+    if reason == "confirmed" and not same_type:
+        raise CorrectionRejected(
+            "reason 'confirmed' means the tool's type was right, but correct_type "
+            "differs from predicted_type."
+        )
+    if reason != "confirmed" and same_type and not corrections:
+        raise CorrectionRejected(
+            f"reason {reason!r} says something was wrong, but the type is unchanged "
+            f"and nothing else was corrected. Use 'confirmed', or record what changed."
+        )
+
+    try:
+        log_failure(
+            document_id,
+            predicted_type,
+            correct_type,
+            f"reviewer:{reason}",
+            corrections=corrections,
+        )
+    except ValueError as e:
+        # An unknown correction kind or an extra field — failure_log.py's own
+        # guard. Surfaced as the same rejection, so a caller has one thing to catch.
+        raise CorrectionRejected(str(e)) from e

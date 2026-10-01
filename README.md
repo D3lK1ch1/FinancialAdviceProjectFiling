@@ -74,9 +74,13 @@ or a figure read out of the document. The full rule with worked examples is in
 field set, so a new field fails that test before it can reach a shared file. Open
 questions on the format are tracked in the issues, not here.
 
-No review UI exists yet to capture human corrections, so the current caller is
-`tests/test_e2e.py` — it already has both a real classifier prediction and a
-hand-labelled correct answer for every sample. `failure_log.jsonl` won't exist
+A reviewer's verdict reaches the log through `POST /review/correction`
+(`review.record_correction()`): `document_id` is the SHA-256 `/ingest` returns —
+never a filename, which is routinely the client's name — and the note is a reason
+code from `review_policy.correction_reasons`, never free text. Confirmations are
+logged as well as corrections, because thresholds are calibrated from both. The
+review screen that calls it is not built yet. `tests/test_e2e.py` is the other
+caller, comparing the classifier against hand labels on the public samples. `failure_log.jsonl` won't exist
 until the first misclassification happens; that's expected, not a bug.
 
 ## What actually happens when you drop a PDF
