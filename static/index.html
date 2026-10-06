@@ -567,6 +567,20 @@ function render(data) {
           <span class="review-detail">${escapeHtml(r.detail)}</span>
         </div>`).join('')}</div>`
     : '';
+  // Every name the document labels as its client, once each, with where it
+  // was found. Nothing is chosen here: two names is shown as two names.
+  const byName = {};
+  for (const cand of (data.client_candidates || [])) {
+    (byName[cand.raw] = byName[cand.raw] || { label: cand.label, pages: [] }).pages.push(cand.page);
+  }
+  const names = Object.entries(byName);
+  const pageList = p => p.length > 3 ? `pages ${p.slice(0, 3).join(', ')}… (${p.length})` : `page${p.length > 1 ? 's' : ''} ${p.join(', ')}`;
+  const clientBlock = `<div class="signals-label">Client named in the document</div>${
+    names.length
+      ? `<ul class="signals">${names.map(([n, v]) =>
+          `<li><strong>${escapeHtml(n)}</strong> — after “${escapeHtml(v.label)}”, ${pageList(v.pages)}</li>`).join('')}</ul>`
+      : `<div class="proposal-note">None found.</div>`
+  }`;
   const signals = (c.matched_signals && c.matched_signals.length)
     ? `<div class="signals-label">Why</div><ul class="signals">${c.matched_signals.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>`
     : '';
@@ -590,6 +604,7 @@ function render(data) {
           review.threshold != null ? ` This type has to reach ${Math.round(review.threshold * 100)}%.` : ''
         }</div>
         ${reviewReasons}
+        ${clientBlock}
         ${signals}
         ${flags}
       </div>

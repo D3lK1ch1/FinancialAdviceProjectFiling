@@ -3,6 +3,55 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 06-10-2026 — whose document is it: finding the client's name (GH#6, slice 1)
+
+### Done
+- `clients.py` / `tests/test_clients.py` (17 tests) — `find_client_candidates(pages)`
+  returns every name a document labels as its client, with the label that found it, the
+  page and context. Same shape as `dates.find_date_candidates`: **it finds, it does not
+  choose.** Choosing (one clear client → `Surname, First name`; anything else → a human)
+  is slice 3.
+- `knowledge_base.json` — new `client_model` block (GH#6 box 1, started). `name_labels`
+  holds only labels a real sample uses: `client name`, `account name`, `soa for`. Ground
+  rule 1: adding a label is a KB edit, not Python.
+- **Checked against all 10 files in `samples/`, not assumed.** Four advice records give
+  one name each (Nick Rossi, George Baker, Wendy Zhang, John Patel). The RG 90 example
+  SOA gives `Brad and Zara Black` — a **joint client**, kept whole, not split or chosen
+  between (open question 1 in `GROUND_TRUTH.md`). The five FSGs and PDSs give nothing,
+  which is right: they name no client. Names that must **not** come back don't: the
+  advisers (Sarah Johnson, Tom Baker, Sally Chong) and the INFO 267 client's wife (Jane).
+
+### Where a name ends — the part that was wrong first
+- Layout extraction puts the next column on the same line: `Client name: John Patel
+  The SOA must include…`, `Nick Rossi AFS licensees and…`. Capitalisation alone took
+  `John Patel The`.
+- Column gaps alone don't work either: the stockbroker ROA spreads one name across a
+  gap — `Account name: Wendy ⟶ Zhang`. So **a gap ends a name only once it has two
+  words.**
+- A following field ends it too: `Account number:`, `Date of advice:` — one capital
+  word, then lower-case words, ending in a colon. A wider "colon within three words"
+  rule cut `Wendy Zhang` to `Wendy`.
+- **A test asserted the wrong thing.** The first version expected nothing from RG 90.
+  Running all ten samples showed the example SOA inside it (p31 on) names Brad and Zara
+  Black in every page header. Fixed by adding the `soa for` label, not by loosening the
+  name rule.
+
+### Not done here
+- **Party type (slice 2)** — person / trust (`Trust`, `Trustee`) / company (`Pty Ltd`) /
+  unknown, words from the KB.
+- **Selecting a client (slice 3)** and wiring into `/ingest`. `review.assess()` still
+  checks only the type, so the 90% rule in `GROUND_TRUTH.md` is half enforced until then.
+- **Matching against a firm's client list** — no list exists. Slice 3 returns what the
+  document *says*; a register can plug in later behind the same output.
+- Open domain questions 1, 3, 4 (joint clients, same-name clients, which of several
+  names is the client) stay with the partner. Until answered, those cases go to a human.
+- **Two known misses, both fail-safe (nothing found → a human, never a wrong name):**
+  `Client name: JOHN SMITH` (all capitals) and `Client name: Smith, John` (surname-first
+  with a comma). Neither appears in the samples; left until a real document does.
+- Only the 10 local samples were run. Bella's wider set (`samples/soa_atp/` etc.) was
+  not — the RG 90 2013 SOA (`Joe and Sue Black`, footer `Statement of Advice for …`) may
+  need a `statement of advice for` label.
+
 ## Session 01-10-2026 — reviewer corrections, filing proposals (Bella)
 
 ### Done (merged 1 Oct)
