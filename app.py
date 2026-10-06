@@ -24,7 +24,10 @@ from scope_gate import check_scope
 app = FastAPI(title="Advice Document Filing — POC")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-with open("knowledge_base.json") as f:
+# UTF-8 stated, not left to the platform: Windows defaults to cp1252, which
+# garbled every em dash and curly quote in the knowledge base on the way to
+# the screen.
+with open("knowledge_base.json", encoding="utf-8") as f:
     _KB = json.load(f)
 
 _DOC_NAMES = {doc["id"]: doc["name"] for doc in _KB["documents"]}
@@ -121,3 +124,26 @@ def review_correction(correction: Correction):
     except CorrectionRejected as e:
         raise HTTPException(status_code=422, detail=str(e))
     return {"recorded": True, "document_id": correction.document_id}
+
+
+@app.get("/review/options")
+def review_options():
+    """The choices the review screen offers, read from the knowledge base.
+
+    The page must not keep its own copy of the document types or the reasons
+    (ground rule #1): a type added to the knowledge base appears on the screen
+    with no change to the page. Approve sends `confirmed`; a reject picks one
+    of the others. Every reason is a fixed code — there is no free-text "why",
+    because that box is where a client's name gets typed (see
+    review_policy.correction_reasons).
+    """
+    codes = _KB["review_policy"]["correction_reasons"]["codes"]
+    return {
+        "document_types": [{"id": doc["id"], "name": doc["name"]} for doc in _KB["documents"]],
+        "approve_reason": "confirmed",
+        "reject_reasons": [
+            {"code": code, "meaning": meaning}
+            for code, meaning in codes.items()
+            if code != "confirmed"
+        ],
+    }

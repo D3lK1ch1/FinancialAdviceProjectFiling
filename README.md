@@ -11,19 +11,95 @@ The purpose of this project is to build upon the referred public demo from pilot
 
 ## Run it
 
-```
-python -m uvicorn app:app --port 8000
-```
+Works on **macOS and Windows**. Where the commands differ, both are shown. On a
+Mac, use the **Terminal** app; on Windows, **PowerShell**.
 
-Then open `http://127.0.0.1:8000/` — drop a PDF on the page.
+**What you need first**
+- **Python 3.10 or newer.** Check with `python3 --version` (Mac) or `python --version`
+  (Windows). On a Mac, install it from [python.org](https://www.python.org/downloads/)
+  if the version is older or missing.
+- **[Ollama](https://ollama.com/download)**, which runs the AI model on your own
+  computer. Install it like any app. On a Mac it lives in the menu bar (top right);
+  on Windows, in the system tray (bottom right).
+- **The `samples/` folder**, from Delia directly (it is not in git, see below).
 
-**Also needs, for classification to actually run (not just parsing/scope-check):**
-- [Ollama](https://ollama.com) running locally on the default port (`localhost:11434`)
-- the `llama3.1` model pulled: `ollama pull llama3.1`
-- Once pulled, will stay in default port and run alongside project
+**One-time setup**
 
-If Ollama isn't running, `/ingest` still works — you just get a `classifier_error`
-in the response instead of a `doc_type`.
+1. Get the code and go into its folder:
+   ```
+   git clone https://github.com/D3lK1ch1/FinancialAdviceProjectFiling.git
+   cd FinancialAdviceProjectFiling
+   ```
+   On a Mac, the first `git` command may offer to install "command line developer
+   tools". Accept, wait for it to finish, then run the command again. Put the
+   `samples/` folder from Delia inside this project folder.
+2. Make a private Python environment for the project, so nothing clashes with
+   anything else on your computer:
+
+   | Mac | Windows |
+   |---|---|
+   | `python3 -m venv .venv` | `python -m venv .venv` |
+   | `source .venv/bin/activate` | `.venv\Scripts\activate` |
+
+   Your prompt now starts with `(.venv)`. From here on, **`python` works the same
+   on both**.
+3. Install what the app needs:
+   ```
+   python -m pip install -r requirements.txt
+   ```
+4. Download the AI model (about 5 GB, once):
+   ```
+   ollama pull llama3.1
+   ```
+
+**Every time you use it**
+
+1. **Start Ollama** (open the Ollama app), then open
+   **http://localhost:11434** in your browser. It must say **"Ollama is running"**.
+2. In Terminal / PowerShell, inside the project folder:
+
+   | Mac | Windows |
+   |---|---|
+   | `source .venv/bin/activate` | `.venv\Scripts\activate` |
+
+   ```
+   python -m uvicorn app:app --port 8000
+   ```
+3. Open **http://127.0.0.1:8000/** and drop a PDF on the page.
+4. To stop: press `Ctrl+C` in Terminal / PowerShell (on a Mac too, it's `Ctrl`,
+   not `Cmd`).
+
+**If the card says "Couldn't reach the classifier … connection refused"**
+(`WinError 10061` on Windows, `Errno 61` on a Mac), Ollama isn't running. It has
+nothing to do with Wi-Fi: the app and Ollama talk to each other *inside* your
+computer. Start Ollama, check http://localhost:11434 again, and drop the file
+again. The first document after a few idle minutes can take a minute while the
+model loads; that is normal.
+
+## Reviewing a document
+
+Every result card ends in **Your verdict**. Nothing is ever filed or moved — a
+verdict is **recorded**, so the tool can be measured and improved.
+
+- **Approve** — the tool named the document type correctly.
+- **Reject** — it didn't. Choose **what it actually is** and **why** it was wrong:
+
+  | reason | when to pick it |
+  |---|---|
+  | lookalike | it quotes, cites or resembles another type (an SOA that refers to a PDS) |
+  | non standard title | its own title is missing, firm-branded or worded unusually |
+  | poor text | the text was garbled or incomplete (a scan, an image-heavy page) |
+  | bundle | one file holds more than one document |
+  | knowledge base gap | none of the above: the tool is missing a rule |
+
+  There is no free-text box on purpose: a typed note is where a client's name ends
+  up. The full meaning of each reason shows on screen when you pick it.
+- A document the tool couldn't place ("Not recognised") offers Reject only.
+
+**Your verdicts are real data.** Each one is a line in `failure_log.jsonl` in the
+project folder, recorded against a code made from the file's contents — never the
+file name. They are how the 90% review level gets checked against reality. When
+you've finished a review session, **send `failure_log.jsonl` to Delia.**
 
 Ollama is used for the purposes of this project, but API keys from LLMs such as Anhropic (Claude) and OpenAI (Codex) can be considered and built upon.
 
@@ -79,7 +155,8 @@ A reviewer's verdict reaches the log through `POST /review/correction`
 never a filename, which is routinely the client's name — and the note is a reason
 code from `review_policy.correction_reasons`, never free text. Confirmations are
 logged as well as corrections, because thresholds are calibrated from both. The
-review screen that calls it is not built yet. `tests/test_e2e.py` is the other
+Approve / Reject buttons on the page call it (see Reviewing a document, above),
+with their choices read from `GET /review/options`. `tests/test_e2e.py` is the other
 caller, comparing the classifier against hand labels on the public samples. `failure_log.jsonl` won't exist
 until the first misclassification happens; that's expected, not a bug.
 
@@ -117,6 +194,7 @@ python -m pip install -r requirements.txt
 | `pypdf` | 6.15.0 | `parser.py` |
 | `python-multipart` | 0.0.22 | `app.py` — FastAPI cannot declare the upload endpoint without it |
 | `requests` | 2.32.4 | `classifier.py` (talks to Ollama's HTTP API) |
+| `cryptography` | 50.0.2 | `pypdf`, to open encrypted PDFs, including owner-locked ones anyone can read |
 
 **Python 3.10 or newer.** `failure_log.py` annotates a parameter `str | None`,
 which is a `TypeError` at import time on 3.9 — the failure is an import error
@@ -131,9 +209,9 @@ Plus a running Ollama instance with `llama3.1` pulled (see above).
 ## Project layout
 
 ```
-app.py                  FastAPI app — one endpoint, POST /ingest
+app.py                  FastAPI app — POST /ingest, POST /review/correction, GET /review/options
 parser.py               PDF -> text + metadata (pypdf, layout mode)
-scope_gate.py           deterministic in-scope check (soa/roa/fsg/pds only)
+scope_gate.py           deterministic in-scope check, every type in knowledge_base.json
 classifier.py           LLM classification via local Ollama, grounded in knowledge_base.json
 static/index.html       drop-zone UI served at /
 knowledge_base.json     source of truth for document types, hints, flags (v0.3) — never
@@ -160,11 +238,13 @@ live app, or gets replaced by it.
 
 ## Status / what's not built yet
 
-- No filing (proposed destination + rename) — classification result is returned,
-  nothing is moved or renamed.
-- No flagging engine wired — `knowledge_base.json`'s 11 `edge_case_flags` rules are
-  read nowhere in the code yet.
-- No Approve/Edit/Reject UI — everything today is read-only output on the page.
+- No filing — proposed filenames and event folders exist in `filing.py`, but
+  `/ingest` does not return a full proposed path yet, and nothing is ever moved or
+  renamed.
+- Flags: the single-document rules (ROA situation, bundle) run on every upload;
+  the rules that need other documents on file wait on persistence.
+- Approve / Reject records a verdict on the type. Not yet: correcting the client,
+  date or filename; roles (who may approve); hard stops greying out Approve.
 
 ## Contributing
 

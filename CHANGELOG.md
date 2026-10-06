@@ -14,6 +14,10 @@ a finished step (see Contributing in `README.md`). Newest at top.
 - `knowledge_base.json` — new `client_model` block (GH#6 box 1, started). `name_labels`
   holds only labels a real sample uses: `client name`, `account name`, `soa for`. Ground
   rule 1: adding a label is a KB edit, not Python.
+- `/ingest` returns `client_candidates` on every document (empty when none), and the
+  result card shows each name once with its label and pages. **Shown, not used:**
+  `review.assess()` doesn't see it, and `tests/test_ingest_clients.py` pins that a found
+  name leaves the review decision unchanged.
 - **Checked against all 10 files in `samples/`, not assumed.** Four advice records give
   one name each (Nick Rossi, George Baker, Wendy Zhang, John Patel). The RG 90 example
   SOA gives `Brad and Zara Black` — a **joint client**, kept whole, not split or chosen
@@ -39,8 +43,8 @@ a finished step (see Contributing in `README.md`). Newest at top.
 ### Not done here
 - **Party type (slice 2)** — person / trust (`Trust`, `Trustee`) / company (`Pty Ltd`) /
   unknown, words from the KB.
-- **Selecting a client (slice 3)** and wiring into `/ingest`. `review.assess()` still
-  checks only the type, so the 90% rule in `GROUND_TRUTH.md` is half enforced until then.
+- **Selecting a client (slice 3).** `review.assess()` still checks only the type, so the
+  90% rule in `GROUND_TRUTH.md` is half enforced until then.
 - **Matching against a firm's client list** — no list exists. Slice 3 returns what the
   document *says*; a register can plug in later behind the same output.
 - Open domain questions 1, 3, 4 (joint clients, same-name clients, which of several
@@ -51,6 +55,69 @@ a finished step (see Contributing in `README.md`). Newest at top.
 - Only the 10 local samples were run. Bella's wider set (`samples/soa_atp/` etc.) was
   not — the RG 90 2013 SOA (`Joe and Sue Black`, footer `Statement of Advice for …`) may
   need a `statement of advice for` label.
+
+## Session 02-10-2026 — review screen, unit B: Approve / Reject on the result card
+
+### Done
+- `static/index.html` — every result card ends in a verdict block. **Approve**
+  records `confirmed` for the proposed type. **Reject** opens two dropdowns,
+  *what it actually is* and *why*, with the chosen reason's meaning shown;
+  Submit stays disabled until both are picked. A recorded verdict replaces the
+  buttons with "Recorded … Nothing has been filed."; a refusal shows the
+  server's own message. Build step 5, first half; GH#4 box 5, screen half.
+- The choices come from `GET /review/options` (unit A), never from a list in
+  the page. The reject list leaves out the type the tool proposed, because the
+  server refuses a "correction" that changes nothing.
+- Out-of-scope documents get Reject only (nothing to approve). The
+  "classifier unavailable" card gets no buttons: a runtime failure is not a
+  verdict on the document.
+- Every button is disabled while a verdict is being sent, so a double click
+  records once.
+- `tests/test_review_buttons.py` — 16 tests on the server side of every click:
+  Approve accepted for all 9 types, Reject accepted for all 5 reasons, a
+  same-type "rejection" refused, and the page holding no copy of the type ids
+  or reason codes.
+
+### Checked by hand (engineer)
+- End to end with Ollama running: Approve on `FSG_PeninsulaWealth.pdf` wrote one
+  `reviewer:confirmed` line to `failure_log.jsonl`, keyed by the SHA-256 hash,
+  no filename. The mechanics work.
+- "Couldn't reach the classifier … WinError 10061" is Ollama's local server not
+  running (port 11434 on this machine), not the network. Check
+  `http://localhost:11434` reads "Ollama is running" before testing.
+
+### Handed over, not done here
+- **Which verdicts are right is a domain judgement**, so acceptance testing of
+  what to approve or reject on the samples goes to the domain collaborator.
+  The engineer checked that a click is recorded correctly; whether the click
+  was the right one is hers to judge.
+- Two findings from this session for that review: `FSG_UniSuper` scored 0.32
+  because the model returned three `key_fields` labels as quotes ("services
+  offered", "fees/commissions"), which the confidence check rightly marked
+  down — a classifier prompt fix. `PDS_AustralianSuper` is held by the bundle
+  hard stop because five blank application forms are appended (pp19–36): is a
+  PDS with its own forms one document?
+- No roles yet: anyone can approve. `approval_policy` (#54) needs a login
+  first. Hard stops greying out Approve are unit C.
+
+## Session 02-10-2026 — review screen, unit A: the choices it offers
+
+### Done
+- `GET /review/options` — the document types and reason codes the Approve/Reject
+  screen offers, read from `knowledge_base.json` so the page keeps no copy of
+  them (ground rule #1). Approve sends `confirmed`; a reject picks one of the
+  other five codes. No free-text "why".
+- `tests/test_review_options.py` — 5 tests, each checked against the knowledge
+  base, including that every choice offered is one `/review/correction` accepts.
+- **`app.py` now opens the knowledge base as UTF-8.** On Windows it defaulted to
+  cp1252 and garbled every em dash on the way to the screen ("—" became "â€”").
+  Found by the new test, not by eye.
+
+### Not done here
+- The same unstated encoding is in eight other files that load the knowledge
+  base (`classifier.py`, `review.py`, `scope_gate.py` and others). Harmless
+  while they only read ids and patterns, but a single loader is #7's fourth box.
+- The buttons themselves are unit B; hard stops are unit C.
 
 ## Session 01-10-2026 — reviewer corrections, filing proposals (Bella)
 

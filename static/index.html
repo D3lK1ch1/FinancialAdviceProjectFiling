@@ -311,6 +311,54 @@
     margin-top: 4px;
   }
 
+  /* ---- verdict: approve / reject ---- */
+
+  .verdict {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .verdict-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .verdict-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn {
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--accent-soft-border); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .reject-form { display: none; margin-top: 12px; flex-direction: column; gap: 10px; }
+  .reject-form.open { display: flex; }
+  .reject-form label { font-size: 13px; color: var(--ink-soft); display: flex; flex-direction: column; gap: 4px; }
+  .reject-form select {
+    font: inherit;
+    font-size: 13.5px;
+    padding: 7px 8px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    max-width: 100%;
+  }
+  .reason-meaning { font-size: 12.5px; color: var(--ink-faint); min-height: 1.2em; }
+  .verdict-status { margin-top: 10px; font-size: 13px; color: var(--ink-soft); min-height: 1.2em; }
+  .verdict-status.ok { color: var(--high); font-weight: 600; }
+  .verdict-status.err { color: var(--low); }
+
   .out-of-scope, .error-block {
     padding: 16px 20px;
     font-size: 14px;
@@ -461,6 +509,130 @@ function metaGrid(data) {
     </details>`;
 }
 
+// ---- verdict: approve / reject ----
+//
+// The choices come from GET /review/options, never from a list in this page:
+// a document type or reason added to the knowledge base appears here with no
+// change to this file (ground rule #1). A verdict is RECORDED, nothing is
+// filed — filing is #10, and who may approve (roles) is not built yet.
+let reviewOptions = null;
+const reviewOptionsReady = fetch('/review/options')
+  .then(res => (res.ok ? res.json() : null))
+  .then(opts => { reviewOptions = opts; })
+  .catch(() => { reviewOptions = null; });
+
+function verdictBlock(predictedType) {
+  if (!reviewOptions) {
+    return `<div class="verdict"><div class="verdict-status err">Review choices could not be loaded, so nothing can be recorded. Reload the page.</div></div>`;
+  }
+  // Reject means the type was wrong, so the type the tool proposed is not
+  // offered back: the server refuses a "correction" that changes nothing.
+  const types = reviewOptions.document_types
+    .filter(t => t.id !== predictedType)
+    .map(t => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`).join('');
+  const reasons = reviewOptions.reject_reasons
+    .map(r => `<option value="${escapeHtml(r.code)}">${escapeHtml(r.code.replace(/_/g, ' '))}</option>`).join('');
+  // A document with no proposed type has nothing to approve.
+  const approve = predictedType
+    ? `<button class="btn primary" data-action="approve">Approve</button>`
+    : '';
+  return `
+    <div class="verdict">
+      <div class="verdict-label">Your verdict</div>
+      <div class="verdict-actions">
+        ${approve}
+        <button class="btn" data-action="reject">Reject</button>
+      </div>
+      <div class="reject-form">
+        <label>What it actually is
+          <select data-field="type"><option value="">Choose a document type…</option>${types}</select>
+        </label>
+        <label>Why the tool got it wrong
+          <select data-field="reason"><option value="">Choose a reason…</option>${reasons}</select>
+        </label>
+        <div class="reason-meaning"></div>
+        <div class="verdict-actions">
+          <button class="btn primary" data-action="submit" disabled>Submit</button>
+          <button class="btn" data-action="cancel">Cancel</button>
+        </div>
+      </div>
+      <div class="verdict-status" role="status"></div>
+    </div>`;
+}
+
+function wireVerdict(documentId, predictedType) {
+  const box = result.querySelector('.verdict');
+  if (!box || !reviewOptions) return;
+  const form = box.querySelector('.reject-form');
+  const typeSelect = box.querySelector('[data-field="type"]');
+  const reasonSelect = box.querySelector('[data-field="reason"]');
+  const meaning = box.querySelector('.reason-meaning');
+  const submit = box.querySelector('[data-action="submit"]');
+  const statusLine = box.querySelector('.verdict-status');
+  const buttons = () => box.querySelectorAll('button');
+
+  const refresh = () => {
+    submit.disabled = !(typeSelect.value && reasonSelect.value);
+    const chosen = reviewOptions.reject_reasons.find(r => r.code === reasonSelect.value);
+    meaning.textContent = chosen ? chosen.meaning : '';
+  };
+  typeSelect.addEventListener('change', refresh);
+  reasonSelect.addEventListener('change', refresh);
+
+  async function send(correctType, reason, label) {
+    // Every button is disabled before the request goes out, so a double
+    // click cannot record the same verdict twice.
+    buttons().forEach(b => { b.disabled = true; });
+    statusLine.className = 'verdict-status';
+    statusLine.textContent = 'Recording…';
+    try {
+      const res = await fetch('/review/correction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          document_id: documentId,
+          predicted_type: predictedType || null,
+          correct_type: correctType,
+          reason: reason,
+        }),
+      });
+      if (res.status === 201) {
+        box.querySelector('.verdict-actions').remove();
+        form.remove();
+        statusLine.className = 'verdict-status ok';
+        statusLine.textContent = `Recorded: ${label}. Nothing has been filed.`;
+        return;
+      }
+      const body = await res.json().catch(() => ({}));
+      statusLine.className = 'verdict-status err';
+      statusLine.textContent = `Not recorded: ${body.detail || `server returned ${res.status}`}`;
+    } catch (err) {
+      statusLine.className = 'verdict-status err';
+      statusLine.textContent = `Not recorded: ${err.message}`;
+    }
+    buttons().forEach(b => { b.disabled = false; });
+    refresh();
+  }
+
+  box.addEventListener('click', e => {
+    const action = e.target.dataset && e.target.dataset.action;
+    if (action === 'approve') {
+      send(predictedType, reviewOptions.approve_reason, 'approved as proposed');
+    } else if (action === 'reject') {
+      form.classList.add('open');
+      typeSelect.focus();
+    } else if (action === 'cancel') {
+      form.classList.remove('open');
+      typeSelect.value = '';
+      reasonSelect.value = '';
+      refresh();
+    } else if (action === 'submit' && !submit.disabled) {
+      const typeName = typeSelect.options[typeSelect.selectedIndex].text;
+      send(typeSelect.value, reasonSelect.value, `rejected, it is a ${typeName}`);
+    }
+  });
+}
+
 function render(data) {
   if (!data.in_scope) {
     result.innerHTML = `
@@ -470,8 +642,10 @@ function render(data) {
           <span class="pill idle">Out of scope</span>
         </div>
         <div class="out-of-scope">Doesn't match SOA, ROA, FSG, or PDS — outside what this prototype covers today.</div>
+        <div class="card-body">${verdictBlock(null)}</div>
         ${metaGrid(data)}
       </div>`;
+    wireVerdict(data.document_id, null);
     return;
   }
 
@@ -492,8 +666,8 @@ function render(data) {
 
   // Flags render as questions with the reasoning shown, never as a bare
   // "unsure". Where the tool can propose an answer it shows what it matched,
-  // so a reviewer corrects one thing instead of starting from scratch. There
-  // is no approve action here — that is the Approve/Edit/Reject work.
+  // so a reviewer corrects one thing instead of starting from scratch. The
+  // verdict itself is the Approve / Reject block at the end of the card.
   // One renderer per rule, chosen by id, with a fallback that always shows
   // something truthful. Keying the whole block on `determination` was wrong:
   // that field belongs to roa_basis_unconfirmed alone, so a multi_doc_bundle
@@ -607,9 +781,11 @@ function render(data) {
         ${clientBlock}
         ${signals}
         ${flags}
+        ${verdictBlock(c.doc_type)}
       </div>
       ${metaGrid(data)}
     </div>`;
+  wireVerdict(data.document_id, c.doc_type);
 }
 
 async function sendFile(file) {
@@ -630,6 +806,7 @@ async function sendFile(file) {
     }
     const data = await res.json();
     status.textContent = '';
+    await reviewOptionsReady;  // a file dropped straight away still gets its buttons
     render(data);
     result.style.display = 'flex';
   } catch (err) {
