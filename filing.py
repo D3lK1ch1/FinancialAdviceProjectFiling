@@ -26,6 +26,8 @@ import json
 import re
 from pathlib import PurePath
 
+from dates import extract_dates
+
 with open("knowledge_base.json") as f:
     _KB = json.load(f)
 
@@ -180,3 +182,37 @@ def proposed_event_folder(
         record += f" · {qualifier}"
     folder = f"{chosen['date'].strftime('%Y-%m')} — {subject['subject']} [{record}]"
     return {"folder": folder, "subject": subject, "reason": subject["reason"]}
+
+
+# --- The whole proposal --------------------------------------------------------
+
+def proposed_filing(
+    doc_type: str | None,
+    text: str,
+    pages: list[str],
+    flags: list[dict] | None = None,
+    original_filename: str = "",
+) -> dict:
+    """Where one document would be filed, part by part, as /ingest reports it.
+
+    Each part is either a name or None with the reason it is missing. Still a
+    proposal: nothing here writes, and the parts are not joined into a path,
+    because a path with a hole in it reads as a real destination.
+
+    The client folder is always None until a client is chosen from the
+    candidates (GH#6). A found name is not a chosen one.
+    """
+    date_result = extract_dates({"pages": pages})
+    chosen = date_result.get("chosen")
+    name = proposed_filename(doc_type, date_result, flags, original_filename)
+    event = proposed_event_folder(doc_type, text, date_result, flags)
+    return {
+        "client_folder": None,
+        "client_reason": "no client chosen yet (GH#6)",
+        "event_folder": event["folder"],
+        "event_reason": event["reason"],
+        "filename": name["filename"],
+        "filename_reason": name["reason"],
+        "date": chosen["date"].isoformat() if chosen and chosen.get("date") else None,
+        "date_determination": date_result.get("determination"),
+    }

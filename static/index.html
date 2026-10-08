@@ -755,6 +755,20 @@ function render(data) {
           `<li><strong>${escapeHtml(n)}</strong> — after “${escapeHtml(v.label)}”, ${pageList(v.pages)}</li>`).join('')}</ul>`
       : `<div class="proposal-note">None found.</div>`
   }`;
+  // Where it would be filed (#10), part by part. A part that can't be filled
+  // shows why rather than a blank, and the parts are not joined into one path:
+  // with no client chosen, a joined path would read as a real destination.
+  const f = data.filing || {};
+  const filingRow = (label, value, reason) => `<li>${label}: ${
+    value ? `<code>${escapeHtml(value)}</code>` : `<em>none</em> — ${escapeHtml(reason || '')}`
+  }</li>`;
+  const filingBlock = data.filing
+    ? `<div class="signals-label">Would be filed as</div><ul class="signals">
+        ${filingRow('Client folder', f.client_folder, f.client_reason)}
+        ${filingRow('Event folder', f.event_folder, f.event_reason)}
+        ${filingRow('File name', f.filename, f.filename_reason)}
+      </ul><div class="proposal-note">A proposal. Nothing has been filed.</div>`
+    : '';
   const signals = (c.matched_signals && c.matched_signals.length)
     ? `<div class="signals-label">Why</div><ul class="signals">${c.matched_signals.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>`
     : '';
@@ -779,6 +793,7 @@ function render(data) {
         }</div>
         ${reviewReasons}
         ${clientBlock}
+        ${filingBlock}
         ${signals}
         ${flags}
         ${verdictBlock(c.doc_type)}
