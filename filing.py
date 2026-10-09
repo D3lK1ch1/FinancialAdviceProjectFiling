@@ -90,9 +90,13 @@ def proposed_filename(
 
 # --- Advice event folder -----------------------------------------------------
 #
-#     YYYY-MM — <subject> [<abbrev>[ · <ROA situation>]]
-#     2024-03 — Insurance [SOA]
-#     2025-06 — Superannuation & Insurance [ROA · further advice]
+#     YYYY-MM — <subject>
+#     2024-03 — Insurance
+#     2025-06 — Superannuation & Insurance
+#
+# No record type in the name: the folder holds every document of the event,
+# so it is not named after one of them (filing_model.advice_event.naming_note).
+# The record type and ROA situation are in each document's filename instead.
 #
 # The subject is read from the advice record's own statement of scope, never
 # from the whole document: an SOA must set out the client's circumstances, so
@@ -152,7 +156,6 @@ def proposed_event_folder(
     doc_type: str | None,
     text: str,
     date_result: dict,
-    flags: list[dict] | None = None,
 ) -> dict:
     """The advice event folder an advice record would open, or why there isn't one.
 
@@ -176,12 +179,25 @@ def proposed_event_folder(
         return {"folder": None, "subject": subject,
                 "reason": f"{subject['reason']} — the reviewer supplies the subject"}
 
-    record = _ABBREV[doc_type]
-    qualifier = _qualifier(doc_type, flags or [])
-    if qualifier:
-        record += f" · {qualifier}"
-    folder = f"{chosen['date'].strftime('%Y-%m')} — {subject['subject']} [{record}]"
+    folder = f"{chosen['date'].strftime('%Y-%m')} — {subject['subject']}"
     return {"folder": folder, "subject": subject, "reason": subject["reason"]}
+
+
+# --- Advice process stage ------------------------------------------------------
+#
+# Shown on each document, not a folder layer (filing_model.stage_label). Read
+# from advice_process_stages[].typical_docs, so a type can sit in more than
+# one stage — an SOA is both constructed and delivered.
+
+_STAGES = _KB["advice_process_stages"]
+_EVERY_STAGE = _KB["filing_model"]["stage_label"]["every_stage_label"]
+
+
+def advice_stages(doc_type: str | None) -> list[str]:
+    """The stage names a document type belongs to, in process order."""
+    found = [f"{s['stage']} {s['name']}" for s in _STAGES if doc_type in s["typical_docs"]]
+    # A type that turns up at every stage (a file note) says nothing by listing them.
+    return [_EVERY_STAGE] if found and len(found) == len(_STAGES) else found
 
 
 # --- The whole proposal --------------------------------------------------------
@@ -205,12 +221,13 @@ def proposed_filing(
     date_result = extract_dates({"pages": pages})
     chosen = date_result.get("chosen")
     name = proposed_filename(doc_type, date_result, flags, original_filename)
-    event = proposed_event_folder(doc_type, text, date_result, flags)
+    event = proposed_event_folder(doc_type, text, date_result)
     return {
         "client_folder": None,
         "client_reason": "no client chosen yet (GH#6)",
         "event_folder": event["folder"],
         "event_reason": event["reason"],
+        "stages": advice_stages(doc_type),
         "filename": name["filename"],
         "filename_reason": name["reason"],
         "date": chosen["date"].isoformat() if chosen and chosen.get("date") else None,

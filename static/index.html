@@ -767,6 +767,7 @@ function render(data) {
         ${filingRow('Client folder', f.client_folder, f.client_reason)}
         ${filingRow('Event folder', f.event_folder, f.event_reason)}
         ${filingRow('File name', f.filename, f.filename_reason)}
+        ${filingRow('Advice stage', (f.stages || []).join(' · '), 'not in any stage in the knowledge base')}
       </ul><div class="proposal-note">A proposal. Nothing has been filed.</div>`
     : '';
   const signals = (c.matched_signals && c.matched_signals.length)

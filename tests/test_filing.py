@@ -157,23 +157,24 @@ def test_no_scope_statement_means_no_subject_and_the_reviewer_supplies_it():
 def test_soa_event_folder():
     text = "This advice is about your personal insurance needs."
 
-    result = proposed_event_folder("soa", text, _dated(date(2024, 3, 14)), [])
+    result = proposed_event_folder("soa", text, _dated(date(2024, 3, 14)))
 
-    assert result["folder"] == "2024-03 — Insurance [SOA]"
+    assert result["folder"] == "2024-03 — Insurance"
 
 
-def test_roa_event_folder_carries_its_situation():
+def test_event_folder_is_not_named_after_its_record():
+    """The folder holds the whole event, so neither the record type nor the
+    ROA situation is in its name — they are in the record's filename."""
     text = "My advice is to make no changes to your XYZ Superannuation Fund. My advice is to apply to increase your IP policy."
 
-    result = proposed_event_folder(
-        "roa", text, _dated(date(2025, 6, 2)), [_roa_flag("further_advice")]
-    )
+    result = proposed_event_folder("roa", text, _dated(date(2025, 6, 2)))
 
-    assert result["folder"] == "2025-06 — Superannuation & Insurance [ROA · further advice]"
+    assert result["folder"] == "2025-06 — Superannuation & Insurance"
+    assert "ROA" not in result["folder"]
 
 
 def test_only_an_advice_record_names_an_event():
-    result = proposed_event_folder("fact_find", "This advice is about insurance.", _dated(date(2024, 3, 1)), [])
+    result = proposed_event_folder("fact_find", "This advice is about insurance.", _dated(date(2024, 3, 1)))
 
     assert result["folder"] is None
     assert "#8" in result["reason"]
@@ -182,7 +183,7 @@ def test_only_an_advice_record_names_an_event():
 def test_no_folder_without_a_usable_date():
     result = proposed_event_folder(
         "soa", "This advice is about your insurance.",
-        {"chosen": None, "determination": "ambiguous", "reason": "x"}, [],
+        {"chosen": None, "determination": "ambiguous", "reason": "x"},
     )
 
     assert result["folder"] is None
@@ -190,7 +191,7 @@ def test_no_folder_without_a_usable_date():
 
 
 def test_no_folder_without_a_subject():
-    result = proposed_event_folder("soa", _CIRCUMSTANCES, _dated(date(2024, 3, 14)), [])
+    result = proposed_event_folder("soa", _CIRCUMSTANCES, _dated(date(2024, 3, 14)))
 
     assert result["folder"] is None
     assert "reviewer" in result["reason"]
@@ -199,3 +200,55 @@ def test_no_folder_without_a_subject():
 def test_every_area_in_the_kb_has_signals():
     for area in _KB["filing_model"]["advice_event"]["subject"]["areas"]:
         assert area["signals"], area["name"]
+
+
+# --- Advice stage, shown per document (decided 9 Oct) --------------------------
+
+from filing import advice_stages, proposed_filing  # noqa: E402
+
+
+def test_a_type_in_two_stages_lists_both_in_order():
+    assert advice_stages("soa") == ["3 Advice construction", "4 Advice delivery"]
+
+
+def test_a_type_at_every_stage_says_so_instead_of_listing_them():
+    assert advice_stages("file_note") == [_KB["filing_model"]["stage_label"]["every_stage_label"]]
+
+
+def test_no_type_means_no_stage():
+    assert advice_stages(None) == []
+
+
+@pytest.mark.parametrize("doc", _KB["documents"], ids=lambda d: d["id"])
+def test_every_type_has_a_stage_in_the_kb(doc):
+    assert advice_stages(doc["id"]), doc["id"]
+
+
+# --- The whole proposal ----------------------------------------------------------
+
+_SOA_PAGES = ["Date of advice: 14 March 2024", "This advice is about your personal insurance."]
+
+
+def test_proposed_filing_gives_each_part():
+    result = proposed_filing("soa", " ".join(_SOA_PAGES), _SOA_PAGES, [], "Nguyen SOA.pdf")
+
+    assert result["event_folder"] == "2024-03 — Insurance"
+    assert result["filename"] == "2024-03-14 SOA.pdf"
+    assert result["stages"] == ["3 Advice construction", "4 Advice delivery"]
+    assert result["date"] == "2024-03-14"
+
+
+def test_proposed_filing_never_names_a_client_folder_yet():
+    result = proposed_filing("soa", " ".join(_SOA_PAGES), _SOA_PAGES, [], "a.pdf")
+
+    assert result["client_folder"] is None
+    assert "GH#6" in result["client_reason"]
+
+
+def test_proposed_filing_without_a_date_says_why_for_each_part():
+    pages = ["This advice is about your personal insurance."]
+
+    result = proposed_filing("soa", pages[0], pages, [], "a.pdf")
+
+    assert result["event_folder"] is None and result["event_reason"]
+    assert result["filename"] is None and result["filename_reason"]
