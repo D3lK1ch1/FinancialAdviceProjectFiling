@@ -3,6 +3,105 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 08-10-2026 — where a document would be filed, shown on ingest (GH#10)
+
+### Done
+- `filing.py` — `proposed_filing()` reads the document's date once
+  (`dates.extract_dates`) and hands it to the existing `proposed_filename` and
+  `proposed_event_folder`. Returns client folder, event folder, filename and date,
+  each with a reason when it can't be filled. **No new logic for names or folders**
+  — both functions already existed with tests; this connects them.
+- `/ingest` returns a `filing` block on every document. **A proposal only:** nothing
+  is written or moved, and `storage.py` is not called.
+- **The parts are not joined into one path.** The client folder is always `null`
+  ("no client chosen yet (GH#6)"), and a path with a hole in it reads as a real
+  destination.
+- `static/index.html` — the result card shows a **"Would be filed as"** section
+  under the client names: client folder, event folder and file name, one row
+  each. A part that can't be filled reads *none* plus its reason, never a blank,
+  and the section ends "A proposal. Nothing has been filed." Display only.
+  **Needs a server restart** (or `uvicorn app:app --reload`) — without it the old
+  `/ingest` returns no `filing` block and the section doesn't appear.
+
+### Checked by hand (engineer, classifier stubbed)
+- `ROA_INFO266_att1_retain_modify.pdf` → `2021-10 — Superannuation & Insurance
+  [ROA · further advice]` / `2021-10-12 ROA — further advice.pdf`.
+- `SOA_INFO267_limited_advice.pdf` → `2021-10-22 SOA.pdf`. Right: the example's own
+  "date of advice" is October 2021. The model's "Why" list said December 2021 —
+  that is when ASIC published INFO 267, not the advice date. Filing doesn't use the
+  model's date, so the wrong one never reached the name.
+- `ROA_INFO266_att2_nochange.pdf` → `2021-08 — Retirement & Investment [ROA ·
+  further advice]` / `2021-08-30 ROA — further advice.pdf`. Date is `declared`.
+- `SOA_RG90_scaled_advice.pdf` → no name, no folder: date `ambiguous`. Expected —
+  this is GH#48, not a filing bug.
+- 375 non-LLM tests pass.
+
+### Not done here
+- **No client folder** until GH#6 slice 3 chooses a client. GH#10's last box
+  ("full proposed path") stays open on that.
+- **Accept doesn't file.** `storage.put` still has no caller, and no filing root
+  is configured.
+- **Open: INFO 267's event subject.** Filing reads `Superannuation` from the scope
+  statement; the model's "Why" list says `personal insurance`. Not yet checked
+  against the PDF.
+- **INFO 267 scored 49% for a correct SOA.** The model said 0.95; half its
+  "matched signals" were its own summaries ("remuneration & conflicts"), not quotes,
+  so `confidence.py` halved it. Same cause as `FSG_UniSuper` on 02-10. A classifier
+  prompt fix (exact quotes only); until then most correct documents go to review.
+
+## Session 06-10-2026 — whose document is it: finding the client's name (GH#6, slice 1)
+
+### Done
+- `clients.py` / `tests/test_clients.py` (17 tests) — `find_client_candidates(pages)`
+  returns every name a document labels as its client, with the label that found it, the
+  page and context. Same shape as `dates.find_date_candidates`: **it finds, it does not
+  choose.** Choosing (one clear client → `Surname, First name`; anything else → a human)
+  is slice 3.
+- `knowledge_base.json` — new `client_model` block (GH#6 box 1, started). `name_labels`
+  holds only labels a real sample uses: `client name`, `account name`, `soa for`. Ground
+  rule 1: adding a label is a KB edit, not Python.
+- `/ingest` returns `client_candidates` on every document (empty when none), and the
+  result card shows each name once with its label and pages. **Shown, not used:**
+  `review.assess()` doesn't see it, and `tests/test_ingest_clients.py` pins that a found
+  name leaves the review decision unchanged.
+- **Checked against all 10 files in `samples/`, not assumed.** Four advice records give
+  one name each (Nick Rossi, George Baker, Wendy Zhang, John Patel). The RG 90 example
+  SOA gives `Brad and Zara Black` — a **joint client**, kept whole, not split or chosen
+  between (open question 1 in `GROUND_TRUTH.md`). The five FSGs and PDSs give nothing,
+  which is right: they name no client. Names that must **not** come back don't: the
+  advisers (Sarah Johnson, Tom Baker, Sally Chong) and the INFO 267 client's wife (Jane).
+
+### Where a name ends — the part that was wrong first
+- Layout extraction puts the next column on the same line: `Client name: John Patel
+  The SOA must include…`, `Nick Rossi AFS licensees and…`. Capitalisation alone took
+  `John Patel The`.
+- Column gaps alone don't work either: the stockbroker ROA spreads one name across a
+  gap — `Account name: Wendy ⟶ Zhang`. So **a gap ends a name only once it has two
+  words.**
+- A following field ends it too: `Account number:`, `Date of advice:` — one capital
+  word, then lower-case words, ending in a colon. A wider "colon within three words"
+  rule cut `Wendy Zhang` to `Wendy`.
+- **A test asserted the wrong thing.** The first version expected nothing from RG 90.
+  Running all ten samples showed the example SOA inside it (p31 on) names Brad and Zara
+  Black in every page header. Fixed by adding the `soa for` label, not by loosening the
+  name rule.
+
+### Not done here
+- **Party type (slice 2)** — person / trust (`Trust`, `Trustee`) / company (`Pty Ltd`) /
+  unknown, words from the KB.
+- **Selecting a client (slice 3).** `review.assess()` still checks only the type, so the
+  90% rule in `GROUND_TRUTH.md` is half enforced until then.
+- **Matching against a firm's client list** — no list exists. Slice 3 returns what the
+  document *says*; a register can plug in later behind the same output.
+- Open domain questions 1, 3, 4 (joint clients, same-name clients, which of several
+  names is the client) stay with the partner. Until answered, those cases go to a human.
+- **Two known misses, both fail-safe (nothing found → a human, never a wrong name):**
+  `Client name: JOHN SMITH` (all capitals) and `Client name: Smith, John` (surname-first
+  with a comma). Neither appears in the samples; left until a real document does.
+- Only the 10 local samples were run. Bella's wider set (`samples/soa_atp/` etc.) was
+  not — the RG 90 2013 SOA (`Joe and Sue Black`, footer `Statement of Advice for …`) may
+  need a `statement of advice for` label.
+
 ## Session 02-10-2026 — review screen, unit B: Approve / Reject on the result card
 
 ### Done

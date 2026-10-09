@@ -741,6 +741,34 @@ function render(data) {
           <span class="review-detail">${escapeHtml(r.detail)}</span>
         </div>`).join('')}</div>`
     : '';
+  // Every name the document labels as its client, once each, with where it
+  // was found. Nothing is chosen here: two names is shown as two names.
+  const byName = {};
+  for (const cand of (data.client_candidates || [])) {
+    (byName[cand.raw] = byName[cand.raw] || { label: cand.label, pages: [] }).pages.push(cand.page);
+  }
+  const names = Object.entries(byName);
+  const pageList = p => p.length > 3 ? `pages ${p.slice(0, 3).join(', ')}… (${p.length})` : `page${p.length > 1 ? 's' : ''} ${p.join(', ')}`;
+  const clientBlock = `<div class="signals-label">Client named in the document</div>${
+    names.length
+      ? `<ul class="signals">${names.map(([n, v]) =>
+          `<li><strong>${escapeHtml(n)}</strong> — after “${escapeHtml(v.label)}”, ${pageList(v.pages)}</li>`).join('')}</ul>`
+      : `<div class="proposal-note">None found.</div>`
+  }`;
+  // Where it would be filed (#10), part by part. A part that can't be filled
+  // shows why rather than a blank, and the parts are not joined into one path:
+  // with no client chosen, a joined path would read as a real destination.
+  const f = data.filing || {};
+  const filingRow = (label, value, reason) => `<li>${label}: ${
+    value ? `<code>${escapeHtml(value)}</code>` : `<em>none</em> — ${escapeHtml(reason || '')}`
+  }</li>`;
+  const filingBlock = data.filing
+    ? `<div class="signals-label">Would be filed as</div><ul class="signals">
+        ${filingRow('Client folder', f.client_folder, f.client_reason)}
+        ${filingRow('Event folder', f.event_folder, f.event_reason)}
+        ${filingRow('File name', f.filename, f.filename_reason)}
+      </ul><div class="proposal-note">A proposal. Nothing has been filed.</div>`
+    : '';
   const signals = (c.matched_signals && c.matched_signals.length)
     ? `<div class="signals-label">Why</div><ul class="signals">${c.matched_signals.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>`
     : '';
@@ -764,6 +792,8 @@ function render(data) {
           review.threshold != null ? ` This type has to reach ${Math.round(review.threshold * 100)}%.` : ''
         }</div>
         ${reviewReasons}
+        ${clientBlock}
+        ${filingBlock}
         ${signals}
         ${flags}
         ${verdictBlock(c.doc_type)}

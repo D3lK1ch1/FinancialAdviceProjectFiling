@@ -769,6 +769,11 @@
     "human_in_the_loop": "Event grouping is always a proposal a human confirms, never silent auto-bundling. Confidence is visible per document and per event. Mis-grouping is expected early because it depends on link accuracy — the fiddliest part of the system.",
     "build_note": "Client-outer/event-inner is a nesting rule over results already produced. Keep the storage layer abstracted so the folder scheme (and later, local-folder vs cloud-bucket) can change without touching the classifier."
   },
+  "client_model": {
+    "status": "Started (GH#6). Finds the names a document gives for its client; does not yet choose one.",
+    "name_labels": ["client name", "account name", "soa for"],
+    "name_labels_source": "Only labels seen in the real samples: 'Client name:' in INFO 266 att 1 and att 2 and the INFO 267 SOA; 'Account name:' in the INFO 266 att 3 stockbroker ROA; 'SOA for' in the running header of the example SOA inside RG 90 ('SOA for Brad and Zara Black', every page from p31). Add a label when a real document uses one, not before."
+  },
   "summary_feature": {
     "status": "PLANNED — a later phase, after classification and filing are working and trusted.",
     "purpose": "Generate a plain-English summary per advice event (not per loose document), leveraging the fact that documents are already grouped into a coherent bundle.",

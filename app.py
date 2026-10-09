@@ -13,6 +13,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from classifier import classify
+from clients import find_client_candidates
+from filing import proposed_filing
 from display import DEFAULT_DISPLAY_MODE, DISPLAY_MODES, teaching_for
 from confidence import verify
 from flags import evaluate_flags
@@ -81,6 +83,11 @@ async def ingest(file: UploadFile, display: str = DEFAULT_DISPLAY_MODE):
     # matches a title pattern, so a document that merely mentions an ROA would
     # otherwise be asked which legislative basis it is.
     result["flags"] = evaluate_flags(doc_type, result["extracted_text"], pages)
+    # Whose document it is, as the document itself says (#6). Every name found,
+    # none chosen yet, and deliberately not passed to assess() below: until
+    # one is selected, a found name must not make a document look safer to
+    # file. Always present, empty when nothing is labelled — same reason as flags.
+    result["client_candidates"] = find_client_candidates(pages)
     # Whether this can stand on its own, and why not if it can't. Out of scope
     # is a review reason here rather than the end of the road: the document
     # keeps its working either way, because a reviewer confirming a correct
@@ -92,6 +99,9 @@ async def ingest(file: UploadFile, display: str = DEFAULT_DISPLAY_MODE):
         parse_error=result.get("parse_error"),
         has_selectable_text=result["has_selectable_text"],
     )
+    # Where it would be filed (#10). A proposal only: nothing is written, and
+    # the client folder stays empty until a client is chosen (GH#6).
+    result["filing"] = proposed_filing(doc_type, result["extracted_text"], pages, result["flags"], file.filename)
     # Display mode (#11). Added last and from the classified type only, so it
     # cannot reach back into anything above — the settings independence rule.
     result["teaching"] = teaching_for(doc_type, display)
