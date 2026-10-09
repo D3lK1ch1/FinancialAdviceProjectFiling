@@ -617,14 +617,20 @@
         "rationale": "Groups every document belonging to one advisory decision, using the document-to-document links. Reconstructs 'the advice and everything behind it'."
       }
     },
+    "stage_label": {
+      "rule": "The advice process stage is shown on each document, read from advice_process_stages[].typical_docs. It is not a folder layer.",
+      "why": "An event usually holds one or two documents per stage, so stage folders would mostly hold a single file. Decided 9 Oct 2026.",
+      "every_stage_label": "Any stage"
+    },
     "advice_event": {
       "definition": "A single advisory decision and all documents that belong to it: the advice record (SOA or ROA), the inputs that fed it (fact find, risk profile), the implementation (authority to proceed), and supporting product disclosure (PDS) used for that decision.",
       "identity": "Derived from the advice record at its centre. Keyed on client + advice-record date + subject matter/scope.",
-      "naming_pattern": "YYYY-MM — <subject matter> [<record type> · <sub-kind if ROA>]",
+      "naming_pattern": "YYYY-MM — <subject matter>",
       "examples": [
-        "2024-03 — Retirement & Super Consolidation [SOA]",
-        "2025-06 — Insurance Top-Up [ROA · further advice]"
+        "2024-03 — Retirement & Super Consolidation",
+        "2025-06 — Insurance Top-Up"
       ],
+      "naming_note": "The folder holds every document of the event — fact find, risk profile, SOA or ROA, authority to proceed, PDS — so it is not named after any one of them. The record type and ROA situation belong in each document's filename, where they describe that document alone. Decided 9 Oct 2026.",
       "subject": {
       "purpose": "The <subject matter> in the event folder name. Read from the advice record's own statement of scope — what it says the advice is about — never from the whole document. Decided on #10 (1 Oct 2026).",
       "why_not_whole_document": "An SOA must describe the client's relevant circumstances, so the whole document reads the client's balance sheet ('$100,000 in a superannuation fund', 'a $440,000 mortgage', 'Centrelink Family Tax Benefit'), and its 'what my advice does not cover' section names areas the advice excludes. On the six public SOAs/ROAs the whole document gave 4–7 areas every time; the scope statement gave the right subject every time it found one.",

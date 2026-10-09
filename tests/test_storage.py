@@ -12,7 +12,7 @@ from storage import LocalStorage, Storage, clean_segment
 
 ROOT = Path(__file__).resolve().parent.parent
 
-EVENT = ["Client A", "2024-03 — Retirement & Super Consolidation [SOA]", "2024-03-14 SOA.pdf"]
+EVENT = ["Client A", "2024-03 — Retirement & Super Consolidation", "2024-03-14 SOA.pdf"]
 
 
 def test_local_storage_satisfies_the_interface():
