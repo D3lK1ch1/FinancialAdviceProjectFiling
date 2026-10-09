@@ -38,6 +38,9 @@ app runs, data it reads (`knowledge_base.json`), or sample input (`samples/`).
    generate the whole system at once. Read what broke before moving on.
 6. **Maintain a failure log.** Every misclassification: input, tool's answer, correct answer,
    one-line why. This is the improvement loop and the proof of accuracy.
+7. **Always work on a branch; never commit or push to `main`.** Branch from an up-to-date
+   `main` (`feature/...`, `fix/...`, `docs/...`), one task per branch, and land it through a
+   PR into `main`. Update `CHANGELOG.md` in the same PR, not as a separate commit on `main`.
 
 ## Domain facts that are easy to get wrong
 - **An ROA is permitted in three situations, not one:** further advice (notional s946B(2)-(3)
