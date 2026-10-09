@@ -3,6 +3,40 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 09-10-2026 — issues brought up to date; domain decisions; docs/ unblocked
+
+### Decided (Bella)
+- **Joint client → one shared client folder**, e.g. `Black, Brad & Zara`. Recorded
+  in `knowledge_base.json` as `client_model.joint_client` (#6, #61).
+- **PDS with blank application forms appended → separate documents.** The bundle
+  flag on `PDS_AustralianSuper` is right; a person splits it. No code change (#19).
+- Event folder named after the event, not one document, with the stage on each
+  document: PR #58.
+
+### Issues
+- **Closed #10** (filing proposals): all built. Its last item, the full path with a
+  client folder, moved to #6.
+- **New:** #59 classifier evidence must be exact quotes (the INFO 267 49% /
+  FSG_UniSuper 32% cause), #60 the missing `docs/` folder, #61 one list of every
+  domain question waiting on Bella.
+- Status lines refreshed on #2, #5, #6, #7, #8, #11, #19, #20, #23, #26 and #48.
+  Several said "awaiting Delia's merge" for PRs merged on 1–2 Oct.
+
+### docs/
+- **`.gitignore` no longer ignores `docs`.** It had since the first commit, so the
+  spec and handover documents `CLAUDE.md` and the README's docs map point to were
+  never in the repo. Client files stay blocked by the `*.pdf`, `*.docx`, `*.doc`
+  and `*.zip` rules and by `samples`. The files themselves still need adding (#60).
+- `README.md` status and docs map, and `CLAUDE.md`, now say so.
+
+### Next for Delia, in order
+1. Review PR #58; decide on PR #28 (waiting on a firm, #61).
+2. #59 — classifier evidence as exact quotes.
+3. #48 — SOA dates.
+4. #6 slices 2–3 — choose the client and fill the client folder.
+5. #60 — add the `docs/` files if you have them.
+6. Every change on a branch through a PR, including session notes (CLAUDE.md rule 7).
+
 ## Session 08-10-2026 — where a document would be filed, shown on ingest (GH#10)
 
 ### Done
