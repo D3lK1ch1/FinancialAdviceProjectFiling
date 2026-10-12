@@ -24,6 +24,18 @@ a finished step (see Contributing in `README.md`). Newest at top.
     answered 9 Oct.
 - `CLAUDE.md` and `README.md` no longer say `docs/` is missing from the repo.
 
+### Decided (Bella, 13 Oct) — #61 Q2, Q3, Q4, Q7, Q8
+Recorded in `knowledge_base.json` and `docs/GROUND_TRUTH.md`. No code reads them yet.
+- **Trust, SMSF, company** is the client, with its own folder under its own name
+  (`client_model.entity_client`).
+- **Same surname:** `Surname, First name` tells clients apart (`client_model.same_surname`).
+- **Several names:** file under the shared surname, or under the trust if a trustee is
+  named; otherwise flag and ask the adviser (`client_model.several_names`).
+- **100% certainty** on document type and new document name
+  (`review_policy.certainty_decision`). In practice a person confirms both. Thresholds are
+  not changed yet.
+- **Renaming** allowed, with who/when/old/new tracked (`filing_model.renaming`, needs #7).
+
 ## Session 09-10-2026 — issues brought up to date; domain decisions; docs/ unblocked
 
 ### Decided (Bella)

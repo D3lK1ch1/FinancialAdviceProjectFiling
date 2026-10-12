@@ -118,17 +118,23 @@ She has **no access to real client documents**, and they would be highly confide
 ### Open questions for the domain partner
 1. ~~**Couples and joint clients**~~: **answered 9 Oct 2026**. One shared folder, e.g.
    `Black, Brad & Zara` (`client_model.joint_client` in `knowledge_base.json`).
-2. **Clients that aren't people** (family trusts, SMSFs, companies): whose name goes on
-   the folder?
-3. **Same name, different people:** how does a firm tell two "Smith, John"s apart (date
-   of birth, client number)? And where does that appear on the documents?
-4. **Several names on one document** (the adviser, the client, a partner, a beneficiary):
-   what tells you which person is *the* client?
+2. ~~**Clients that aren't people**~~: **answered 13 Oct 2026**. The trust, SMSF or company
+   is the client. Each one has its own folder under its own name, separate from the people
+   behind it (`client_model.entity_client`).
+3. ~~**Same name, different people**~~: **answered 13 Oct 2026**. In practice clients share
+   only a surname, so `Surname, First name` tells them apart (`client_model.same_surname`).
+   Two clients with the *same full name* aren't covered; that goes to the adviser (Q4).
+4. ~~**Several names on one document**~~: **answered 13 Oct 2026**. Usually the same surname
+   with different first names: file under the surname. If a trustee is named, file under the
+   trust. If neither works, flag it and ask the adviser (`client_model.several_names`).
 5. ~~**Documents that aren't about one client** (FSG, PDS)~~: **answered**. See "Settled
    domain answers".
 6. ~~**Inside a client folder**~~: **answered 9 Oct 2026**. One sub-folder per advice event,
    named after the event; see "Folder levels" above.
-7. **Worst mistakes:** of wrong client, wrong document type, and wrong year, which does a
-   firm consider serious enough to need 100% instead of 90%?
-8. **Renaming:** is a firm allowed to rename a client's document, or does the original
-   file name have to be kept for record-keeping?
+7. ~~**Worst mistakes**~~: **answered 13 Oct 2026**. The document type and the new document
+   name need 100% certainty (`review_policy.certainty_decision`). No model is ever 100%
+   certain, so in practice a person confirms both before filing. **Not applied yet:** the
+   0.90 thresholds stay until Bella and Delia agree how this works on screen.
+8. ~~**Renaming**~~: **answered 13 Oct 2026**. Yes, documents are renamed, and every rename
+   records the old name, new name, who and when (`filing_model.renaming`; needs the audit
+   log, #7).
