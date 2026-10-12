@@ -3,6 +3,35 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 09-10-2026 — event folders name the event, not one document; stage on each document
+
+### Done
+- **Filing is two layers: client, then advice event.** That was always the design
+  (`filing_model.axes`), but the event folder was named after its advice record —
+  `2021-10 — Superannuation & Insurance [SOA]`. The folder holds every document of
+  the event (fact find, risk profile, SOA, ATP, PDS), so naming it after one of them
+  misdescribes it. Now `2021-10 — Superannuation & Insurance`.
+- `knowledge_base.json` — `naming_pattern` and `examples` drop `[<record type>]`;
+  new `naming_note` says why. The record type and ROA situation stay in each
+  document's **filename** (`2021-10-12 ROA — further advice.pdf`), where they
+  describe that document alone.
+- **Advice stage is shown per document, not as a folder.** New
+  `filing_model.stage_label` in the KB; `filing.advice_stages()` reads
+  `advice_process_stages[].typical_docs`. An SOA reads `3 Advice construction ·
+  4 Advice delivery`; a file note, which sits in all six, reads `Any stage`.
+  `/ingest`'s `filing` block gains `stages`; the result card shows an
+  "Advice stage" row. Stage folders were ruled out: an event usually holds one or
+  two documents per stage.
+- `proposed_event_folder()` no longer takes `flags` — it only used them for the tag.
+- `tests/test_filing.py` — **`proposed_filing()` now has tests** (the gap noted in
+  #56), plus stage tests for every document type. 359 non-LLM tests pass
+  (344 before), 13 skipped.
+
+### Not done here
+- **The client layer is still empty** until GH#6 slice 3 chooses a client.
+- The stages stay at the KB's **six**. Other frameworks slice the same process
+  into seven (FPSB); not adopted.
+
 ## Session 08-10-2026 — where a document would be filed, shown on ingest (GH#10)
 
 ### Done
