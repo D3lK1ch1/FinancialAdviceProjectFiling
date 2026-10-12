@@ -226,8 +226,8 @@ docs/                   spec, architecture, session notes, to-do list — see be
 
 - **Live app track** (`app.py` / `parser.py` / `scope_gate.py` / `classifier.py`) —
   the one you run with the uvicorn command above. Parser → scope gate → LLM
-  classifier are wired. Filing and the 11-rule flagging engine (`edge_case_flags` in
-  `knowledge_base.json`) are **not** wired yet.
+  classifier are wired, and `/ingest` shows a filing proposal. Nothing is filed yet,
+  and 2 of the 12 flag rules (`edge_case_flags` in `knowledge_base.json`) run.
 - **Harness/validation track** (`harness.py`) — batch keyword-matcher, currently runs
   against `harness_demo_fixture.json` (synthetic text), not the real `samples/` PDFs.
   Has two known unfixed bugs (KB-array-order tie-breaking, string-sorted date
@@ -238,13 +238,17 @@ live app, or gets replaced by it.
 
 ## Status / what's not built yet
 
-- No filing — proposed filenames and event folders exist in `filing.py`, but
-  `/ingest` does not return a full proposed path yet, and nothing is ever moved or
-  renamed.
+- No filing — `/ingest` proposes an event folder and a file name for each
+  document, but the client folder stays empty until a client can be chosen (#6),
+  and nothing is ever moved or renamed.
 - Flags: the single-document rules (ROA situation, bundle) run on every upload;
   the rules that need other documents on file wait on persistence.
 - Approve / Reject records a verdict on the type. Not yet: correcting the client,
   date or filename; roles (who may approve); hard stops greying out Approve.
+
+**What's next, in order:** #59 (classifier evidence as exact quotes, so correct
+documents stop going to review) → #48 (SOA dates) → #6 (choose the client). Domain
+questions waiting on Bella are collected in #61.
 
 ## Contributing
 
@@ -309,3 +313,6 @@ These are the documents handed off from me with the collaborator, as project's s
 | `docs/ARCHITECTURE_TRACE.md` | what maps to what across the docs |
 | `docs/HANDOVER.md` | sample sourcing decisions, judgment calls, source URLs |
 | `docs/sample_documents.labelling.md` | hand-labelled expected results for `samples/` |
+
+**None of these are in the repo yet.** `.gitignore` blocked `docs/` until 9 Oct, so
+they were never committed. Adding them is #60.

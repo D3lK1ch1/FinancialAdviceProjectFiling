@@ -12,6 +12,8 @@ It proposes; a human approves, edits, or rejects. It classifies documents that a
 exist — **it never generates financial advice.**
 
 ## Read these first
+**`docs/` is not in the repo yet** — `.gitignore` blocked it until 9 Oct (#60). Until the
+files are added, the knowledge base, `README.md` and `CHANGELOG.md` are what exists.
 - `docs/SYSTEM.md` — the spec. Build from it. Source of truth for behaviour.
 - `knowledge_base.json` — the domain data the classifier reads (v0.3).
 - `harness.py` — a working keyword-based prototype of the full pipeline. Reference, not final.
