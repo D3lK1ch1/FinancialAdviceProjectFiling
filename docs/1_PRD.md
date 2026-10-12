@@ -47,12 +47,12 @@ Primary early customers: sole practitioners and micro-practices (~6,000 firms, a
 
 ### 5.2 Classification
 - Return **document type** from the nine+ types in `knowledge_base.json`, with a confidence score.
-- Distinguish the hard cases: **SOA vs ROA** (and ROA's four legislative bases), FSG vs PDS, fact find vs risk profile.
+- Distinguish the hard cases: **SOA vs ROA** (and the three situations that permit an ROA), FSG vs PDS, fact find vs risk profile.
 - Emit structured JSON: `{doc_type, confidence, advice_record_role, matched_signals, suggested_path, flags[]}`.
 - `advice_record_role` flag absorbs the DBFO SOA→CAR transition via **relabelling, not rebuilding**.
 
 ### 5.3 Edge-case flagging
-- Apply the eleven flagging rules from the knowledge base (e.g. "ROA — confirm which of four bases", severity medium).
+- Apply the flagging rules from the knowledge base, `edge_case_flags` (12 as of 13 Oct 2026; e.g. `roa_basis_unconfirmed` — "ROA: confirm which of three situations", severity medium).
 - Never silently resolve ambiguity — flag and route to review.
 
 ### 5.4 Filing model

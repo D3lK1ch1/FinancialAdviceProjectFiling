@@ -3,6 +3,27 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 13-10-2026 — docs/ added (#60) and brought in line with current decisions
+
+- **Added** (Delia): the eight handover documents in `docs/` — `SYSTEM.md`, `1_PRD.md`,
+  `2_ARCHITECTURE.md`, `3_BUSINESS_CASE.md`, `HANDOVER.md`, `GROUND_TRUTH.md`,
+  `advice_classification_reference.md`, `sample_documents.labelling.md`. The domain
+  partner's name is replaced with "the domain collaborator". Spec shared; samples stay out.
+- **Corrected** (Bella): several were the 20 Aug handover copies, from before later decisions.
+  - `advice_classification_reference.md` replaced with the 29 Sep version: **three** ROA
+    situations, not four (#33).
+  - INFO 266 attachment 2 is **further advice** whose recommendation is no change, not
+    "NOT further advice". Fixed in `HANDOVER.md` and `sample_documents.labelling.md`.
+  - Small investment is s946AA + reg 7.7.09A, not reg 7.7.10AAA.
+  - "Four bases" → three situations in `1_PRD.md`, `2_ARCHITECTURE.md`, `3_BUSINESS_CASE.md`.
+  - "11 flag rules" → the rules in `edge_case_flags` (12 today); the ROA flag id is
+    `roa_basis_unconfirmed`.
+  - `SYSTEM.md`: event folder is `YYYY-MM — subject`, never labelled "[SOA]"; stage shown
+    per document (PR #58).
+  - `GROUND_TRUTH.md`: folder levels, joint clients (Q1) and sub-folders (Q6) marked
+    answered 9 Oct.
+- `CLAUDE.md` and `README.md` no longer say `docs/` is missing from the repo.
+
 ## Session 09-10-2026 — issues brought up to date; domain decisions; docs/ unblocked
 
 ### Decided (Bella)

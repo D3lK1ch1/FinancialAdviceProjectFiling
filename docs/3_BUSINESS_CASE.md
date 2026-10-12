@@ -31,7 +31,7 @@ Sole practitioners and micro-practices (~6,000 firms) — most squeezed on cost,
 ## 5. Positioning
 
 - **Overlay, not replacement.** Ride alongside Xplan/AdviserLogic/Midwinter via file tree / API. Switching core systems is too painful ("necessary evil") — don't ask them to.
-- **Advice-native, not generic.** Understands SOA vs ROA (four bases) vs FSG vs PDS and Corporations Act record-keeping — where accounting DMS tools can't follow.
+- **Advice-native, not generic.** Understands SOA vs ROA (three situations) vs FSG vs PDS and Corporations Act record-keeping — where accounting DMS tools can't follow.
 - **Cheap and no lock-in.** Deliberate contrast to Iress's pricing and contracts.
 - **Australian data sovereignty.** No offshore handling of client data/TFNs — table-stakes.
 
@@ -70,7 +70,7 @@ Sole practitioners and micro-practices (~6,000 firms) — most squeezed on cost,
 
 ## 10. Threats & responses
 - **Iress ships AI auto-filing** → wedge narrows; accelerate into Stage 2 (record-completeness, CAR workflows) where incumbents are weakest; lean on price + integration neutrality.
-- **FYI extends into advice** with Corporations Act/CAR awareness → same response; emphasise advice-native depth (ROA four bases, CAR seam).
+- **FYI extends into advice** with Corporations Act/CAR awareness → same response; emphasise advice-native depth (ROA three situations, CAR seam).
 - **Drafting tools drift into classification** → window is finite; move to own the niche now.
 
 ## 11. Regulatory boundary

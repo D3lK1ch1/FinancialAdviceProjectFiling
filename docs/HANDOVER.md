@@ -18,7 +18,7 @@ made, and states plainly what is still a manual human step (and why it can't be 
 | 1. Fill the PDS gap (2nd PDS) | **Open, low priority** | Manual browser download. Second PDS is an edge variant — not blocking |
 | 2. Spot-check every file is native text | **Manual — domain collaborator** | Human eyeball check; can't be scripted. See §2 |
 | 3. Narrow down the test set | **Decided** | See §3 — labels + keep/drop resolved |
-| 3a. Does the ROA set test the four bases? | **Answered** | 3 of 4 bases covered; enough to prove the mechanism. See §3 |
+| 3a. Does the ROA set test the ROA situations? | **Answered, corrected 17 Sep** | There are three situations, not four, and all three samples are *further advice*. One situation covered, three times. See §3 |
 | 3b. Are the two FSGs different enough? | **Answered** | Yes — boutique vs large super fund differ structurally. Keep both |
 | 3c. Anything to drop as unrepresentative? | **Answered** | Nothing dropped; the *gap* is missing everyday types, not bad files. See §4 |
 | 4. Label expected doc_type (unit 2) | **Drafted** | `sample_documents.labelling.md` — domain collaborator to confirm |
@@ -55,12 +55,19 @@ it's the check that the *input* is real before anything downstream trusts it.
 
 ## 3. Judgment calls (resolved)
 
-- **Attachment 2 relabelled:** it is a **no-change ROA**, not "further advice." Corrected
-  filename: `ROA_INFO266_att2_nochange.pdf`. Att 1 = further advice, att 2 = no-change,
-  att 3 = stockbroker.
-- **ROA bases:** the set covers **three of four** legislative bases. That is enough to prove the
-  "confirm which kind" mechanism. The fourth (small investment, reg 7.7.10AAA) is a **known gap**,
-  logged — not to be sourced artificially just for completeness.
+> **Corrected 17 Sep 2026 (issue #33).** The two bullets below originally said attachment 2
+> was "not further advice" and that the set covered "three of four" bases. Both were wrong.
+> See `advice_classification_reference.md` §4.
+
+- **Attachment 2:** titled "No change advice", but its basis is **further advice** — the client
+  had an SOA from 2018. "No change" is what the advice *recommends*, not the basis. The filename
+  `ROA_INFO266_att2_nochange.pdf` describes the recommendation and is kept. Att 1, att 2 and
+  att 3 all cite further advice (notional s946B(2), reg 7.7.10AE).
+- **ROA situations:** an ROA is permitted in **three** situations, not four: further advice
+  (reg 7.7.10AE), no buy or sell (reg 7.7.10AAA, notional s946B(7)–(8)), and small investment
+  under $15,000 (s946AA + reg 7.7.09A). The sample set covers **one situation three times**.
+  The other two are a **known gap**, logged — not to be sourced artificially. A mock written by
+  whoever wrote the rules matches by construction and tests nothing.
 - **FSGs:** keep both. Boutique practice (Peninsula) vs large super fund (UniSuper) differ in
   structure and wording — a genuine test, not a trivial one.
 

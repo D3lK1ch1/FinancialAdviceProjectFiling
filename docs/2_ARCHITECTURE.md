@@ -25,7 +25,7 @@
         ┌───────────▼──┐ ┌──────▼──────┐ ┌───▼─────────┐ ┌▼──────────────┐
         │  Parser       │ │ Classifier  │ │ Filing      │ │ Flagging      │
         │ pypdf /       │ │ LLM → JSON  │ │ engine      │ │ engine        │
-        │ pdfplumber    │ │ + KB hints  │ │ client→event│ │ 11 rules      │
+        │ pdfplumber    │ │ + KB hints  │ │ client→event│ │ KB rules      │
         └───────┬───────┘ └──────┬──────┘ └──────┬──────┘ └───────┬───────┘
                 │                │               │                │
                 └────────────────┴───────┬───────┴────────────────┘
@@ -61,7 +61,7 @@
 
 1. **Ingest** — folder or single file → parser extracts text + metadata → raw record persisted.
 2. **Classify** — text + KB signals → LLM → JSON `{doc_type, confidence, advice_record_role, matched_signals, flags[]}`.
-3. **Flag** — flagging engine applies the 11 rules (e.g. ROA four-bases → "confirm which kind", medium).
+3. **Flag** — flagging engine applies the rules in `knowledge_base.json` `edge_case_flags` (12 as of 13 Oct 2026; e.g. `roa_basis_unconfirmed` → "confirm which of the three situations", medium).
 4. **File (propose)** — filing engine maps to `client → advice_event` path, applies naming convention, or routes to `_Needs review` if confidence below threshold.
 5. **Review** — human approves / corrects; approval commits the file move, correction writes to `failure_log`.
 
@@ -102,7 +102,7 @@ failure_log(
 - **KB-driven hints:** `knowledge_base.json` supplies per-type signals (headings, phrases, disclosures, legislative references) fed into the prompt so classification is grounded, not guessed.
 - **Confidence + threshold:** below threshold → `_Needs review`. Threshold tunable per type (some types are higher-stakes).
 - **Hard-case handling:**
-  - **SOA vs ROA** — both advice records; look for issue-scope, disclosure set, "record of advice" markers. ROA's **four legislative bases** must be distinguished, not collapsed (prior error: treating as one changed flag severity from high to medium "confirm which kind").
+  - **SOA vs ROA** — both advice records; look for issue-scope, disclosure set, "record of advice" markers. An ROA is permitted in **three situations** (further advice, no buy or sell, small investment), so an ROA raises a medium "confirm which kind" flag, not a high-severity error. The situation that permits the ROA is separate from what the advice recommends: "hold / no change" is a recommendation, not a basis (corrected 17 Sep 2026, #33).
   - **FSG vs PDS** — provider-disclosure vs product-disclosure signals.
   - **Fact find vs risk profile** — data-collection vs risk-tolerance instrument.
 - **Explainability:** persist `matched_signals` so the review UI shows *why*.
@@ -115,7 +115,7 @@ failure_log(
 
 ## 7. Flagging engine
 
-- Rules loaded from KB (11 rules). Each: `{rule_id, applies_when, severity, message}`.
+- Rules loaded from KB (`edge_case_flags.rules`, 12 as of 13 Oct 2026). Each: `{rule_id, applies_when, severity, message}`.
 - Deterministic layer on top of the probabilistic classifier — cheap, auditable, testable via `harness.py`.
 
 ## 8. Forward-compatibility (DBFO / SOA→CAR)

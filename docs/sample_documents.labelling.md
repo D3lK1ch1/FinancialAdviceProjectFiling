@@ -39,6 +39,8 @@ Each entry in `sample_documents.json` should carry at least:
 - `expected_doc_type` — the type the classifier must return.
 - `expected_advice_record_role` — the DBFO seam value (SOA today; becomes CAR post-Tranche 2).
 - `expected_flags` — flags the classifier *should* raise (empty = clean classification expected).
+- **Note (13 Oct 2026):** in `knowledge_base.json`, `advice_record_role` is now `true`/`false`
+  (`true` on `soa` and `roa` only). The strings above are the label each file is expected to carry.
 - `is_real_client_file` — `false` for ASIC/regulatory samples. Reminds everyone the set is not
   yet representative of real practice documents.
 
@@ -50,23 +52,27 @@ Each entry in `sample_documents.json` should carry at least:
 |---|---|---|---|---|
 | `SOA_RG90_scaled_advice.pdf` | SOA | SOA | (none) | RG 90 scaled advice, new client, personal insurance |
 | `SOA_INFO267_limited_advice.pdf` | SOA | SOA | (none) | INFO 267 limited-advice example SOA |
-| `ROA_INFO266_att1_retain_modify.pdf` | ROA | n/a | `confirm_roa_basis` | Further-advice basis (reg 7.7.10AE). Republished Nov 2024 |
-| `ROA_INFO266_att2_nochange.pdf` | ROA | n/a | `confirm_roa_basis` | **No-change / no-action basis (s946B(7))** — NOT further advice. Republished Nov 2024 |
-| `ROA_INFO266_att3_stockbroker.pdf` | ROA | n/a | `confirm_roa_basis` | Stockbroker switch. Edge variant, kept but not core |
+| `ROA_INFO266_att1_retain_modify.pdf` | ROA | ROA | `roa_basis_unconfirmed` | Further advice (reg 7.7.10AE). Republished Nov 2024 |
+| `ROA_INFO266_att2_nochange.pdf` | ROA | ROA | `roa_basis_unconfirmed` | **Further advice (reg 7.7.10AE)** — the *recommendation* is no change, but the basis is further advice because the client had an SOA from 2018. Republished Nov 2024 |
+| `ROA_INFO266_att3_stockbroker.pdf` | ROA | ROA | `roa_basis_unconfirmed` | Further advice (reg 7.7.10AE) — not small investment; mentions neither s946AA nor "small investment". Edge variant, kept but not core |
 | `FSG_PeninsulaWealth.pdf` | FSG | n/a | (none) | Boutique advice-practice FSG |
 | `FSG_UniSuper.pdf` | FSG | n/a | (none) | Large super-fund FSG — structurally different from Peninsula |
 | `PDS_AustralianEthicalSuper.pdf` | PDS | n/a | (none) | Edge variant (ethical super). Kept but not core |
 | `PDS_<fund>.pdf` | PDS | n/a | (none) | Second PDS — issuer TBD, low priority |
 
-**The `confirm_roa_basis` flag is expected and correct on all three ROAs.** An ROA legitimately
-has four legislative bases, so the right behaviour is a medium-severity "confirm which kind,"
+**The `roa_basis_unconfirmed` flag is expected and correct on all three ROAs.** An ROA is
+permitted in three situations, so the right behaviour is a medium-severity "confirm which kind,"
 not a clean silent classification and not an error. If the classifier returns an ROA with *no*
 basis flag, that's a miss — log it.
 
-**Attachment 2 label is the one to get right.** It is a *no-change* ROA. The earlier filename
-implied "further advice," which was wrong. Att 1 = further advice, att 2 = no-change,
-att 3 = stockbroker. Three distinct bases across the set; the fourth (small investment,
-reg 7.7.10AAA) is not present and is a known gap, not something to fake.
+**Attachment 2 label is the one to get right.** It is titled "No change advice", but its basis
+is **further advice**: the client had an SOA from 2018. "No change" is what the advice
+recommends, not the situation that permits the ROA. *(Corrected 17 Sep 2026, issue #33 — an
+earlier version of this brief said att 2 was "NOT further advice", which was wrong.)*
+
+All three INFO 266 ROAs are **further advice** — one situation, three times. The other
+two situations (no buy or sell, reg 7.7.10AAA; small investment under $15,000, s946AA +
+reg 7.7.09A) are not present. That is a known gap, not something to fake.
 
 ---
 

@@ -105,7 +105,7 @@ documents above (a file note, an ROA, a fee statement).
 | Topic | This file | Elsewhere | Status |
 |---|---|---|---|
 | Threshold | 90% for everything | `review_policy`: 0.90 for every type (#50) | **Resolved 2026-10-02.** Matches |
-| Folder levels | Client (`Surname, First name`) | #47 proposes Client → Advice event; `settings.filing_mode` has `client_event` and `flat` (#51, flat not built yet) | Open, waiting on partner Q6. The event level is only a proposal, and `flat` is the switch if she says no sub-folders |
+| Folder levels | Client (`Surname, First name`) | #47 Client → Advice event; `settings.filing_mode` has `client_event` and `flat` (#51, flat not built yet) | **Resolved 9 Oct 2026.** Two layers: client folder, then an event folder named `YYYY-MM — <subject>`, never after one document such as "[SOA]". The stage is shown on each document, not as a folder (PR #58) |
 | Popup actions | Accept / Reject (+ correct or manual) | SYSTEM.md: Approve / Edit / Reject | Same idea. "Reject + correct" = Edit |
 | The "why" on a reject | Tell the model what it is and why | `review_policy.correction_reasons`: pick one of six codes, **no free text** (#43) | **Resolved by design.** A free-text box is where staff type a client's name, and the failure log is shared. The "speech bubble" is a pick-a-reason list |
 | Who can accept | "The user" | `approval_policy` (#54): only an adviser (own clients, for SOA/ROA/ATP/FDS) or compliance may approve; admin and paraplanner can edit, not approve | **Added 2026-10-02**, decided by Bella. The tool now has roles |
@@ -116,8 +116,8 @@ documents above (a file note, an ROA, a fee statement).
 She has **no access to real client documents**, and they would be highly confidential anyway. **Never ask her for real examples.** Test material is public (ASIC samples) or synthetic only, until a firm pilot provides real files under proper controls.
 
 ### Open questions for the domain partner
-1. **Couples and joint clients:** is it one folder (`Smith, John & Jane`) or two? And if a
-   joint SOA goes into one, which one?
+1. ~~**Couples and joint clients**~~: **answered 9 Oct 2026**. One shared folder, e.g.
+   `Black, Brad & Zara` (`client_model.joint_client` in `knowledge_base.json`).
 2. **Clients that aren't people** (family trusts, SMSFs, companies): whose name goes on
    the folder?
 3. **Same name, different people:** how does a firm tell two "Smith, John"s apart (date
@@ -126,8 +126,8 @@ She has **no access to real client documents**, and they would be highly confide
    what tells you which person is *the* client?
 5. ~~**Documents that aren't about one client** (FSG, PDS)~~: **answered**. See "Settled
    domain answers".
-6. **Inside a client folder**, do firms expect sub-folders (by year, by piece of advice,
-   by document type), or is one flat folder fine?
+6. ~~**Inside a client folder**~~: **answered 9 Oct 2026**. One sub-folder per advice event,
+   named after the event; see "Folder levels" above.
 7. **Worst mistakes:** of wrong client, wrong document type, and wrong year, which does a
    firm consider serious enough to need 100% instead of 90%?
 8. **Renaming:** is a firm allowed to rename a client's document, or does the original
