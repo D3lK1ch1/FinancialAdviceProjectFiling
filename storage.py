@@ -5,7 +5,7 @@ later (build step 6) without the classifier changing. So nothing outside this
 module knows what a path separator, a root folder or a bucket is. Callers hand
 over a destination as a list of plain segments —
 
-    ["_Needs review", "2024-03 — Retirement [SOA]", "2024-03-14 SOA.pdf"]
+    ["_Needs review", "2024-03 — Retirement", "2024-03-14 SOA.pdf"]
 
 — and the backend decides what that means on its medium. tests/test_storage.py
 asserts that classifier.py, scope_gate.py and app.py carry no file-system
