@@ -617,6 +617,10 @@
         "rationale": "Groups every document belonging to one advisory decision, using the document-to-document links. Reconstructs 'the advice and everything behind it'."
       }
     },
+    "renaming": {
+      "rule": "Documents and folders are renamed. Every rename is tracked: the original name, the new name, who renamed it and when — and users can see who renamed it, so they know who to follow up with questions.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q8). The tracking needs the audit log (GH#7)."
+    },
     "stage_label": {
       "rule": "The advice process stage is shown on each document, read from advice_process_stages[].typical_docs. It is not a folder layer.",
       "why": "An event usually holds one or two documents per stage, so stage folders would mostly hold a single file. Decided 9 Oct 2026.",
@@ -781,7 +785,22 @@
     "name_labels_source": "Only labels seen in the real samples: 'Client name:' in INFO 266 att 1 and att 2 and the INFO 267 SOA; 'Account name:' in the INFO 266 att 3 stockbroker ROA; 'SOA for' in the running header of the example SOA inside RG 90 ('SOA for Brad and Zara Black', every page from p31). Add a label when a real document uses one, not before.",
     "joint_client": {
       "rule": "A joint client is one client with one shared client folder, e.g. 'Black, Brad & Zara'. The names are kept together, never split into two folders or chosen between.",
-      "decided": "Bella, 9 Oct 2026 (GH#61)."
+      "decided": "Bella, 9 Oct 2026 (GH#61).",
+      "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026."
+    },
+    "entity_client": {
+      "rule": "A trust, SMSF or company is the client in its own right. Its folder uses the entity's own name, and each entity has its own folder, separate from the people behind it.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q2)."
+    },
+    "same_surname": {
+      "rule": "Clients who share a surname are told apart by first name: 'Surname, First name'. In practice two clients share only the surname, not the full name.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q3).",
+      "open": "Two different clients with the same full name is not covered by this rule; under the several_names fallback it goes to the adviser."
+    },
+    "several_names": {
+      "rule": "Several names on one document usually share a surname with different first names: file under the surname. If a trustee is named, file under the trust. If neither works, flag it and ask the adviser. Never guess.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q4).",
+      "spouse_named_not_client": "Often only one spouse is the client — usually the husband — and the other is named as context (e.g. INFO 267: advice for John; his wife Jane is named, and insurance advice for her is excluded). The folder uses the client's name only. When both spouses attend and the advice is for both, it is joint advice and joint_client applies. Bella, 13 Oct 2026."
     }
   },
   "summary_feature": {
@@ -931,7 +950,13 @@
         "knowledge_base_gap": "None of the above: the knowledge base is missing a rule. The record says a gap exists; what the gap is belongs in an issue, not in the log."
       }
     },
-    "forces_review_decision": "RESOLVED by multi_doc_bundle. Severity sets the default (edge_case_flags.severity_forces_review: only high blocks). A rule may override it with its own `forces_review`. Medium stays non-blocking by default because roa_basis_unconfirmed fires on every ROA and a queue that asks about every document gets ignored — see the direction note on #20. multi_doc_bundle is medium and overrides to blocking, because filing a two-document bundle as one document destroys a record rather than mislabelling one. It is the only override today."
+    "forces_review_decision": "RESOLVED by multi_doc_bundle. Severity sets the default (edge_case_flags.severity_forces_review: only high blocks). A rule may override it with its own `forces_review`. Medium stays non-blocking by default because roa_basis_unconfirmed fires on every ROA and a queue that asks about every document gets ignored — see the direction note on #20. multi_doc_bundle is medium and overrides to blocking, because filing a two-document bundle as one document destroys a record rather than mislabelling one. It is the only override today.",
+    "certainty_decision": {
+      "rule": "Everything the tool proposes needs 100% certainty: document type, client name, the advice stage, and the new document name. In practice a person confirms every one before anything is filed. Nothing is filed automatically, at any confidence.",
+      "why": "Any of these being wrong can lead to heavy compliance fines and problems with regulators.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q7). Matches CLAUDE.md ground rule 2: everything is a proposal a human approves.",
+      "consequence": "The 0.90 thresholds no longer decide whether to file; every document is confirmed. They can still decide how a proposal is shown (e.g. 'likely' vs 'needs a closer look'). How that works on screen is for Delia and Bella to agree; thresholds are unchanged until then."
+    }
   },
   "approval_policy": {
     "purpose": "Who may approve a filing proposal, what they check, and which flags block approval outright. Decided by Bella on 1 Oct 2026 for the Approve/Edit/Reject screen (build step 5, #4). Read by that screen; never restated in code (ground rule #1).",

@@ -3,6 +3,52 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 13-10-2026 — docs/ added (#60) and brought in line with current decisions
+
+- **Added** (Delia): the eight handover documents in `docs/` — `SYSTEM.md`, `1_PRD.md`,
+  `2_ARCHITECTURE.md`, `3_BUSINESS_CASE.md`, `HANDOVER.md`, `GROUND_TRUTH.md`,
+  `advice_classification_reference.md`, `sample_documents.labelling.md`. The domain
+  partner's name is replaced with "the domain collaborator". Spec shared; samples stay out.
+- **Corrected** (Bella): several were the 20 Aug handover copies, from before later decisions.
+  - `advice_classification_reference.md` replaced with the 29 Sep version: **three** ROA
+    situations, not four (#33).
+  - INFO 266 attachment 2 is **further advice** whose recommendation is no change, not
+    "NOT further advice". Fixed in `HANDOVER.md` and `sample_documents.labelling.md`.
+  - Small investment is s946AA + reg 7.7.09A, not reg 7.7.10AAA.
+  - "Four bases" → three situations in `1_PRD.md`, `2_ARCHITECTURE.md`, `3_BUSINESS_CASE.md`.
+  - "11 flag rules" → the rules in `edge_case_flags` (12 today); the ROA flag id is
+    `roa_basis_unconfirmed`.
+  - `SYSTEM.md`: event folder is `YYYY-MM — subject`, never labelled "[SOA]"; stage shown
+    per document (PR #58).
+  - `GROUND_TRUTH.md`: folder levels, joint clients (Q1) and sub-folders (Q6) marked
+    answered 9 Oct.
+- `CLAUDE.md` and `README.md` no longer say `docs/` is missing from the repo.
+
+### Decided (Bella, 13 Oct) — #61 Q2, Q3, Q4, Q7, Q8
+Recorded in `knowledge_base.json` and `docs/GROUND_TRUTH.md`. No code reads them yet.
+- **Trust, SMSF, company** is the client, with its own folder under its own name
+  (`client_model.entity_client`).
+- **Same surname:** `Surname, First name` tells clients apart (`client_model.same_surname`).
+- **Several names:** file under the shared surname, or under the trust if a trustee is
+  named; otherwise flag and ask the adviser (`client_model.several_names`).
+- **100% certainty on everything the tool proposes**: document type, client name, advice
+  stage and new document name, because a wrong one risks compliance fines and regulator
+  problems (`review_policy.certainty_decision`). A person confirms every document; nothing
+  files automatically. Thresholds not changed yet.
+- **Renaming** of documents and folders allowed, with who/when/old/new tracked and the
+  renamer shown to users for follow-up (`filing_model.renaming`, needs #7).
+- **Joint folder order:** husband's first name first (`client_model.joint_client.order`).
+- **INFO 267 subject is Personal Insurance** (#61). Its "Scope of my advice" (p7) covers
+  personal insurance only and excludes superannuation. The tool proposed *Superannuation*
+  because the scope phrase "want advice about" matched p2's "John did **not** want advice
+  about his superannuation". **For Delia:** scope phrases need to ignore negated sentences,
+  or prefer a "Scope of my advice" section when there is one. Not changed here.
+- **Spouse named but not a client** (INFO 267's Jane): folder uses the client's name only;
+  joint advice uses the joint folder (`client_model.several_names.spouse_named_not_client`).
+- **Other documents firms hold** (#23): emails, letters of outcome from government,
+  invoices, ID documents, tax returns, provider forms. Listed in `GROUND_TRUTH.md` and
+  `advice_classification_reference.md`; not document types yet.
+
 ## Session 09-10-2026 — issues brought up to date; domain decisions; docs/ unblocked
 
 ### Decided (Bella)

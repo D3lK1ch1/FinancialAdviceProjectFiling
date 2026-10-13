@@ -7,7 +7,7 @@ A public demonstration of where the pipeline and review UI are heading:
 
 The purpose of this project is to build upon the referred public demo from pilot stage to an actual product.
 
-> **`docs/` and `samples/` are not in this git repo.** They're gitignored on purpose since planning docs and sample documents are client/collaborator-sourced material, not cleared for public repo (in discussion). A fresh clone will build and pass most tests but won't have them.
+> **`samples/` is not in this git repo.** Sample documents are gitignored on purpose. `docs/` (spec, planning and handover documents) is in the repo since 13 Oct 2026, after it was confirmed the spec can be shared but not the samples. A fresh clone will build and pass most tests but won't have the samples.
 
 ## Run it
 
@@ -291,16 +291,16 @@ PDF dropped at the repo root. It is **not retroactive**: it stops the next commi
 does not scrub history. If a client document is already committed, raise it before
 pushing on top of it.
 
-**`docs/` and `samples/` — shared outside git:**
-Both are gitignored — planning docs and sample advice documents aren't cleared for
-a public repo, and `samples/` doesn't need to grow the repo's size. Get the current
-copies from me directly (drive link / direct transfer, not a PR) and drop them in
-at the same paths — `docs/` and `samples/` — so the code and docs above still find
-them. If you have your own reference/sample documents to add for your own use,
+**`samples/` — shared outside git; `docs/` — in git:**
+`samples/` is gitignored — sample advice documents aren't cleared for a public repo,
+and it doesn't need to grow the repo's size. Get the current copies from me directly
+(drive link / direct transfer, not a PR) and drop them in at `samples/` so the code
+and docs above still find them. `docs/` is tracked in git since 13 Oct 2026; change
+it through a PR like any other file. If you have your own reference/sample documents to add for your own use,
 follow the existing `TYPE_Description.pdf` naming (e.g. `FSG_YourProvider.pdf`) and
 add a matching entry in `docs/sample_documents.labelling.md` with the expected
-classification, then send me the updated folder the same way — not as a PR, since
-neither path is tracked.
+classification. Send new samples the same way (not as a PR); the labelling entry
+goes in through a PR.
 
 ## Docs map
 These are the documents handed off from me with the collaborator, as project's scaffold and used as reference while project is being built.
