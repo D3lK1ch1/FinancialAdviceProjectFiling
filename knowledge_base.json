@@ -950,9 +950,10 @@
     },
     "forces_review_decision": "RESOLVED by multi_doc_bundle. Severity sets the default (edge_case_flags.severity_forces_review: only high blocks). A rule may override it with its own `forces_review`. Medium stays non-blocking by default because roa_basis_unconfirmed fires on every ROA and a queue that asks about every document gets ignored — see the direction note on #20. multi_doc_bundle is medium and overrides to blocking, because filing a two-document bundle as one document destroys a record rather than mislabelling one. It is the only override today.",
     "certainty_decision": {
-      "rule": "The document type and the new document name need 100% certainty.",
-      "decided": "Bella, 13 Oct 2026 (GH#61 Q7).",
-      "consequence": "No classifier is ever 100% certain, so in practice a person confirms the type and the new name before anything is filed. Not applied yet: the thresholds above are unchanged until this is agreed with Delia."
+      "rule": "Everything the tool proposes needs 100% certainty: document type, client name, the advice stage, and the new document name. In practice a person confirms every one before anything is filed. Nothing is filed automatically, at any confidence.",
+      "why": "Any of these being wrong can lead to heavy compliance fines and problems with regulators.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q7). Matches CLAUDE.md ground rule 2: everything is a proposal a human approves.",
+      "consequence": "The 0.90 thresholds no longer decide whether to file; every document is confirmed. They can still decide how a proposal is shown (e.g. 'likely' vs 'needs a closer look'). How that works on screen is for Delia and Bella to agree; thresholds are unchanged until then."
     }
   },
   "approval_policy": {

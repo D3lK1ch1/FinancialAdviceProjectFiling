@@ -31,9 +31,10 @@ Recorded in `knowledge_base.json` and `docs/GROUND_TRUTH.md`. No code reads them
 - **Same surname:** `Surname, First name` tells clients apart (`client_model.same_surname`).
 - **Several names:** file under the shared surname, or under the trust if a trustee is
   named; otherwise flag and ask the adviser (`client_model.several_names`).
-- **100% certainty** on document type and new document name
-  (`review_policy.certainty_decision`). In practice a person confirms both. Thresholds are
-  not changed yet.
+- **100% certainty on everything the tool proposes**: document type, client name, advice
+  stage and new document name, because a wrong one risks compliance fines and regulator
+  problems (`review_policy.certainty_decision`). A person confirms every document; nothing
+  files automatically. Thresholds not changed yet.
 - **Renaming** allowed, with who/when/old/new tracked (`filing_model.renaming`, needs #7).
 
 ## Session 09-10-2026 — issues brought up to date; domain decisions; docs/ unblocked

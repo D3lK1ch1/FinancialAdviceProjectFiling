@@ -19,7 +19,7 @@ file in
   → document type + confidence         (classifier.py, rules from knowledge_base.json)
   → client + confidence                (not built — GH#6)
   → both >= 0.90 ?
-        yes → file to  <Surname>, <First name>/   and log it
+        yes → file to  <Surname>, <First name>/   and log it   [superseded 13 Oct: always popup, see Q7]
         no  → popup: "I think this is <type> for <client>, filed at <path>"
                  accept → file there, log it
                  reject → user gives correct type/client + a reason → file there, log it
@@ -30,8 +30,9 @@ file in
 1. **Filing key = client name, surname then first name.** The point of the tool is that a
    document never ends up in the wrong client's folder. A wrong client is the worst possible
    failure.
-2. **90% threshold covers both the type and the client.** If either one is below 90%, the
-   popup appears. Nothing is ever filed silently below the threshold.
+2. ~~**90% threshold covers both the type and the client.**~~ **Superseded 13 Oct 2026 (Q7):**
+   a person confirms every document — type, client, stage and new name — whatever the
+   confidence. Nothing is ever filed automatically.
 3. **The confidence has to be real.** An LLM that says "0.95" is only reporting its own
    opinion. The number has to be checked before the 90% rule means anything (PR #37).
 4. **Reject is never a dead end.** The user can correct it (type, client, reason), or they
@@ -131,10 +132,11 @@ She has **no access to real client documents**, and they would be highly confide
    domain answers".
 6. ~~**Inside a client folder**~~: **answered 9 Oct 2026**. One sub-folder per advice event,
    named after the event; see "Folder levels" above.
-7. ~~**Worst mistakes**~~: **answered 13 Oct 2026**. The document type and the new document
-   name need 100% certainty (`review_policy.certainty_decision`). No model is ever 100%
-   certain, so in practice a person confirms both before filing. **Not applied yet:** the
-   0.90 thresholds stay until Bella and Delia agree how this works on screen.
+7. ~~**Worst mistakes**~~: **answered 13 Oct 2026**. *All* of it needs 100% certainty:
+   document type, client name, advice stage and the new document name, because any of them
+   being wrong can mean compliance fines and regulator problems
+   (`review_policy.certainty_decision`). So a person confirms every document; **nothing is
+   filed automatically**, even at 90%+. This replaces the auto-file step in the pipeline above.
 8. ~~**Renaming**~~: **answered 13 Oct 2026**. Yes, documents are renamed, and every rename
    records the old name, new name, who and when (`filing_model.renaming`; needs the audit
    log, #7).
