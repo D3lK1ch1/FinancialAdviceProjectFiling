@@ -189,7 +189,9 @@ and that row populates advice type, process stage, compliance step, and flag beh
 
 **Not yet document types** (a firm has them, the knowledge base does not model them — issue #23):
 application / insurance forms (implementation stage, s1012) and engagement letters (initial
-consultation). They route to review today rather than being classified.
+consultation). Bella added on 13 Oct 2026: emails, letters of outcome from government,
+invoices, ID documents, tax returns, and provider forms. They route to review today rather
+than being classified.
 
 ### The three load-bearing rows
 - **SOA/ROA** — the only documents that *are* safe-harbour evidence (step 7). Everything else

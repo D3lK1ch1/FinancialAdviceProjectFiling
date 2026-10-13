@@ -618,7 +618,7 @@
       }
     },
     "renaming": {
-      "rule": "Documents are renamed. Every rename is tracked: the original name, the new name, who renamed it and when.",
+      "rule": "Documents and folders are renamed. Every rename is tracked: the original name, the new name, who renamed it and when — and users can see who renamed it, so they know who to follow up with questions.",
       "decided": "Bella, 13 Oct 2026 (GH#61 Q8). The tracking needs the audit log (GH#7)."
     },
     "stage_label": {
@@ -785,7 +785,8 @@
     "name_labels_source": "Only labels seen in the real samples: 'Client name:' in INFO 266 att 1 and att 2 and the INFO 267 SOA; 'Account name:' in the INFO 266 att 3 stockbroker ROA; 'SOA for' in the running header of the example SOA inside RG 90 ('SOA for Brad and Zara Black', every page from p31). Add a label when a real document uses one, not before.",
     "joint_client": {
       "rule": "A joint client is one client with one shared client folder, e.g. 'Black, Brad & Zara'. The names are kept together, never split into two folders or chosen between.",
-      "decided": "Bella, 9 Oct 2026 (GH#61)."
+      "decided": "Bella, 9 Oct 2026 (GH#61).",
+      "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026."
     },
     "entity_client": {
       "rule": "A trust, SMSF or company is the client in its own right. Its folder uses the entity's own name, and each entity has its own folder, separate from the people behind it.",

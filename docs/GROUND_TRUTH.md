@@ -118,7 +118,8 @@ She has **no access to real client documents**, and they would be highly confide
 
 ### Open questions for the domain partner
 1. ~~**Couples and joint clients**~~: **answered 9 Oct 2026**. One shared folder, e.g.
-   `Black, Brad & Zara` (`client_model.joint_client` in `knowledge_base.json`).
+   `Black, Brad & Zara` (`client_model.joint_client` in `knowledge_base.json`). Husband's
+   first name first, the convention firms expect (13 Oct 2026).
 2. ~~**Clients that aren't people**~~: **answered 13 Oct 2026**. The trust, SMSF or company
    is the client. Each one has its own folder under its own name, separate from the people
    behind it (`client_model.entity_client`).
@@ -137,6 +138,9 @@ She has **no access to real client documents**, and they would be highly confide
    being wrong can mean compliance fines and regulator problems
    (`review_policy.certainty_decision`). So a person confirms every document; **nothing is
    filed automatically**, even at 90%+. This replaces the auto-file step in the pipeline above.
-8. ~~**Renaming**~~: **answered 13 Oct 2026**. Yes, documents are renamed, and every rename
-   records the old name, new name, who and when (`filing_model.renaming`; needs the audit
-   log, #7).
+8. ~~**Renaming**~~: **answered 13 Oct 2026**. Yes, documents *and folders* are renamed.
+   Every rename records the old name, new name, who and when, and users can see who renamed
+   it so they can follow up with questions (`filing_model.renaming`; needs the audit log, #7).
+9. ~~**Other documents a firm holds**~~ (from #61 / #23): **answered 13 Oct 2026**. Emails,
+   letters of outcome from government, invoices, ID documents, tax returns, and provider
+   forms. None are document types yet; they go to review until they are.

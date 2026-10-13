@@ -35,7 +35,12 @@ Recorded in `knowledge_base.json` and `docs/GROUND_TRUTH.md`. No code reads them
   stage and new document name, because a wrong one risks compliance fines and regulator
   problems (`review_policy.certainty_decision`). A person confirms every document; nothing
   files automatically. Thresholds not changed yet.
-- **Renaming** allowed, with who/when/old/new tracked (`filing_model.renaming`, needs #7).
+- **Renaming** of documents and folders allowed, with who/when/old/new tracked and the
+  renamer shown to users for follow-up (`filing_model.renaming`, needs #7).
+- **Joint folder order:** husband's first name first (`client_model.joint_client.order`).
+- **Other documents firms hold** (#23): emails, letters of outcome from government,
+  invoices, ID documents, tax returns, provider forms. Listed in `GROUND_TRUTH.md` and
+  `advice_classification_reference.md`; not document types yet.
 
 ## Session 09-10-2026 — issues brought up to date; domain decisions; docs/ unblocked
 
