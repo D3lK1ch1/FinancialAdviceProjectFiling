@@ -38,6 +38,13 @@ Recorded in `knowledge_base.json` and `docs/GROUND_TRUTH.md`. No code reads them
 - **Renaming** of documents and folders allowed, with who/when/old/new tracked and the
   renamer shown to users for follow-up (`filing_model.renaming`, needs #7).
 - **Joint folder order:** husband's first name first (`client_model.joint_client.order`).
+- **INFO 267 subject is Personal Insurance** (#61). Its "Scope of my advice" (p7) covers
+  personal insurance only and excludes superannuation. The tool proposed *Superannuation*
+  because the scope phrase "want advice about" matched p2's "John did **not** want advice
+  about his superannuation". **For Delia:** scope phrases need to ignore negated sentences,
+  or prefer a "Scope of my advice" section when there is one. Not changed here.
+- **Spouse named but not a client** (INFO 267's Jane): folder uses the client's name only;
+  joint advice uses the joint folder (`client_model.several_names.spouse_named_not_client`).
 - **Other documents firms hold** (#23): emails, letters of outcome from government,
   invoices, ID documents, tax returns, provider forms. Listed in `GROUND_TRUTH.md` and
   `advice_classification_reference.md`; not document types yet.

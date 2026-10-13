@@ -129,6 +129,9 @@ She has **no access to real client documents**, and they would be highly confide
 4. ~~**Several names on one document**~~: **answered 13 Oct 2026**. Usually the same surname
    with different first names: file under the surname. If a trustee is named, file under the
    trust. If neither works, flag it and ask the adviser (`client_model.several_names`).
+   A spouse who is named but isn't a client (INFO 267: advice for John only; Jane is named)
+   doesn't go on the folder — it's `[Surname], John`. Joint advice, both attending, uses the
+   joint folder, husband first.
 5. ~~**Documents that aren't about one client** (FSG, PDS)~~: **answered**. See "Settled
    domain answers".
 6. ~~**Inside a client folder**~~: **answered 9 Oct 2026**. One sub-folder per advice event,

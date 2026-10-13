@@ -799,7 +799,8 @@
     },
     "several_names": {
       "rule": "Several names on one document usually share a surname with different first names: file under the surname. If a trustee is named, file under the trust. If neither works, flag it and ask the adviser. Never guess.",
-      "decided": "Bella, 13 Oct 2026 (GH#61 Q4)."
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q4).",
+      "spouse_named_not_client": "Often only one spouse is the client — usually the husband — and the other is named as context (e.g. INFO 267: advice for John; his wife Jane is named, and insurance advice for her is excluded). The folder uses the client's name only. When both spouses attend and the advice is for both, it is joint advice and joint_client applies. Bella, 13 Oct 2026."
     }
   },
   "summary_feature": {
