@@ -9,6 +9,31 @@ a finished step (see Contributing in `README.md`). Newest at top.
   keep titles ('Dr John Smith' → 'Smith, Dr John'). Recorded as
   `client_model.name_format`; not built yet (#6).
 
+### For Delia — next fixes (from Bella's review of the code, 14 Oct)
+Nothing below is built yet; each is its own branch + PR.
+1. **Client names (`clients.py`, #6)** — tested 14 Oct:
+   - `JOHN SMITH` (all capitals) → not found. Should give `Smith, John`.
+   - `Anna van der Berg` → cut to `Anna`. Surname particles (van, der, de, von) dropped.
+   - `ABC Pty Ltd` → not found. Companies, trusts and SMSFs are clients (`entity_client`).
+   - `Mr John Smith` → keep the title, but put it after the comma: `Smith, Mr John`
+     (`name_format`).
+2. **Dates (`dates.py`, #48):** two different "Date of advice" dates → picks the first
+   silently; should go to a person. `03/04/24` (two-digit year) is ignored.
+3. **"date of advice" is written in `dates.py`** — move it to `knowledge_base.json`
+   (ground rule 1).
+4. **INFO 267 subject:** scope phrase "want advice about" matched "John did **not** want
+   advice about his superannuation". Skip negated sentences or prefer the "Scope of my
+   advice" section. Correct answer: Personal Insurance.
+5. **Who did it:** `/review/correction` records no reviewer. Needed for "show who renamed
+   it" (`filing_model.renaming`, #7).
+6. **Confirm everything:** a person confirms type, client, stage and name on every
+   document (`review_policy.certainty_decision`). Agree the screen with Bella before
+   changing the 0.90 thresholds.
+7. **Tidy:** stale comments in `app.py` ("no classifier yet", a duplicated comment) and
+   `.github/workflows/tests.yml` ("docs/ gitignored"); the skip message in `conftest.py`
+   points to a README heading renamed 13 Oct; `harness.py` still needs
+   `sample_documents.json`.
+
 ## Session 13-10-2026 — docs/ added (#60) and brought in line with current decisions
 
 - **Added** (Delia): the eight handover documents in `docs/` — `SYSTEM.md`, `1_PRD.md`,
