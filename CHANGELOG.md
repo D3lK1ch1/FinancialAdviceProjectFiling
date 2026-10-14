@@ -3,6 +3,12 @@
 What's actually done, in progress, and not started — so nobody re-does or overwrites
 a finished step (see Contributing in `README.md`). Newest at top. 
 
+## Session 14-10-2026 — client name format decided
+
+- **Decided (Bella):** folder names use normal capitals ('JOHN SMITH' → 'Smith, John') and
+  keep titles ('Dr John Smith' → 'Smith, Dr John'). Recorded as
+  `client_model.name_format`; not built yet (#6).
+
 ## Session 13-10-2026 — docs/ added (#60) and brought in line with current decisions
 
 - **Added** (Delia): the eight handover documents in `docs/` — `SYSTEM.md`, `1_PRD.md`,
