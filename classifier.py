@@ -32,10 +32,13 @@ document. Respond with ONLY a JSON object, no prose, no markdown fences:
 
 {{"doc_type": {_DOC_TYPE_ENUM}, "confidence": 0.0-1.0, "matched_signals": ["..."]}}
 
-matched_signals must be short phrases actually present in the document text
-that support your answer (e.g. a title phrase, a key field you found).
+matched_signals must be 3-6 exact quotes, each under 12 words, copied
+character for character from the "Document text" section below. Never quote
+the hints, never summarise, never give a field label or category name.
+Right: "Statement of Advice", "Our fees are $3,300".
+Wrong: "title", "fees/commissions", "remuneration & conflicts".
 
-Classifier hints:
+Hints (descriptions of each type, NOT text to quote):
 {hints_block}
 
 Document text (may be truncated):
