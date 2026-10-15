@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-from classifier import _parse_response, classify
+from classifier import _build_prompt, _parse_response, classify
 
 VALID_JSON = '{"doc_type": "soa", "confidence": 0.92, "matched_signals": ["Statement of Advice"]}'
 
@@ -111,3 +111,41 @@ def test_classify_missing_response_key_returns_fallback(mock_post):
 
     assert result["doc_type"] is None
     assert "classifier_error" in result
+
+
+# --- _build_prompt (#59) ---------------------------------------------------
+# confidence.py marks down every quote it can't find in the document, so what
+# the prompt asks for decides whether correct answers reach review. These pin
+# the parts measured in docs/EXPERIMENT_LOG.md.
+
+
+def _flat(text: str) -> str:
+    # The prompt wraps lines; compare wording, not where the line breaks fall.
+    return " ".join(text.split())
+
+
+def test_prompt_asks_for_exact_quotes_not_summaries_or_labels():
+    prompt = _flat(_build_prompt("some document text"))
+
+    assert 'copied exactly from the "Document text" section' in prompt
+    assert "never summarise" in prompt
+    assert "never give a field label" in prompt
+
+
+def test_prompt_puts_document_text_last():
+    prompt = _build_prompt("UNIQUE-DOC-MARKER")
+
+    assert prompt.index("Hints (") < prompt.index("UNIQUE-DOC-MARKER")
+    assert prompt.rstrip().endswith("UNIQUE-DOC-MARKER")
+
+
+@patch("classifier.requests.post")
+def test_classify_sends_temperature_zero_as_a_number(mock_post):
+    mock_post.return_value = _mock_ollama_response(VALID_JSON)
+
+    classify("some document text")
+
+    options = mock_post.call_args.kwargs["json"]["options"]
+    assert options["temperature"] == 0
+    # Ollama rejects "0" (a string) with a 500, and ignores a misspelled key.
+    assert not isinstance(options["temperature"], str)

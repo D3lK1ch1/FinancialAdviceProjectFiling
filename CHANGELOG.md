@@ -1,969 +1,434 @@
 # Changelog
 
-What's actually done, in progress, and not started — so nobody re-does or overwrites
-a finished step (see Contributing in `README.md`). Newest at top. 
+What is done, what was decided, and what is still open, so nobody redoes or
+overwrites a finished step (see Contributing in `README.md`).
 
-## Session 13-10-2026 — docs/ added (#60) and brought in line with current decisions
+**How to read it**
+- Newest first. Dates are `YYYY-MM-DD`. Several sessions on one day are one entry.
+- Each entry uses only the headings it needs, always in this order:
+  **Added · Changed · Fixed · Decided · Checked · Known gaps**.
+- `#N` is a GitHub issue or PR. "Bella" is the domain collaborator; "Delia" is the engineer.
+- Each line says *what* changed and *why* in a sentence. Longer reasoning lives in
+  the issue, the code's docstrings, or `docs/EXPERIMENT_LOG.md`.
 
-- **Added** (Delia): the eight handover documents in `docs/` — `SYSTEM.md`, `1_PRD.md`,
+---
+
+## Classifier evidence as exact quotes 
+
+### Changed
+- `classifier.py` prompt: `matched_signals` must be 3–6 short quotes (3–8 words)
+  copied exactly from the document text. Never a summary, a field label or a hint.
+  The hints are labelled "NOT text to quote", and the document text comes last.
+- The prompt's concrete example quotes are gone: the model copied `"Our fees are $3,300"` into four documents.
+- `classify()` sends `temperature: 0`, so the same document always gets the same
+  answer. Without it, scores for one file varied by 20–44 points (part of #7).
+
+### Added
+- `tests/test_classifier.py`: 3 tests. The prompt keeps the exact-quote
+  instruction, the document text comes last, and temperature is sent as the
+  number `0` (Ollama rejects `"0"`). 393 tests pass.
+- `docs/EXPERIMENT_LOG.md`: every run, score and finding behind this change.
+
+### Checked
+- **INFO 267: 0.41 → 0.90 (passes).** Every quote was found in the text.
+- **FSG_UniSuper: 0.45 → 0.40 (doesn't pass).** Its quotes are real text that PDF
+  extraction splits across two columns. A prompt rule tried for this made things worse and was reverted (log findings 10–11).
+- Every sample kept its correct type. `confidence.py` unchanged.
+
+### Known gaps
+- Multi-column PDFs need column-by-column text extraction (#5).
+- For #7: stamp the model digest and Ollama version on results (Ollama updated
+  itself mid-experiment). `classify()` discards Ollama's error message.
+  `classifier.py` opens the knowledge base without UTF-8, so em dashes reach the model garbled.
+
+---
+
+## 2026-10-13 — `docs/` added and corrected 
+
+### Added
+- (Delia) The eight handover documents in `docs/`: `SYSTEM.md`, `1_PRD.md`,
   `2_ARCHITECTURE.md`, `3_BUSINESS_CASE.md`, `HANDOVER.md`, `GROUND_TRUTH.md`,
-  `advice_classification_reference.md`, `sample_documents.labelling.md`. The domain
-  partner's name is replaced with "the domain collaborator". Spec shared; samples stay out.
-- **Corrected** (Bella): several were the 20 Aug handover copies, from before later decisions.
-  - `advice_classification_reference.md` replaced with the 29 Sep version: **three** ROA
-    situations, not four (#33).
-  - INFO 266 attachment 2 is **further advice** whose recommendation is no change, not
-    "NOT further advice". Fixed in `HANDOVER.md` and `sample_documents.labelling.md`.
-  - Small investment is s946AA + reg 7.7.09A, not reg 7.7.10AAA.
-  - "Four bases" → three situations in `1_PRD.md`, `2_ARCHITECTURE.md`, `3_BUSINESS_CASE.md`.
-  - "11 flag rules" → the rules in `edge_case_flags` (12 today); the ROA flag id is
-    `roa_basis_unconfirmed`.
-  - `SYSTEM.md`: event folder is `YYYY-MM — subject`, never labelled "[SOA]"; stage shown
-    per document (PR #58).
-  - `GROUND_TRUTH.md`: folder levels, joint clients (Q1) and sub-folders (Q6) marked
-    answered 9 Oct.
-- `CLAUDE.md` and `README.md` no longer say `docs/` is missing from the repo.
+  `advice_classification_reference.md`, `sample_documents.labelling.md`. The
+  partner's name is replaced with "the domain collaborator". Samples stay out.
 
-### Decided (Bella, 13 Oct) — #61 Q2, Q3, Q4, Q7, Q8
-Recorded in `knowledge_base.json` and `docs/GROUND_TRUTH.md`. No code reads them yet.
-- **Trust, SMSF, company** is the client, with its own folder under its own name
-  (`client_model.entity_client`).
+### Fixed
+(Bella: several were 20 Aug copies from before later decisions.)
+- `advice_classification_reference.md` replaced with the 29 Sep version: **three** ROA situations, not four.
+- INFO 266 attachment 2 is **further advice** recommending no change. Fixed in
+  `HANDOVER.md` and `sample_documents.labelling.md`.
+- Small investment is s946AA + reg 7.7.09A, not reg 7.7.10AAA.
+- "Four bases" → three situations in `1_PRD.md`, `2_ARCHITECTURE.md`, `3_BUSINESS_CASE.md`.
+- "11 flag rules" → the rules in `edge_case_flags` (12 today). The ROA flag id is `roa_basis_unconfirmed`.
+- `SYSTEM.md`: event folder is `YYYY-MM — subject`, never labelled `[SOA]`; stage shown per document.
+- `GROUND_TRUTH.md`: folder levels, joint clients (Q1) and sub-folders (Q6) marked answered 9 Oct.
+- `CLAUDE.md` and `README.md` no longer say `docs/` is missing.
+
+### Decided
+(Bella, #61 Q2–Q4, Q7, Q8. Recorded in `knowledge_base.json` and `GROUND_TRUTH.md`; no code reads them yet.)
+- **Trust, SMSF, company** is the client, with its own folder (`client_model.entity_client`).
 - **Same surname:** `Surname, First name` tells clients apart (`client_model.same_surname`).
-- **Several names:** file under the shared surname, or under the trust if a trustee is
-  named; otherwise flag and ask the adviser (`client_model.several_names`).
-- **100% certainty on everything the tool proposes**: document type, client name, advice
-  stage and new document name, because a wrong one risks compliance fines and regulator
-  problems (`review_policy.certainty_decision`). A person confirms every document; nothing
-  files automatically. Thresholds not changed yet.
-- **Renaming** of documents and folders allowed, with who/when/old/new tracked and the
-  renamer shown to users for follow-up (`filing_model.renaming`, needs #7).
+- **Several names:** file under the shared surname, or under the trust if a
+  trustee is named. Otherwise flag and ask the adviser (`client_model.several_names`).
+- **100% certainty** on document type, client name, advice stage and new name.
+  A wrong one risks compliance fines. A person confirms every document; nothing
+  files automatically (`review_policy.certainty_decision`). Thresholds not changed yet.
+- **Renaming** documents and folders is allowed, tracking who, when, old and new,
+  with the renamer shown (`filing_model.renaming`, needs #7).
 - **Joint folder order:** husband's first name first (`client_model.joint_client.order`).
-- **INFO 267 subject is Personal Insurance** (#61). Its "Scope of my advice" (p7) covers
-  personal insurance only and excludes superannuation. The tool proposed *Superannuation*
-  because the scope phrase "want advice about" matched p2's "John did **not** want advice
-  about his superannuation". **For Delia:** scope phrases need to ignore negated sentences,
-  or prefer a "Scope of my advice" section when there is one. Not changed here.
-- **Spouse named but not a client** (INFO 267's Jane): folder uses the client's name only;
-  joint advice uses the joint folder (`client_model.several_names.spouse_named_not_client`).
-- **Other documents firms hold** (#23): emails, letters of outcome from government,
-  invoices, ID documents, tax returns, provider forms. Listed in `GROUND_TRUTH.md` and
-  `advice_classification_reference.md`; not document types yet.
+- **INFO 267's subject is Personal Insurance.** Its "Scope of my advice" (p7)
+  excludes super. The tool said *Superannuation* because "want advice about"
+  matched p2's "John did **not** want advice about his superannuation". **For
+  Delia:** scope phrases must ignore negated sentences, or prefer a "Scope of my
+  advice" section. Not changed yet.
+- **Spouse named but not the client** (INFO 267's Jane): the folder uses the client's name only (`client_model.several_names.spouse_named_not_client`).
+- **Other documents firms hold** (#23): emails, government outcome letters,
+  invoices, ID, tax returns, provider forms. Listed in the docs; not document types yet.
 
-## Session 09-10-2026 — issues brought up to date; domain decisions; docs/ unblocked
+---
 
-### Decided (Bella)
-- **Joint client → one shared client folder**, e.g. `Black, Brad & Zara`. Recorded
-  in `knowledge_base.json` as `client_model.joint_client` (#6, #61).
-- **PDS with blank application forms appended → separate documents.** The bundle
-  flag on `PDS_AustralianSuper` is right; a person splits it. No code change (#19).
-- Event folder named after the event, not one document, with the stage on each
-  document: PR #58.
+## 2026-10-09 — Event folders name the event; issues brought up to date
 
-### Issues
-- **Closed #10** (filing proposals): all built. Its last item, the full path with a
-  client folder, moved to #6.
-- **New:** #59 classifier evidence must be exact quotes (the INFO 267 49% /
-  FSG_UniSuper 32% cause), #60 the missing `docs/` folder, #61 one list of every
-  domain question waiting on Bella.
+### Changed
+- **The event folder is named after the event, not one document:**
+  `2021-10 — Superannuation & Insurance`, no `[SOA]` (#58). The folder holds every
+  document of the event. The record type and ROA situation stay in each
+  **filename** (`2021-10-12 ROA — further advice.pdf`). `naming_note` in the KB says why.
+- **The advice stage is shown per document, not as a folder.** `filing_model.stage_label`;
+  `filing.advice_stages()` reads `advice_process_stages[].typical_docs`. An SOA reads
+  `3 Advice construction · 4 Advice delivery`; a file note reads `Any stage`. The result
+  card has an "Advice stage" row. Stage folders were ruled out: an event usually holds
+  one or two documents per stage.
+- `proposed_event_folder()` no longer takes `flags`. It only used them for the tag.
+- **`.gitignore` no longer ignores `docs`.** It had done so since the first commit, so
+  the spec was never in the repo. Client files stay blocked by the `*.pdf`, `*.docx`,
+  `*.doc` and `*.zip` rules and by `samples`. `README.md` and `CLAUDE.md` updated.
+
+### Added
+- `tests/test_filing.py`: `proposed_filing()` tests, plus stage tests for every
+  type. 359 non-LLM tests pass (344 before), 13 skipped.
+- New issues: #59 (exact-quote evidence; INFO 267 49%, FSG_UniSuper 32%), #60
+  (missing `docs/`), #61 (every domain question for Bella).
+
+### Decided
+- (Bella) **Joint client → one shared folder**, e.g. `Black, Brad & Zara` (`client_model.joint_client`; #6, #61).
+- (Bella) **A PDS with blank application forms appended is separate documents.**
+  The bundle flag on `PDS_AustralianSuper` is right; a person splits it (#19).
+
+### Checked
+- Closed #10. Its last item, the full path with a client folder, moved to #6.
 - Status lines refreshed on #2, #5, #6, #7, #8, #11, #19, #20, #23, #26 and #48.
-  Several said "awaiting Delia's merge" for PRs merged on 1–2 Oct.
 
-### docs/
-- **`.gitignore` no longer ignores `docs`.** It had since the first commit, so the
-  spec and handover documents `CLAUDE.md` and the README's docs map point to were
-  never in the repo. Client files stay blocked by the `*.pdf`, `*.docx`, `*.doc`
-  and `*.zip` rules and by `samples`. The files themselves still need adding (#60).
-- `README.md` status and docs map, and `CLAUDE.md`, now say so.
+### Known gaps
+- The client folder stays empty until #6 slice 3 chooses a client.
+- Stages stay at six. FPSB's seven-stage split was not adopted.
+- Next for Delia: #59, then #48 (SOA dates), then #6 slices 2–3.
 
-### Next for Delia, in order
-1. Review PR #58; decide on PR #28 (waiting on a firm, #61).
-2. #59 — classifier evidence as exact quotes.
-3. #48 — SOA dates.
-4. #6 slices 2–3 — choose the client and fill the client folder.
-5. #60 — add the `docs/` files if you have them.
-6. Every change on a branch through a PR, including session notes (CLAUDE.md rule 7).
-## Session 09-10-2026 — event folders name the event, not one document; stage on each document
+---
 
-### Done
-- **Filing is two layers: client, then advice event.** That was always the design
-  (`filing_model.axes`), but the event folder was named after its advice record —
-  `2021-10 — Superannuation & Insurance [SOA]`. The folder holds every document of
-  the event (fact find, risk profile, SOA, ATP, PDS), so naming it after one of them
-  misdescribes it. Now `2021-10 — Superannuation & Insurance`.
-- `knowledge_base.json` — `naming_pattern` and `examples` drop `[<record type>]`;
-  new `naming_note` says why. The record type and ROA situation stay in each
-  document's **filename** (`2021-10-12 ROA — further advice.pdf`), where they
-  describe that document alone.
-- **Advice stage is shown per document, not as a folder.** New
-  `filing_model.stage_label` in the KB; `filing.advice_stages()` reads
-  `advice_process_stages[].typical_docs`. An SOA reads `3 Advice construction ·
-  4 Advice delivery`; a file note, which sits in all six, reads `Any stage`.
-  `/ingest`'s `filing` block gains `stages`; the result card shows an
-  "Advice stage" row. Stage folders were ruled out: an event usually holds one or
-  two documents per stage.
-- `proposed_event_folder()` no longer takes `flags` — it only used them for the tag.
-- `tests/test_filing.py` — **`proposed_filing()` now has tests** (the gap noted in
-  #56), plus stage tests for every document type. 359 non-LLM tests pass
-  (344 before), 13 skipped.
+## 2026-10-08 — Proposed filing shown on ingest (#10)
 
-### Not done here
-- **The client layer is still empty** until GH#6 slice 3 chooses a client.
-- The stages stay at the KB's **six**. Other frameworks slice the same process
-  into seven (FPSB); not adopted.
+### Added
+- `filing.proposed_filing()` reads the document's date once and passes it to the
+  existing `proposed_filename` and `proposed_event_folder`. It returns client
+  folder, event folder, filename and date, each with a reason when it can't be
+  filled. It joins existing functions; it adds no naming logic.
+- `/ingest` returns a `filing` block. **A proposal only:** nothing is written or
+  moved, and `storage.py` isn't called. The parts aren't joined into one path,
+  because with no client folder a joined path would look like a real destination.
+- The result card has a **"Would be filed as"** section. A part that can't be
+  filled reads *none* plus its reason, never a blank. Restart the server to see it.
 
-## Session 08-10-2026 — where a document would be filed, shown on ingest (GH#10)
+### Checked
+(By hand, classifier stubbed. 375 non-LLM tests pass.)
+- `ROA_INFO266_att1` → `2021-10 — Superannuation & Insurance` / `2021-10-12 ROA — further advice.pdf`.
+- `SOA_INFO267` → `2021-10-22 SOA.pdf`. Right: the model's "December 2021" is when
+  ASIC published INFO 267, and filing doesn't use the model's date.
+- `ROA_INFO266_att2` → `2021-08 — Retirement & Investment` / `2021-08-30 ROA — further advice.pdf`.
+- `SOA_RG90` → no name and no folder, because the date is ambiguous. That's #48, not a filing bug.
 
-### Done
-- `filing.py` — `proposed_filing()` reads the document's date once
-  (`dates.extract_dates`) and hands it to the existing `proposed_filename` and
-  `proposed_event_folder`. Returns client folder, event folder, filename and date,
-  each with a reason when it can't be filled. **No new logic for names or folders**
-  — both functions already existed with tests; this connects them.
-- `/ingest` returns a `filing` block on every document. **A proposal only:** nothing
-  is written or moved, and `storage.py` is not called.
-- **The parts are not joined into one path.** The client folder is always `null`
-  ("no client chosen yet (GH#6)"), and a path with a hole in it reads as a real
-  destination.
-- `static/index.html` — the result card shows a **"Would be filed as"** section
-  under the client names: client folder, event folder and file name, one row
-  each. A part that can't be filled reads *none* plus its reason, never a blank,
-  and the section ends "A proposal. Nothing has been filed." Display only.
-  **Needs a server restart** (or `uvicorn app:app --reload`) — without it the old
-  `/ingest` returns no `filing` block and the section doesn't appear.
+### Known gaps
+- No client folder until #6 slice 3.
+- Accepting a proposal doesn't file anything: `storage.put` has no caller, and no filing root is configured.
+- INFO 267 scored 49% for a correct SOA: half its "quotes" were the model's own summaries. Same cause as FSG_UniSuper on 2 Oct → #59.
 
-### Checked by hand (engineer, classifier stubbed)
-- `ROA_INFO266_att1_retain_modify.pdf` → `2021-10 — Superannuation & Insurance
-  [ROA · further advice]` / `2021-10-12 ROA — further advice.pdf`.
-- `SOA_INFO267_limited_advice.pdf` → `2021-10-22 SOA.pdf`. Right: the example's own
-  "date of advice" is October 2021. The model's "Why" list said December 2021 —
-  that is when ASIC published INFO 267, not the advice date. Filing doesn't use the
-  model's date, so the wrong one never reached the name.
-- `ROA_INFO266_att2_nochange.pdf` → `2021-08 — Retirement & Investment [ROA ·
-  further advice]` / `2021-08-30 ROA — further advice.pdf`. Date is `declared`.
-- `SOA_RG90_scaled_advice.pdf` → no name, no folder: date `ambiguous`. Expected —
-  this is GH#48, not a filing bug.
-- 375 non-LLM tests pass.
+---
 
-### Not done here
-- **No client folder** until GH#6 slice 3 chooses a client. GH#10's last box
-  ("full proposed path") stays open on that.
-- **Accept doesn't file.** `storage.put` still has no caller, and no filing root
-  is configured.
-- **Open: INFO 267's event subject.** Filing reads `Superannuation` from the scope
-  statement; the model's "Why" list says `personal insurance`. Not yet checked
-  against the PDF.
-- **INFO 267 scored 49% for a correct SOA.** The model said 0.95; half its
-  "matched signals" were its own summaries ("remuneration & conflicts"), not quotes,
-  so `confidence.py` halved it. Same cause as `FSG_UniSuper` on 02-10. A classifier
-  prompt fix (exact quotes only); until then most correct documents go to review.
+## 2026-10-06 — Finding the client's name (#6 slice 1)
 
-## Session 06-10-2026 — whose document is it: finding the client's name (GH#6, slice 1)
+### Added
+- `clients.py` (17 tests): `find_client_candidates(pages)` returns every name a
+  document labels as its client, with the label, page and context. **It finds; it doesn't choose.** Choosing is slice 3.
+- `knowledge_base.json` `client_model.name_labels`: `client name`, `account name`,
+  `soa for`. Only labels a real sample uses. Adding one is a KB edit, not Python.
+- `/ingest` returns `client_candidates`, and the card shows each name. **Shown, not
+  used:** `review.assess()` doesn't see it, and a test pins that.
 
-### Done
-- `clients.py` / `tests/test_clients.py` (17 tests) — `find_client_candidates(pages)`
-  returns every name a document labels as its client, with the label that found it, the
-  page and context. Same shape as `dates.find_date_candidates`: **it finds, it does not
-  choose.** Choosing (one clear client → `Surname, First name`; anything else → a human)
-  is slice 3.
-- `knowledge_base.json` — new `client_model` block (GH#6 box 1, started). `name_labels`
-  holds only labels a real sample uses: `client name`, `account name`, `soa for`. Ground
-  rule 1: adding a label is a KB edit, not Python.
-- `/ingest` returns `client_candidates` on every document (empty when none), and the
-  result card shows each name once with its label and pages. **Shown, not used:**
-  `review.assess()` doesn't see it, and `tests/test_ingest_clients.py` pins that a found
-  name leaves the review decision unchanged.
-- **Checked against all 10 files in `samples/`, not assumed.** Four advice records give
-  one name each (Nick Rossi, George Baker, Wendy Zhang, John Patel). The RG 90 example
-  SOA gives `Brad and Zara Black` — a **joint client**, kept whole, not split or chosen
-  between (open question 1 in `GROUND_TRUTH.md`). The five FSGs and PDSs give nothing,
-  which is right: they name no client. Names that must **not** come back don't: the
-  advisers (Sarah Johnson, Tom Baker, Sally Chong) and the INFO 267 client's wife (Jane).
+### Fixed
+(Where a name ends.)
+- The next PDF column lands on the same line, so capitalisation alone took `John Patel The`.
+- A column gap ends a name only once it has two words (`Account name: Wendy ⟶ Zhang`).
+- A following field (`Account number:`) ends a name. A wider rule had cut `Wendy Zhang` to `Wendy`.
+- A test expected no name from RG 90, but its example SOA names Brad and Zara Black
+  in every header. Fixed by adding the `soa for` label, not by loosening the rule.
 
-### Where a name ends — the part that was wrong first
-- Layout extraction puts the next column on the same line: `Client name: John Patel
-  The SOA must include…`, `Nick Rossi AFS licensees and…`. Capitalisation alone took
-  `John Patel The`.
-- Column gaps alone don't work either: the stockbroker ROA spreads one name across a
-  gap — `Account name: Wendy ⟶ Zhang`. So **a gap ends a name only once it has two
-  words.**
-- A following field ends it too: `Account number:`, `Date of advice:` — one capital
-  word, then lower-case words, ending in a colon. A wider "colon within three words"
-  rule cut `Wendy Zhang` to `Wendy`.
-- **A test asserted the wrong thing.** The first version expected nothing from RG 90.
-  Running all ten samples showed the example SOA inside it (p31 on) names Brad and Zara
-  Black in every page header. Fixed by adding the `soa for` label, not by loosening the
-  name rule.
+### Checked
+- All 10 samples: four advice records give Nick Rossi, George Baker, Wendy Zhang and
+  John Patel. RG 90 gives `Brad and Zara Black`, a joint client kept whole. The FSGs
+  and PDSs give none, which is correct. Advisers and INFO 267's wife Jane are not returned.
 
-### Not done here
-- **Party type (slice 2)** — person / trust (`Trust`, `Trustee`) / company (`Pty Ltd`) /
-  unknown, words from the KB.
-- **Selecting a client (slice 3).** `review.assess()` still checks only the type, so the
-  90% rule in `GROUND_TRUTH.md` is half enforced until then.
-- **Matching against a firm's client list** — no list exists. Slice 3 returns what the
-  document *says*; a register can plug in later behind the same output.
-- Open domain questions 1, 3, 4 (joint clients, same-name clients, which of several
-  names is the client) stay with the partner. Until answered, those cases go to a human.
-- **Two known misses, both fail-safe (nothing found → a human, never a wrong name):**
-  `Client name: JOHN SMITH` (all capitals) and `Client name: Smith, John` (surname-first
-  with a comma). Neither appears in the samples; left until a real document does.
-- Only the 10 local samples were run. Bella's wider set (`samples/soa_atp/` etc.) was
-  not — the RG 90 2013 SOA (`Joe and Sue Black`, footer `Statement of Advice for …`) may
-  need a `statement of advice for` label.
+### Known gaps
+- Slice 2 (party type: person, trust or company) and slice 3 (choose one client).
+  Until slice 3, the 90% rule is only half enforced.
+- No firm client list exists to match against.
+- Known misses, which fail safe (nothing found → a person): `JOHN SMITH` in capitals and `Smith, John`.
+- Only the 10 local samples were run. The RG 90 2013 SOA may need a `statement of advice for` label.
 
-## Session 02-10-2026 — review screen, unit B: Approve / Reject on the result card
+---
 
-### Done
-- `static/index.html` — every result card ends in a verdict block. **Approve**
-  records `confirmed` for the proposed type. **Reject** opens two dropdowns,
-  *what it actually is* and *why*, with the chosen reason's meaning shown;
-  Submit stays disabled until both are picked. A recorded verdict replaces the
-  buttons with "Recorded … Nothing has been filed."; a refusal shows the
-  server's own message. Build step 5, first half; GH#4 box 5, screen half.
-- The choices come from `GET /review/options` (unit A), never from a list in
-  the page. The reject list leaves out the type the tool proposed, because the
-  server refuses a "correction" that changes nothing.
-- Out-of-scope documents get Reject only (nothing to approve). The
-  "classifier unavailable" card gets no buttons: a runtime failure is not a
-  verdict on the document.
-- Every button is disabled while a verdict is being sent, so a double click
-  records once.
-- `tests/test_review_buttons.py` — 16 tests on the server side of every click:
-  Approve accepted for all 9 types, Reject accepted for all 5 reasons, a
-  same-type "rejection" refused, and the page holding no copy of the type ids
-  or reason codes.
+## 2026-10-02 — Review screen: the choices, and Approve / Reject
 
-### Checked by hand (engineer)
-- End to end with Ollama running: Approve on `FSG_PeninsulaWealth.pdf` wrote one
-  `reviewer:confirmed` line to `failure_log.jsonl`, keyed by the SHA-256 hash,
-  no filename. The mechanics work.
-- "Couldn't reach the classifier … WinError 10061" is Ollama's local server not
-  running (port 11434 on this machine), not the network. Check
-  `http://localhost:11434` reads "Ollama is running" before testing.
+### Added
+- `GET /review/options`: document types and reason codes read from the KB, so the
+  page keeps no copy (ground rule 1). Approve sends `confirmed`; Reject picks one
+  of five codes; there is no free text. 5 tests.
+- **Approve / Reject on every result card.** Reject asks *what it actually is* and
+  *why*, and Submit stays disabled until both are picked. A recorded verdict reads
+  "Recorded … Nothing has been filed." Out-of-scope cards get Reject only. A
+  "classifier unavailable" card gets no buttons, because a runtime failure isn't a
+  verdict on the document. Buttons are disabled while a verdict is being sent, so a double click records once.
+- `tests/test_review_buttons.py`: 16 tests on the server side of every click.
 
-### Handed over, not done here
-- **Which verdicts are right is a domain judgement**, so acceptance testing of
-  what to approve or reject on the samples goes to the domain collaborator.
-  The engineer checked that a click is recorded correctly; whether the click
-  was the right one is hers to judge.
-- Two findings from this session for that review: `FSG_UniSuper` scored 0.32
-  because the model returned three `key_fields` labels as quotes ("services
-  offered", "fees/commissions"), which the confidence check rightly marked
-  down — a classifier prompt fix. `PDS_AustralianSuper` is held by the bundle
-  hard stop because five blank application forms are appended (pp19–36): is a
-  PDS with its own forms one document?
-- No roles yet: anyone can approve. `approval_policy` (#54) needs a login
-  first. Hard stops greying out Approve are unit C.
+### Fixed
+- `app.py` opens the knowledge base as UTF-8. On Windows, cp1252 had garbled every em dash. Found by a test.
 
-## Session 02-10-2026 — review screen, unit A: the choices it offers
+### Checked
+- Approve on `FSG_PeninsulaWealth.pdf` wrote one `reviewer:confirmed` line, keyed
+  by SHA-256 with no filename.
+- "WinError 10061" means Ollama isn't running. Check that `http://localhost:11434` reads "Ollama is running".
 
-### Done
-- `GET /review/options` — the document types and reason codes the Approve/Reject
-  screen offers, read from `knowledge_base.json` so the page keeps no copy of
-  them (ground rule #1). Approve sends `confirmed`; a reject picks one of the
-  other five codes. No free-text "why".
-- `tests/test_review_options.py` — 5 tests, each checked against the knowledge
-  base, including that every choice offered is one `/review/correction` accepts.
-- **`app.py` now opens the knowledge base as UTF-8.** On Windows it defaulted to
-  cp1252 and garbled every em dash on the way to the screen ("—" became "â€”").
-  Found by the new test, not by eye.
+### Known gaps
+- Whether each verdict is *right* is a domain call, handed to Bella.
+- `FSG_UniSuper` scored 0.32 because the model returned field labels as quotes → #59.
+- No roles yet, so anyone can approve. `approval_policy` (#54) needs a login first.
+- The same unstated encoding is in the other KB loaders, including `classifier.py` → #7.
 
-### Not done here
-- The same unstated encoding is in eight other files that load the knowledge
-  base (`classifier.py`, `review.py`, `scope_gate.py` and others). Harmless
-  while they only read ids and patterns, but a single loader is #7's fourth box.
-- The buttons themselves are unit B; hard stops are unit C.
+---
 
-## Session 01-10-2026 — reviewer corrections, filing proposals (Bella)
+## 2026-10-01 — Reviewer corrections, filing proposals (Bella)
 
-### Done (merged 1 Oct)
-- **#43** `POST /review/correction` → `review.record_correction()` → failure log. `/ingest`
-  now returns `document_id` (SHA-256 of the bytes); only that is accepted, never a filename.
-  Reason codes in `review_policy.correction_reasons`; no free text. GH#4 box 5, server half.
-- **#44** `cryptography==50.0.2` pinned. Without it an owner-locked AES PDS (opens in any
-  viewer) was routed as `unreadable`. Tests per failure mode. Closes GH#36.
-- **#45** `storage.py`: `Storage` protocol + `LocalStorage`; never overwrites; guard test that
-  `classifier.py`/`scope_gate.py`/`app.py` import no file-system libraries. GH#10 boxes 3–4.
-- **#46** `filing.proposed_filename()`: `YYYY-MM-DD <abbrev>[ — <ROA situation>].<ext>`. No
-  usable date → no name. GH#10 box 2.
-- Issues closed: GH#12, GH#36, GH#41. GH#23 corrected to 4/5.
+### Added
+- **#43** `POST /review/correction` writes a reviewer's verdict to the failure log,
+  keyed by `document_id` (SHA-256 of the bytes), never a filename. Reason codes only, no free text.
+- **#45** `storage.py`: a `Storage` protocol and `LocalStorage`; never overwrites.
+  A test checks the classifier never imports file-system code.
+- **#46** `filing.proposed_filename()`: `YYYY-MM-DD <abbrev>[ — <ROA situation>].<ext>`. No usable date → no name.
+- **#47** `filing.proposed_event_folder()`: the subject is read from the advice record's scope statement only.
+- **#51** Teach mode: a `settings` block; `/ingest?display=teach|off` adds the KB's
+  `teaching` note. Five teaching notes corrected.
+- **#54** `approval_policy`: roles, approvers, hard stops vs warnings. Also a
+  stage-map fix: the PDS was in no stage, and file notes are now in every stage.
 
-### Ready, awaiting merge (#47 and the list below)
-- **#47** `filing.proposed_event_folder()` / `advice_subject()`: subject read from the advice
-  record's scope statement, never the whole document (it reads the client's circumstances and
-  the "does not cover" list). Areas in `filing_model.advice_event.subject`. Domain-approved.
+### Changed
+- **#50** One review level, **0.90 for every type**, set once for all firms (`review_policy.screening_model`).
 
-- **#50** One firm-safe review level, 0.90, for every type, set once for the domain;
-  `review_policy.screening_model` (screen, then confirm — the health model).
-- **#51** Teach mode (#11 boxes 1–2): `settings` block; `/ingest?display=teach|off` adds the
-  KB `teaching` note; independence test. Five teaching notes corrected (Bella approved).
-- **#53** Bundle split counts a boundary once and names each part (fixes #52, #19 box 4).
-- **#54** `approval_policy` for the review screen (roles, approvers, hard stops vs warnings,
-  per-type checks) + stage map fix (PDS was in no stage; file notes in every stage).
+### Fixed
+- **#44** `cryptography` pinned. Owner-locked AES PDFs were routed as `unreadable`. Closes #36.
+- **#53** A bundle boundary is counted once, and each part is named. Fixes #52.
 
-### Decisions recorded (Bella)
-- Document filename: date first, KB `abbrev` (GH#10 comment).
-- Event subject: scope statement only; other areas returned as `also_mentioned` (GH#10 comment).
-- Advice-event date = the **"advice as at" (commencement) date**. Expiry, meeting and
-  `PDS … dated` dates are never it (GH#48).
-- Review level: **0.90 for every type**, set once for all firms; no firm or user lowers it.
-- Approvals: adviser or compliance only; advisers for their own clients' advice records;
-  only compliance clears a hard stop (GH#54, posted on GH#4 for the review screen).
-- Firm-specific document types are learned from `knowledge_base_gap` corrections (GH#23).
+### Decided
+- Filename: date first, then the KB `abbrev`.
+- Event subject: from the scope statement only. Other areas come back as `also_mentioned`.
+- The advice-event date is the **"advice as at" (commencement) date**. Expiry,
+  meeting and `PDS … dated` dates never are (#48).
+- Approvals: adviser or compliance only. Advisers approve their own clients'
+  records. Only compliance clears a hard stop (#54).
+- Firm-specific document types are learned from `knowledge_base_gap` corrections (#23).
+- Issues closed: #12, #36, #41. #23 corrected to 4 of 5.
 
-### Not done here
-- **GH#48** — `dates.py` returns `ambiguous` on all three real SOAs: "advice as at" isn't a
-  declared label, the footer date is discarded as boilerplate, `"date of advice"` is hardcoded.
-  Blocks SOA folder names. In Delia's `dates.py` (GH#8). One open question back to Bella.
-- **GH#10 last box** — `/ingest` returning the full proposed path + filename. Next up.
-- GH#4 box 5's review-screen half waits on build step 5.
+### Known gaps
+- **#48:** `dates.py` returns `ambiguous` on all three real SOAs, which blocks SOA folder names.
+- #4 box 5 (the review-screen half) waits on build step 5.
 
-## Session 24-09-2026 — date extraction, and closing GH#9 honestly
+---
 
-### Done
-- `dates.py` / `tests/test_dates.py` (23 tests) — date extraction (GH#8 box 2 / unit 5).
-  Four units: `find_date_candidates` (date-shaped substrings + page + context, no
-  validity judgement yet), `parse_day_first` (explicit day-first — `03/04/2025` → 3
-  April — rejects invalid dates and 2-digit years rather than reordering or guessing),
-  `select_date` (`declared`/`inferred`/`ambiguous`/`absent`, mirroring #32's ROA-basis
-  flag *engine shape* only — checked against a live review comment on #32 first, which
-  confirms the engine itself is unaffected by that PR's disputed legislative content),
-  `extract_dates(parsed)` (integration against `parser.py`'s real return shape).
-- **Empirically checked before designing `select_date`, not assumed:** ran the real
-  `samples/*.pdf` text through candidate-matching first. Bare `Month YYYY` dates
-  ("Issued: November 2021 Updated: November 2024", repeated per-page ASIC footers) are
-  template publication stamps, never the client's advice date — confirms Unit 1's regex
-  was already right to exclude them.
-- **A real bug found by the real-sample spot-check, not by unit tests:** two mentions of
-  the identical date in different sentences were miscounted as competing candidates,
-  returning `ambiguous` on 2 of 3 single-date FSGs (`FSG_AustralianSuper`, `FSG_UniSuper`).
-  Fixed by grouping non-boilerplate candidates by resolved date value instead of raw
-  candidate count. Pinned by
-  `test_same_date_confirmed_by_multiple_mentions_is_not_ambiguous`. Final read across all
-  10 real samples: 3 `declared`, 3 `inferred`, 4 genuinely `ambiguous` (two documents have
-  no declared date label at all, two have multiple real competing dates in the text).
-- **GH#9's two undone boxes are now actually true**, without touching the closed issue
-  (still closed, boxes still ticked — the record is honest because the work exists, not
-  because the record was edited). `llm` marker + default deselect: `pytest.ini` sets
-  `addopts = -m "not llm"`, `test_ingest_full_pipeline_in_scope` (the one test that hits
-  live Ollama) carries the marker. Verified: default run shows `4 deselected`, `pytest -m
-  llm` overrides it and still fails loudly on an unreachable model. Side effect: bare
-  `pytest` is now safe to run on this machine despite the `qwen2.5:3b`/`llama3.1`
-  mismatch — the suite as a whole no longer needs 0.3 done first, only `pytest -m llm`
-  does. File-hygiene CI job: new `file-hygiene` job in `.github/workflows/tests.yml`,
-  `pull_request`-only, diffs base→head for added `*.pdf`/`*.docx`/`*.doc`/`*.zip`, fails
-  with an explicit error. Verified both directions in a throwaway repo before trusting it.
-  Points at README.md's "Client documents never enter git" — the original issue text said
-  "Contributing", but no `CONTRIBUTING.md` exists in this repo.
+## 2026-09-24 — Date extraction (#8); #9 finished properly
 
-### Not done here
-- Date extraction is not wired into `/ingest` — `extract_dates()` exists standalone,
-  nothing calls it from the live app yet.
-- The KB's existing `no_date` edge-case-flag rule is not fired by this work — the output
-  is shaped for a future flag-engine unit to consume, not wired to it.
-- `docs/sample_documents.labelling.md` still has zero hand-labelled expected dates for
-  the real samples. The real-PDF check this session stayed eyeball-only by design;
-  building actual ground truth is still a separate, undecided future task.
+### Added
+- `dates.py` (23 tests), in four units:
+  - `find_date_candidates`: date-shaped text with page and context.
+  - `parse_day_first`: `03/04/2025` is 3 April. Rejects invalid dates and 2-digit years.
+  - `select_date`: returns `declared`, `inferred`, `ambiguous` or `absent`.
+  - `extract_dates(parsed)`: runs on `parser.py`'s real output.
+- An `llm` test marker, deselected by default (`pytest.ini`), so bare `pytest` no
+  longer needs Ollama. `pytest -m llm` runs the live test.
+- A file-hygiene CI job that fails any PR adding `*.pdf`, `*.docx`, `*.doc` or `*.zip`.
 
-## Session 22-09-2026 — CI workflow, and the runtime dependency it found missing
+### Fixed
+- Two mentions of the same date counted as competing dates, which made 2 of 3 FSGs
+  `ambiguous`. Candidates are now grouped by date value. Across the 10 samples:
+  3 declared, 3 inferred, 4 genuinely ambiguous.
 
-### Done
-- `.github/workflows/tests.yml` — runs `python -m pytest -rs` on every PR and every
-  push to `main`, on Python 3.10 (the documented floor) and 3.12, from a fresh
-  install. `-rs` prints the skip reasons in the log, so a skipped test is never
-  silent. No Ollama, no `samples/`: it runs the no-documents tier only.
-- `requirements-dev.txt` — `requirements.txt` plus `pytest` and `httpx`, pinned.
-  The README already said test-only dependencies belonged with CI; this is where.
-- **`requirements.txt` was missing `python-multipart`.** FastAPI cannot declare an
-  `UploadFile` endpoint without it, so in a fresh environment `import app` raised
-  `Form data requires "python-multipart"` — and so did the README's own
-  `pip install -r requirements.txt` followed by `uvicorn app:app`. It never showed
-  because every machine that had run the project already had the package. Found by
-  installing into an empty virtualenv, which is what CI does on every run.
-  Pinned at `0.0.22`, the version already working alongside `fastapi==0.128.0`.
-- README: the install step before `pytest`, the new dependency row, and what CI does.
+### Checked
+- On real samples, a bare `Month YYYY` is a template stamp, never the advice date. The regex was right to skip it.
 
-### Not done here
-- **The workflow has not run on GitHub.** Its YAML parses and its steps were run by
-  hand in fresh virtualenvs on 3.11 and 3.12 (60 passed, 7 skipped on both), but a
-  workflow is only really tested by running. Python 3.10 could not be tried locally
-  (the launcher's 3.10 entry points at a folder that no longer exists), so 3.10's
-  first real run is CI's.
-- **The file-hygiene check** (#9, fourth checkbox): fail any PR that adds a
-  `*.pdf`/`*.docx`/`*.doc`/`*.zip`.
-- **`main` is not protected**, so CI reports but blocks nothing.
+### Known gaps
+- `extract_dates()` isn't wired into `/ingest`, and nothing fires the `no_date` flag yet.
+- No hand-labelled expected dates exist for the samples.
 
-## Session 21-09-2026 — CI test tiers
+---
 
-### Done
-- **A bare clone no longer fails.** Baseline on `origin/main` with no `samples/`:
-  5 failed, 60 passed, 2 skipped. The five were the four `test_e2e.py` sample
-  tests and `test_fsg_is_not_misread_as_soa`, all `FileNotFoundError` — a missing
-  input reading as a broken change. Now: 0 failed, 60 passed, 7 skipped.
-- `@pytest.mark.samples` marks the 25 tests that read real PDFs; `conftest.py`
-  skips them with a reason when `samples/` has no PDFs, and says where to get
-  them. `pytest.ini` registers the marker.
-- The two old skips said only `got empty parameter set` — true, and no help to
-  anyone. The skip mark is added ahead of pytest's own so the useful reason wins.
-- With `samples/` present nothing changes: 80 passed excluding `test_e2e.py`.
+## 2026-09-22 — CI workflow
 
-### Not done here
-- **`llm` marker and default deselect** (#9, second checkbox). `test_e2e.py`'s
-  docstring chooses to fail loudly rather than skip when Ollama is missing, and
-  that choice is being reversed in part — it needs its own decision, so it is its
-  own unit.
-- The **file-hygiene check** (fourth checkbox). CI itself is the entry above.
-- A `samples/` folder with only *some* of the files still fails on the missing
-  one. That is left loud on purpose: an incomplete folder is a real problem.
-- `test_e2e.py`'s four sample tests were not run with `samples/` present — they
-  need `llama3.1`, and this machine's Ollama has `qwen2.5:3b`.
-## Session 17-09-2026 — bundle detection
+### Added
+- `.github/workflows/tests.yml` runs `pytest -rs` on every PR and every push to
+  `main`, on Python 3.10 and 3.12, with no Ollama and no samples. `-rs` prints why each test was skipped.
+- `requirements-dev.txt`: runtime dependencies plus `pytest` and `httpx`, pinned.
 
-### Done
-- `flags.py` — `multi_doc_bundle` now fires. #19's checkboxes 2 and 3: detect
-  from the knowledge base, flag before splitting. `/ingest` passes per-page
-  text (from #21) to the flag engine, which is why that had to land first —
-  joined text cannot show where one document ends and the next begins.
-- **Two signals, and the strong one needs no notion of type.** A page-number
-  marker reading "page 1 of N" on any page but the first is direct evidence of
-  a boundary. The example SOA inside ASIC's RG 90 file restarts at "Page 1 of
-  23" on page 31 of 53, and that is what finds it.
-- **The type signal is a TRANSITION, not a presence.** Every page of a real
-  SOA carries its own title in a running header, so a second type's name
-  appearing somewhere means nothing; the change from one type to another is
-  the signal.
-- **Nothing is ever split.** Candidate boundaries and proposed page ranges go
-  to a human. A missed bundle is a flag nobody actioned; a wrong split cuts a
-  record in half and nothing downstream can tell it happened.
-- **`review_policy.open_question` is resolved, by a real case.** It asked
-  whether medium severity should force review, given `roa_basis_unconfirmed`
-  fires on every ROA. The answer is a per-rule override rather than a
-  severity-wide rule: `multi_doc_bundle` sets `forces_review: true` because
-  filing a two-document bundle as one document destroys a record rather than
-  mislabelling one, and cannot be corrected later from what was filed.
-  `roa_basis_unconfirmed` stays non-blocking, so the queue does not fill with
-  every ROA.
+### Fixed
+- `requirements.txt` was missing `python-multipart`, so `import app` failed in a fresh
+  environment. Pinned at `0.0.22`. Found by installing into an empty virtualenv.
 
-### Shown in the UI, and two things that fixing it exposed
-- The result card renders the bundle flag: page count, the proposed ranges as
-  `p1-18 + p19-24 + ...`, each boundary with its evidence and strength, and a
-  line saying nothing has been split.
-- **The flag renderer was keyed to one rule.** It branched on
-  `determination`, which belongs to `roa_basis_unconfirmed` alone, so a
-  bundle flag fell through to "The document does not say which:" followed by
-  an empty list — untrue, and it hid the evidence. Now one renderer per rule
-  id with a fallback that shows the question and severity rather than
-  asserting something false about a rule it does not know.
-- **`flagged_high_severity` is renamed `flagged_blocking`.** The name was
-  accurate until a rule could override its severity's default. A medium flag
-  displaying as "FLAGGED HIGH SEVERITY" is the kind of small wrongness that
-  teaches a reviewer to distrust the labels. Named for what it does.
+### Known gaps
+- The workflow hadn't run on GitHub yet, and Python 3.10 couldn't be tested locally.
+- `main` is not protected, so CI reports failures but blocks nothing.
 
-### Two wrong turns, both caught by real documents
-- **Frequency-based header suppression was wrong.** Ignoring types that appear
-  on most pages looks sensible and hides exactly the boundary being looked
-  for: in a real bundle the larger document's own running header legitimately
-  appears on most pages of the whole file. Stapling a real FSG to a real ROA
-  showed it — `roa` covered 9 of 11 pages and the boundary at page 3
-  disappeared.
-- **The excursion rule needed both halves.** `unisuper-flexi-pension-pds.pdf`
-  reads `pds -> risk_profile -> pds`, because a PDS describes the risk profile
-  of its investment options. Suppressing only the departure left the RETURN
-  reported as the start of a new document.
+---
 
-### Validated against every real document available
-- 25 files, no mismatches. Five are genuine bundles, twenty are not.
-- **Three findings that correct earlier claims, all raised separately:**
-  - `asic-cp284-example-soa-attachment.pdf` (p56) and
-    `asic-rg90-example-soa-2013.pdf` (p40) **do** carry an appended Authority
-    to Proceed. An earlier note on #19 said no real SOA+ATP case existed in
-    the set — wrong; it was in different files from the one named for it.
-  - `Example SOA.pdf` in the working copy is byte-identical to
-    `samples/soa_atp/asic-rg90-example-soa-with-atp.pdf`.
-  - **`PDS.pdf` is a bundle nobody had noticed** — an AustralianSuper PDS
-    (pp1-18) with five appended forms: Join, Pay my super into, Combine your
-    super twice, and a binding death benefit nomination. Native text, not
-    scanned. See #23.
+## 2026-09-21 — CI test tiers
 
-### Not done here
-- #19's checkbox 4 (propose a split for approval as an action) and checkbox 5
-  (`atp_without_advice_record` must not fire on an unsplit bundle) are
-  separate. The second is stateful and waits on #8.
-- The title signal's known weakness is recorded in the knowledge base rather
-  than left to be discovered: a heading naming another type that never returns
-  to the parent still reads as a boundary. Candidates are evidence for a
-  human, so a wrong one costs a look rather than a record.
-## Session 17-09-2026 — an unreadable file stops being a crash
+### Fixed
+- A bare clone no longer fails. Tests needing `samples/` were failing with
+  `FileNotFoundError`. Now: 0 failed, 60 passed, 7 skipped.
 
-### Done
-- `parser.py` — `parse_pdf()` no longer raises on a file it cannot open. It
-  returns the same shape either way, with `parse_error` carrying the reason,
-  so no caller has to branch on whether parsing worked.
-- **`/ingest` returned HTTP 500 on any unreadable PDF.** Encrypted with a user
-  password, corrupt, truncated, or not a PDF at all — all of them escaped as
-  an unhandled exception, and a reviewer got a stack trace where a document
-  should have been. Part of #36; the two missing dependency pins in that issue
-  are left for #9.
-- **The same defect as #22, in a different code path** — *"a document we
-  cannot read is treated the same as a document that is not advice"* — except
-  worse: it was not treated as anything. `parser.py`'s own docstring already
-  stated the principle it was breaking.
-- **Three situations that were being collapsed, now distinct**, because a
-  reviewer acts on each differently:
+### Added
+- `@pytest.mark.samples` marks the 25 tests that read real PDFs. `conftest.py`
+  skips them with a reason when `samples/` is empty.
+
+### Known gaps
+- A partly filled `samples/` folder still fails on the missing file, on purpose.
+- `test_e2e.py`'s sample tests weren't run: they need `llama3.1`, and this machine had `qwen2.5:3b`.
+
+---
+
+## 2026-09-17 — Confidence check, review threshold, flags, bundles, fail-soft parsing
+
+### Added
+- **Confidence check** (`confidence.py`): verified confidence = the model's
+  confidence × quotes found × scope-gate agreement. `/ingest` returns both
+  `confidence_raw` and `confidence`; thresholds apply to the verified figure.
+  - It only ever lowers the number. Accurate quotes show the model was honest, not that it was right.
+  - A silent scope gate isn't disagreement.
+  - An answer with no quotes is halved, not rejected.
+- **Review threshold** (`review.py`): every document gets a `review` block saying
+  whether it needs a person and why. Thresholds moved from `static/index.html` into
+  `review_policy` in the KB. (They were per type then; they became one 0.90 on 1 Oct.)
+  - Out of scope, `unknown_type` and `classifier_unavailable` are separate reasons.
+  - A low-confidence document keeps its working.
+  - Reasons accumulate rather than stopping at the first.
+- **ROA basis flag** (`flags.py`): `evaluate_flags()` reads `edge_case_flags`, and
+  `/ingest` always returns `flags`. `roa_basis_unconfirmed` (medium) fires on every ROA.
+  - It proposes a situation when the text supports exactly one, otherwise
+    `ambiguous` or `absent`. A declared basis beats an inferred one.
+  - Every rule declares `stateless` or `stateful`, and the engine runs only stateless rules.
+- **Bundle detection** (#19 boxes 2–3): `multi_doc_bundle` fires on a "page 1 of N"
+  restart, or on a change from one document type to another. **Nothing is ever split.**
+  Page ranges go to a person. `multi_doc_bundle` forces review; `roa_basis_unconfirmed` doesn't.
+- **Fail-soft parsing** (`parser.py`): `parse_pdf()` never raises, and `/ingest` no
+  longer returns HTTP 500 on a bad PDF. Three reasons replace the crash:
 
   | reason | meaning | what a person does |
   |---|---|---|
   | `unreadable` | nothing was read | chase the file or the password |
   | `no_selectable_text` | it opened and held no text | send it to OCR (#5) |
-  | `out_of_scope` | read in full, matched nothing | confirm it is not advice |
+  | `out_of_scope` | read in full, matched nothing | confirm it isn't advice |
 
-- **A scanned Statement of Advice is still a Statement of Advice.** It was
-  coming back `out_of_scope`, which is the #22 defect surviving in the review
-  layer. `has_selectable_text` existed and was returned explicitly for exactly
-  this purpose — nothing had ever read it.
-- The catch is deliberately broad. pypdf raises `DependencyError` for AES
-  without `cryptography`, `PdfReadError` for corruption,
-  `FileNotDecryptedError` for a user password, and plain `ValueError`/`OSError`
-  for things that are not PDFs. Enumerating them would leave the next kind of
-  bad file crashing, and the response is the same for all of them: hand it to
-  a person and say why.
-
-### Not done here
-- **The two dependency pins stay with #9.** `python-multipart` (without which
-  the test suite cannot even be collected) and `cryptography` (without which
-  every AES-encrypted PDF fails) are one line each, but they are that issue's
-  subject matter and it is unassigned.
-- Failing soft means the three UniSuper PDS files now route to review with a
-  reason instead of crashing. They still do not get read — that needs the
-  `cryptography` pin. Correct behaviour in the meantime rather than a fix.
-## Session 17-09-2026 — recording corrections other than the document type
-
-### Decided (issue #12)
-- **A generic `corrections` list, not a second pair of fields.**
-  `predicted_type`/`correct_type` record one kind of correction: the tool said
-  PDS, it was a file note. Reviewers make others — which of the three ROA
-  situations a record sits on, and the confidence the system acted on versus
-  what a person judged. A field pair per kind means a schema change for every
-  future flag, so corrections are `{kind, predicted, correct}` entries in a
-  list instead.
-
-### Done
-- `failure_log.py` — `log_failure()` takes an optional `corrections` list.
-  Always written, empty when the document type was the only thing corrected,
-  so no reader branches on whether the key exists.
-- **The de-identification rule is expressed as a shape, not a warning.**
-  `corrections` is the extension point every future flag will use, which makes
-  it precisely where a client name would eventually be written by somebody
-  being helpful at the end of the day. So: `kind` must be one of a known set,
-  the only other fields are `predicted` and `correct`, **and there is no
-  free-text field at all**. An unknown kind or an extra field raises and
-  nothing is written.
-- Three kinds to start: `doc_type`, `roa_situation`, `confidence`. Adding one
-  is a deliberate act with a test behind it, not something a caller can
-  invent — a log that silently accepts anything stops being evidence of
-  anything.
-- `tests/test_failure_log.py` — the exact-field-set guard now applies one
-  level down, to each correction record, for the same reason it applies to the
-  entry.
-
-### Why this was blocking two things
-- #12's ROA basis flag had nowhere to record a corrected situation.
-- #37 keeps `confidence_raw` specifically so model drift is visible, and that
-  comparison needs somewhere to live.
-
-### Not done here
-- **Nothing writes a correction yet**, because no approve/edit/reject action
-  exists — that is #4's fifth checkbox and build step 5. This is the slot,
-  ready for it.
-
-## Session 17-09-2026 — three ROA situations, not four
-
-### Decided (issue #33)
-- **An ROA is permitted in THREE situations, not four.** The old list carried
-  "hold / no-action (s946B(7))" and "no buy/sell (reg 7.7.10AAA)" as separate
-  legislative bases. They are one situation: the Act's s946B(7) *is* the
-  no-buy/sell provision, and reg 7.7.10AAA substitutes a notional version of
-  it and sets its content requirements — the regulation's own title is "Record
-  of advice without a recommendation to purchase or sell". ASIC's FAQ lists
-  three. The old list counted one situation twice.
-- **"Hold" is not a basis at all — it is what the advice recommends.** Which
-  situation permits the ROA and what the advice says are two different things,
-  and collapsing them is what made the old list wrong. An ROA can be *further
-  advice* whose *recommendation* is no change, which is exactly what INFO 266
-  attachment 2 is. The old four-entry list could not express that sentence.
-- **Situation 2 carries a limb that is easy to miss:** no remuneration or
-  benefit received, and conflicts disclosed. For a client on an ongoing fee
-  arrangement that usually fails, which is why an annual-review "no change"
-  recommendation is normally documented as further advice. Content alone never
-  establishes that basis, and the knowledge base now says so.
+- **Failure-log corrections** (#12): an optional `corrections` list of `{kind,
+  predicted, correct}`. The kinds are `doc_type`, `roa_situation` and `confidence`.
+  There is no free-text field, so a client name has nowhere to go.
 
 ### Changed
-- `knowledge_base.json` — `legislation.four_kinds` becomes
-  `legislation.situations`, three entries. `hold_no_action` is absorbed into
-  `no_buy_sell`, which keeps the "take no action" phrasing as INFERRED signals
-  while recording that content alone cannot establish the situation.
-- `CLAUDE.md` — the domain-facts entry rewritten, including the correction
-  that an earlier version said attachment 2 was "not further advice". It cites
-  the further-advice situation, as do attachments 1 and 3.
-- `flags.py`, `tests/test_flags.py` — three situations throughout.
+- **Three ROA situations, not four** (#33). `legislation.four_kinds` became
+  `situations`; `hold_no_action` was absorbed into `no_buy_sell`. "Hold" is what the
+  advice recommends, not a basis. `CLAUDE.md`, `flags.py` and tests updated.
+- `flagged_high_severity` renamed `flagged_blocking`: a rule can now override its severity.
+- The flag renderer has one view per rule, with a fallback. It had been built around the ROA flag only.
 
-### Recorded, not resolved
-- **ASIC's 2021 media release describes INFO 266 as explaining "four
-  exemptions".** Only three ROA situations have been found. The fourth may be
-  a different exemption entirely rather than a fourth ROA basis. Kept in the
-  knowledge base as `unresolved` so nobody re-derives the question from
-  scratch — it does not change the three.
+### Fixed
+- **Quote matching** removes all whitespace before comparing. PDF text splits words
+  internally ("A ustralian S ecurities"), so collapsing spaces wasn't enough. Looser
+  matching is acceptable here because it can only decline to lower a score.
+- **ROA flag on INFO 266 att 1** first said `ambiguous`. "Retain your existing
+  policy" describes a consequence, not a hold, and "no changes to one fund" inside
+  advice that changes another isn't a no-action ROA.
+- **Bundles:** suppressing types that appear on most pages hid real boundaries. The
+  `pds → risk_profile → pds` excursion rule needed both of its halves.
 
-### What the sample set actually covers
-- One situation, three times. All three INFO 266 attachments cite notional
-  s946B(2) and reg 7.7.10AE. `example_status` on the other two situations says
-  plainly that no real document of that kind exists to test against.
+### Checked
+- Bundle detection across 25 files: no mismatches, 5 genuine bundles.
+  - The CP 284 (p56) and RG 90 2013 (p40) SOAs carry an appended ATP.
+  - `PDS.pdf` is an AustralianSuper PDS with five forms appended.
+- The sample set covers one ROA situation (further advice) three times.
 
-## Session 17-09-2026 — the ROA basis flag
+### Known gaps
+- The confidence factors (0.5, 0.6) and thresholds are judgements, not measurements (`calibration_status`).
+- Five stateful flags wait on persistence (#8).
+- Nothing writes a correction yet. That needs the review screen (#4 box 5).
+- No flag fires end to end without Ollama, because flags key on the classified type.
+- ASIC's 2021 media release mentions "four exemptions". Kept as `unresolved` in the KB.
 
-### Done
-- `flags.py` — the first flagging rule, and the seam the rest land in.
-  `evaluate_flags(doc_type, text)` reads `edge_case_flags` from the knowledge
-  base and returns the flags a document earns from its own contents. Wired
-  into `/ingest`, which now always returns a `flags` list, and rendered in the
-  result card so a flag that fires is a flag a person sees.
-- `knowledge_base.json` — `roa_basis_unconfirmed`, medium severity. An ROA has
-  four legislative bases — further advice (reg 7.7.10AE), hold/no-action
-  (s946B(7)), small investment (s946AA), no buy/sell (reg 7.7.10AAA) — and
-  which one applies decides what the record must contain and whether a prior
-  SOA is required at all. Classifying a document as an ROA does not record
-  that, so the question has to be asked.
-- **It fires on every ROA, and it is the only rule in the set that works that
-  way.** The others fire on an anomaly. This one fires on a property of the
-  type, which is what `advice_classification_reference.md` §6 already says
-  against the ROA row: "Medium: confirm which of 4 bases".
-- **It proposes rather than asks blankly.** Where the text supports exactly one
-  basis the flag names it and cites the phrases it matched, so a reviewer
-  confirms or corrects one thing. Where it supports several, or none, it says
-  so and proposes nothing — `determination` is `proposed`, `ambiguous` or
-  `absent`, so the queue stays sortable.
-- **Signals are split into `declared` and `inferred`,** and a declared basis
-  wins. A document naming the situation it was written under outranks a basis
-  read off the shape of the recommendation.
+---
 
-### Calibrated against a real document, not invented
-- Run against ASIC INFO 266 attachment 1 (further advice), the first version
-  returned **ambiguous** — the most canonical further-advice example in the
-  public set, unreadable. Two real causes, both now fixed in the knowledge
-  base and pinned by tests:
-  - *"you will retain your existing policy features and benefits"* describes a
-    **consequence** of advice, not a recommendation to hold. Retain- and
-    continue-to-hold phrasing is gone from `hold_no_action` entirely; it is
-    compatible with further advice that changes something else.
-  - That ROA's own words include *"My advice is to make no changes to your XYZ
-    Superannuation Fund"* while it increases the client's insurance cover. **No
-    change to one holding, inside advice that changes another, is not a
-    s946B(7) no-action ROA** — that basis needs the advice overall to be to
-    take no action. Phrase matching cannot tell those apart, which is why the
-    declared/inferred split exists and why this flag proposes rather than
-    decides.
-- After the fix the same document reads `proposed: further_advice`.
-- Every rule in `edge_case_flags` now declares `"evaluation": "stateless"` or
-  `"stateful"`, and a test asserts the engine only ever runs rules the
-  knowledge base calls stateless. It cannot report having checked something it
-  had no evidence for.
+## 2026-09-10 — File notes; stage references
 
-### Not done here
-- **The failure log has nowhere to put a corrected basis.** `log_failure()`
-  records `predicted_type` / `correct_type` — document type, not basis — and
-  `tests/test_failure_log.py` asserts the exact field set on purpose, so the
-  schema cannot grow quietly. A reviewer correcting a basis is a real
-  correction that ground rule #6 wants captured, and it needs a decision
-  before any field is added. Raised on #12 rather than settled here.
-- **The other ten rules are declared, not implemented.** Five are stateful and
-  wait on persistence (#8). `multi_doc_bundle` is stateless and belongs to
-  #19, which now has the page boundaries it needs.
-- **No review threshold.** The flag says "review" and nothing routes on it yet
-  — that is #4's own checkbox, and `_Needs review` filing is #10.
-- **Nothing fires end to end without Ollama.** The rule keys on the classified
-  type, deliberately, so that a document merely mentioning an ROA is not asked
-  which legislative basis it is. With the classifier unreachable there is no
-  type, so no flag. Verified with the classifier stubbed.
+### Added
+- The `file_note` document type, listed in stage 3. Data only, no Python. It's the
+  only paper trail for safe-harbour steps 3–6.
+  - Without it, a meeting note came back as a PDS.
+  - Notes often record a call to a *provider*, so a fund's name in the title says who was contacted, not who issued the note.
+  - `advice_record_role: false`.
+  - Seven scope-gate tests.
 
-## Session 17-09-2026 — verifying the classifier's confidence
+### Fixed
+- Stage 6: `ongoing_fee_consent` → `fee_disclosure_statement`. `annual_review` removed: it's a service event, not a document.
 
-### Done
-- `confidence.py` — #4's third checkbox. The model's self-reported confidence
-  is now checked before anything acts on it, and `/ingest` returns both
-  numbers: `confidence_raw` as the model gave it, `confidence` as the system
-  will act on it. `review_policy`'s thresholds are applied to the verified
-  figure.
-- **The number was a claim by the model about itself**, produced by the same
-  process that produced the answer, and nothing independent had looked at it.
-  Two things can be checked without trusting the model at all:
-  - **Every phrase in `matched_signals`** is supposed to be text found in the
-    document. Whether it is there is a fact about the document. The proportion
-    that are becomes a multiplier.
-  - **The scope gate's independent read.** It is not smarter than the
-    classifier — it matches title strings — but it cannot be wrong in the same
-    way a language model is wrong, and that independence is what makes
-    agreement worth more than either alone. Same argument
-    `filing_model.accuracy_mechanism` already makes about two axes agreeing.
-- **Verification can only lower, never raise.** Accurate quoting shows the
-  model told the truth about its reasoning; it does not show the answer is
-  right. Letting evidence inflate a figure the model invented would launder a
-  guess into a measurement. There is a test over the whole input space
-  asserting the result never exceeds the raw number.
-- **A silent scope gate is not disagreement.** It reads only the first 500
-  characters, so a document whose title sits below that window leaves it with
-  no opinion — absence of evidence, which must not be scored as evidence of
-  absence.
-- **An answer with no quotes at all is halved, not rejected.** No working is
-  not the same as fabrication, and the flag and the review threshold should
-  still see the proposal.
+### Known gaps
+- `.docx` returns HTTP 500, and file notes are usually Word documents (#5).
+- `application_forms` is a genuine missing type (#23).
 
-### The bit that was wrong first
-- Matching started out whitespace-*collapsed*, and a test written against the
-  real ASIC samples caught that this does not work. PDF extraction splits
-  words **internally** — those files produce "A ustralian S ecurities" and
-  "h is advice" — so the space sits inside the word and collapsing runs of
-  spaces does not help. An accurate quote from such a page still read as
-  fabricated, which would have marked down almost every real PDF and made the
-  check noise rather than signal.
-- Now all whitespace is removed from both sides before comparing. The cost is
-  looser matching — a short signal can match inside an unrelated word, "ROA"
-  sits inside "BROADWAY" — and that is tolerable **here** in a way it is not
-  in `scope_gate.py`, because this only decides whether to LOWER confidence.
-  A loose match declines to penalise; it never promotes anything. Recorded as
-  `matching_trade_off` in the knowledge base rather than left in a comment.
+---
 
-### Not done here
-- **The two factors are judgements, not fitted values.** 0.5 for an answer
-  with no quotes, 0.6 for disagreeing with the scope gate. Nothing has been
-  measured against a scored sample set because the classifier is not wired to
-  one. They encode a direction and a rough weight, not an observed error rate,
-  and `calibration_status` says so.
-- **Nothing compares the two numbers yet.** Keeping `confidence_raw` is what
-  makes model drift visible and lets the failure log show where the model was
-  overconfident — but the failure log has no field for it, which is the same
-  schema question raised on #12.
+## 2026-09-05 — Dependencies, type set from the KB, scope-gate fixes
 
-## Session 17-09-2026 — the review threshold
+### Added
+- `requirements.txt` pinned, with a Python 3.10 floor.
+- The failure-log de-identification rule, and a test on its exact field set (#3).
+- `.gitignore` blocks client documents by extension anywhere in the tree.
+- `parse_pdf()` returns per-page text (#19). `"\n".join(pages) == extracted_text` always holds.
 
-### Done
-- `review.py` — `needs_review` with a reason, per #4's fourth checkbox.
-  `/ingest` now returns a `review` block on every document: whether it can
-  stand on its own, what threshold it was held to, and if it cannot, why not.
-- `knowledge_base.json` — `review_policy`. A threshold per document type with
-  the reasoning written next to it, a `default_threshold` for any type without
-  its own entry, and the five reason codes a reviewer can be shown.
-- **The only thresholds in the system were two numbers in a browser file.**
-  `static/index.html` had `confidence >= 0.75` and `>= 0.5` and nothing else
-  did — so the rule deciding whether a person looks at a client's advice
-  record was a presentational detail of one page, applied to every document
-  type equally, with no reasoning attached and invisible to the API. Moved to
-  the knowledge base (ground rule #1); the page now colours the bar against
-  the threshold the server sends and no longer decides anything.
-- **Per type, because the cost of being wrong is not uniform.** Misfiling a
-  PDS moves a product brochure. Misfiling an SOA builds an advice event around
-  the wrong document. Advice records (`soa`, `roa`) sit at 0.80, the ATP and
-  FDS at 0.75, inputs at 0.70, and the FSG and PDS at 0.60 — licensee- and
-  issuer-wide documents that are not client-specific and are highly
-  standardised in their titling. There is a test asserting advice records are
-  held to the highest bar in the set, so the domain claim is pinned rather
-  than implied.
-- **Out of scope is a review reason, not a dead end.** It used to leave the
-  pipeline with no type, no confidence and no flag — indistinguishable from an
-  unreadable file. `unknown_type` is kept distinct from it: out of scope means
-  nothing looked like ours, unknown type means the title gate matched and the
-  classifier still could not name it.
-- **A low-confidence document keeps its working.** It is not discarded and not
-  blanked: the proposed type, the confidence and the matched signals all still
-  come back, because a reviewer confirming a correct low-confidence answer is
-  exactly the failure-log evidence ground rule #6 wants.
-- `classifier_unavailable` is its own reason. An unreachable classifier is a
-  property of the runtime, and must never be recorded against the document as
-  a classification failure it did not cause.
-- Reasons accumulate rather than short-circuit — two things wrong with a
-  document is two things a reviewer should see.
+### Changed
+- The supported document types come from `knowledge_base.json`. They were
+  hardcoded in three files (#12).
+- The `car` type was removed: DBFO Tranche 2 isn't law. `advice_record_role` keeps the transition seam.
+- The ATP's hints key on what it does (a client's grant of authority to the
+  adviser), not on its title, which firms word inconsistently.
 
-### Open question, recorded rather than settled
-- **Only high severity forces review.** Medium deliberately does not, because
-  `roa_basis_unconfirmed` fires on every ROA and a queue that asks about every
-  document gets ignored — the failure mode named in #20's direction note. But
-  `multi_doc_bundle` is also medium, and filing a two-document bundle as one
-  document is not something to wave through. That probably wants a per-rule
-  `forces_review` override rather than a severity-wide rule. Left as
-  `review_policy.open_question` because no real case has forced it yet.
+### Fixed
+- The scope gate ranks by earliest match, not by pattern length. An ROA citing a PDS had come back as a PDS (#4).
+- Case sensitivity is decided per pattern, so ALL-CAPS cover pages match while acronyms stay strict (#4).
+- Patterns match on word boundaries. "ROA" had matched ROAD and BROADWAY (#12).
+- `test_parser.py` builds its PDFs in the test, so it runs on a bare clone.
 
-### Not done here
-- **The numbers are a judgement, not a measurement**, and `calibration_status`
-  in the knowledge base says so in as many words. Nothing has been scored
-  against a labelled sample set, because the classifier is not wired to one.
-  They are set by the cost of being wrong per type, which is knowable now,
-  rather than by observed accuracy, which is not. They should move once the
-  failure log has entries.
-- Nothing routes anywhere yet. `_Needs review` is returned as a proposed
-  destination; filing itself is #10.
-## Session 10-09-2026 — file notes
+---
 
-### Done
-- `knowledge_base.json` — added the `file_note` document type. Stage 3 (advice
-  construction) now lists it. Data only; no Python changed.
-- **Why it is the biggest gap in the type set.** Safe harbour steps 3-6 —
-  assess competence, investigate, base the advice on that investigation,
-  prioritise the client — are four of the seven, they happen before the advice
-  record is written, and the file note is the only paper trail they leave.
-  `advice_classification_reference.md` §2 maps that stage to "(internal file
-  notes)". Stage 3 previously pointed at `soa`, which is stage 4's document.
-- **The failure was confident, not uncertain.** With no `file_note` type the
-  only patterns that could match were the ones the note cites, so a meeting note
-  came back `{'in_scope': True, 'likely_type': 'pds'}` — a Product Disclosure
-  Statement, stated with confidence.
-- **A file note often records a conversation with the PROVIDER, not the client**
-  — calling a fund about a balance, a rollover or a policy. Titles carry the
-  subject after a dash or "on" ("File Note - <fund>"), so a fund's name in one
-  says who was contacted, not who issued it. That is now the first thing
-  `distinguishing_signals` and `confusable_with` say.
-- `advice_record_role` is `false`. A file note describes advice being prepared;
-  it is never the advice record.
-- `tests/test_scope_gate.py` — seven cases, all plain text, no `samples/`
-  needed: four file-note shapes including the dash-subject and ALL-CAPS forms,
-  a provider-named note, and two regression cases proving a genuine SOA and PDS
-  still win their own titles.
+## 2026-08-31 — Starting point
 
-### Not done here
-- **`.docx` still returns HTTP 500.** File notes are typically Word documents,
-  and `app.py` calls `parse_pdf()` on whatever is uploaded with no format check.
-  So this classifies correctly through the scope gate but cannot yet run
-  end-to-end on the format it usually arrives in. Depends on #5.
+### Added
+- Live app: `parser.py` (pypdf), `scope_gate.py`, `classifier.py` (local Ollama
+  `llama3.1`, grounded in `classifier_hints`), `app.py` (`POST /ingest` plus a
+  drop-zone page) and `failure_log.py` (JSON Lines). 40 tests.
+- Harness: `knowledge_base.json` v0.3, and `harness.py` (a keyword matcher, run on a synthetic fixture).
 
-## Session 10-09-2026 — knowledge base
-
-### Done
-- `knowledge_base.json` — `advice_process_stages` stage 6 no longer names two
-  document ids that `documents` does not define. `ongoing_fee_consent` was an id
-  mismatch: the type exists as `fee_disclosure_statement`, whose own `name` reads
-  "Fee Disclosure Statement / Ongoing Fee Consent", and it was already listed in
-  the same stage — so the reference was a duplicate, not a missing type.
-  `annual_review` is removed because it is not a document type at all: an annual
-  review is a service event, and the documents it produces are the FDS and, where
-  something changed, a new ROA. `advice_classification_reference.md` §2 says so
-  directly ("Ongoing review ... FDS (+ new ROA)"), and §6's master mapping table
-  carries no annual-review row.
-- Stage-to-document mapping is what advice-event grouping (#10) will key on, so a
-  stage naming a type that does not exist is a defect in that mapping rather than
-  a cosmetic one.
-
-### Not done here
-- Stage 5 still names `application_forms`, which `documents` does not define. That
-  one is a genuine gap rather than a bad reference: the reference doc's §6 table
-  carries an "Application / insurance" row with legal basis **s1012**, so it is a
-  legislated type and belongs in the knowledge base. Adding it is its own change
-  (#23, checkbox 2). The self-consistency test (#23, checkbox 4) lands with it,
-  because it cannot pass until then.
-
-## Session 05-09-2026
-
-### Done
-- `requirements.txt` — the four runtime dependencies (`fastapi`, `uvicorn`,
-  `pypdf`, `requests`) pinned to exact versions, with the Python 3.10 floor
-  stated (`failure_log.py`'s `str | None` is an import-time `TypeError` on
-  3.9). README's Dependencies section now installs from it instead of listing
-  whatever happened to be in the environment.
-- `failure_log.py` / `tests/test_failure_log.py` — the de-identification rule for
-  `failure_log.jsonl` is now written down (it's committed and shared, so
-  `document_id` is a filename or hash and never a path, and `note` carries the
-  classification decision only), and a test asserts the record's exact field set
-  so a new field can't be added without failing first (issue #3).
-- `.gitignore` — client documents blocked by extension (`*.pdf`, `*.docx`,
-  `*.doc`, `*.zip`) anywhere in the tree, alongside the existing `docs`/
-  `samples` path rules, which miss a PDF dropped at the repo root. Not
-  retroactive; that limit is now written down in README's Contributing.
-- `app.py` / `classifier.py` / `scope_gate.py` — the supported document-type set
-  now comes from `knowledge_base.json` instead of the same four-type tuple
-  hardcoded in three files. Every KB type is in scope, and the classifier's
-  hint block covers all of them (they already carry complete `classifier_hints`, so
-  this is a data change, not new matching logic). Previously the unsupported
-  types — most of a firm's real intake — left the pipeline as `in_scope: False`
-  with no type and no flag, indistinguishable from an unreadable file (#12).
-- `knowledge_base.json` — the `car` (Client Advice Record) document type is
-  removed. DBFO Tranche 2 is not law, and the system does not classify or file
-  document types that are not legislated. `reform_watch` keeps the record of the
-  reform and now carries the decision. The transition seam is
-  `advice_record_role`, still carried by `soa` and `roa`, so role-keyed logic
-  stays exercised; and because the supported type set is read from the knowledge
-  base rather than hardcoded, adding the successor on enactment is one entry and
-  no Python. That property is now asserted by a test instead of assumed, which
-  the placeholder entry never did (#12).
-- `scope_gate.py` — candidate types now rank on earliest match position, not on
-  summed pattern length. Length was standing in for confidence: "Product
-  Disclosure Statement" (28 chars) outranked "Record of Advice" (16), so an ROA
-  that cites the PDS of the product it discusses came back as a `pds`. A
-  document's own title is at the top; a type it merely cites appears further
-  down. Ties break on distinct patterns matched (#4).
-- `scope_gate.py` — case sensitivity is now decided per pattern from the pattern's
-  own shape: mixed-case titles match in any casing, all-caps acronyms stay
-  case-sensitive. An ALL-CAPS cover page previously matched nothing and left the
-  pipeline as `in_scope: False` with no flag. Casefolding the acronyms too would
-  have traded that for `car`'s "CAR" matching the ordinary word "car" (#4).
-- `scope_gate.py` — `title_patterns` now match on word boundaries instead of bare
-  substrings. Six of them are three-letter acronyms, so `"ROA" in head` was also
-  true for ROAD and BROADWAY, and a letterhead street address sits inside exactly
-  the 500-char title window the gate reads. Out-of-scope documents were entering
-  the pipeline as ROAs. Prerequisite for widening the supported type set (#12).
-
-## Session 05-09-2026 — knowledge base
-
-### Done
-- `knowledge_base.json` — the Authority to Proceed's hints now key on what the
-  document *does* rather than what it looks like. Firms name this one
-  inconsistently (four title variants already), so title is weak evidence; the
-  substance is constant: a named party, specific actions, and a client's grant of
-  authority to act. Adds the first-person grant, the authorised party as a key
-  field, and the distinction from application forms — both are signed lists of
-  actions, but an ATP empowers the ADVISER while application forms instruct the
-  PRODUCT ISSUER.
-
-## Session 05-09-2026 — parser
-
-### Done
-- `parser.py` — `parse_pdf()` now returns per-page text alongside the joined text.
-  Extraction was already page by page; the boundaries existed and were discarded
-  on the join. They are the only evidence a bundle split point can be argued from
-  (#19). `"\n".join(pages) == extracted_text` always holds, so the two views
-  cannot disagree. `/ingest` does not echo `pages` — no consumer yet, and it would
-  roughly double the payload.
-- `tests/test_parser.py` — multi-page PDFs are now built in the test with `pypdf`
-  itself, so the file runs on a bare clone. `test_parse_pdf_returns_expected_keys`
-  previously indexed `samples/` and raised `IndexError` rather than guarding the
-  record shape when the samples weren't present.
-
-## Session 31-08-2026
-
-### In progress
-- Step 3 of the build sequence (`CLAUDE.md`): running real documents through the
-  live-app track, fixing failures, calibrating classifier confidence.
-
-### Not started
-- Filing (proposed destination + rename) — `/ingest` returns a classification only,
-  nothing is moved or renamed yet.
-- Flagging engine — `knowledge_base.json`'s 11 `edge_case_flags` rules exist in the
-  data but aren't read by any code yet.
-- Approve/Edit/Reject UI — everything today is read-only output on the page.
-- Reconciling `docs/SYSTEM.md` and `docs/SYSTEM_v2.md` into one spec.
-- Deciding whether `harness.py` (harness/validation track) stays as an offline
-  batch tester alongside the live app, or gets replaced by it.
-
-## Done
-### Live app track
-- `parser.py` — PDF text extraction via `pypdf`, layout mode.
-- `scope_gate.py` — deterministic in-scope check (SOA/ROA/FSG/PDS) against
-  `knowledge_base.json`.
-- `classifier.py` — LLM classification via local Ollama (`llama3.1`), grounded in
-  `knowledge_base.json`'s `classifier_hints`.
-- `app.py` — `POST /ingest` wiring parser → scope gate → classifier, plus a
-  drop-zone UI at `/`.
-- `failure_log.py` — JSON Lines misclassification log, schema matches the future
-  SQLite `failure_log` table in `docs/2_ARCHITECTURE.md`.
-- Test suite: 40 tests across parser, scope gate, classifier, e2e, and failure log
-  (`tests/`).
-
-### Harness/validation track
-- `knowledge_base.json` (v0.3) — document types, classifier hints, stages, flags.
-- `harness.py` — keyword-matcher prototype, runs against
-  `harness_demo_fixture.json` (synthetic text, not real samples yet)
+### Known gaps
+- At this point there was no filing, no flag engine and no Approve/Edit/Reject screen.
+- `docs/SYSTEM.md` and `SYSTEM_v2.md` were not yet reconciled.
+- Undecided: does `harness.py` stay as an offline tester alongside the live app?
