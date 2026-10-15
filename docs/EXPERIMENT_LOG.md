@@ -25,7 +25,8 @@ Ollama 0.40.3 on 14 Oct and 0.40.4 on 15 Oct. It updated itself in between (see 
 
 ## #59 — Classifier evidence must be exact quotes (14–15 Oct 2026)
 
-**Status:** in progress. The pass bar isn't met yet.
+**Status:** partly met. INFO 267 passes (0.90). FSG_UniSuper doesn't (0.18):
+its missed quotes are real text split up by PDF columns, which a prompt can't fix (findings 10, 11).
 
 ### Problem
 `confidence.py` checks each quote the classifier gives as evidence
@@ -122,6 +123,23 @@ FSGs is a separate problem (#35, point 4). The missed FSG quotes that were check
 Multi-column layouts are typical of issuer-published FSGs and PDSs. Whether a
 firm's own documents are laid out this way can't be told from public examples (#35).
 
+### Change 4 — quotes must stop at line ends (tried and reverted)
+Added to the change 3 prompt: "A quote must not run past the end of a line in
+the Document text; stop where the line stops, even mid-sentence." The aim was to
+get around the PDF-column splits in finding 10.
+
+| File | Change 3 | Change 4 |
+|---|---|---|
+| FSG_UniSuper | 0.40 / 3 | 0.40 / 3 (the same three quotes) |
+| SOA_INFO267_limited_advice | **0.90** / 0 | 0.54 / 2 |
+| FSG_PeninsulaWealth | 0.75 / 1 | 0.45 / 3 |
+| Other 7 files | — | unchanged or within 0.03 |
+
+**11. Line-level rules don't work for this model.** It ignored the rule on
+FSG_UniSuper, and quotes got *longer* elsewhere: INFO 267 returned 20–35-word
+sentences. Reverted. The column problem can't be solved in the prompt. It needs
+text extraction that keeps columns apart, which is a parser change (#5).
+
 ### Findings
 
 **1. Summaries mostly stopped.** Before: `"adviser + AFSL/authorised-rep number:
@@ -197,9 +215,11 @@ engine still changed under the results.
 - `classify()` discards Ollama's error message: `raise_for_status()` reports only
   "500 Server Error", and Ollama's explanation in the response body is lost.
 
-### Next for #59
-1. A full 10-file baseline at temperature 0, run twice to confirm it repeats.
-2. Prompt pass 2: remove the concrete example (finding 3); ask for short quotes
-   of 3–8 words, ideally headings or titles (finding 4).
-3. Re-judge against the pass bar. Any correct file still under 0.90 gets its
-   reason recorded here.
+### Follow-ups outside #59 (for the parser, #5)
+- Extract multi-column PDFs column by column, so a sentence stays continuous in
+  the text (findings 10, 11). Then re-run FSG_UniSuper and FSG_AustralianSuper.
+
+### Outcome for #59
+The prompt now draws real quotes instead of summaries and labels (changes 1 and 3),
+and runs repeat (change 2). The remaining misses on FSGs come from text
+extraction, not the prompt, so the rest of the pass bar moves to the parser follow-up above.
