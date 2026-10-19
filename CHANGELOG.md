@@ -13,6 +13,26 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-20 — README rewritten for two audiences
+
+### Changed
+- `README.md` now opens with a plain-language section for finance and accounting
+  readers (the problem, what the tool does, what it never does, why it matters),
+  then a status summary, then a shortened quick start. Contributor detail moved
+  under one "For contributors" heading.
+
+### Fixed
+- README no longer says `docs/` is missing. The docs map lists the files that
+  actually exist (it named `SYSTEM_v2.md` and `ARCHITECTURE_TRACE.md`, which
+  don't, and left out `GROUND_TRUTH.md`, `EXPERIMENT_LOG.md` and
+  `advice_classification_reference.md`).
+- References to `docs/TO_DO_LIST.md`, which isn't in the repo, are removed.
+- The project layout lists every module, including `clients.py`, `confidence.py`,
+  `dates.py`, `display.py`, `filing.py`, `flags.py`, `review.py` and `storage.py`.
+- "What's next" now includes #66.
+
+---
+
 ## Classifier evidence as exact quotes 
 
 ### Changed
