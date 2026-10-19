@@ -4,7 +4,7 @@
     "framework": "Corporations Act 2001 (Cth), Chapter 7 (Pt 7.7 Financial Services Disclosure; Pt 7.9 Financial Product Disclosure), and Corporations Regulations 2001",
     "regulator": "ASIC",
     "version": "0.3",
-    "legislative_currency_note": "Provisions verified against AustLII / ASIC sources as at 2026-08. The SOA regime (s946A) is current but has a legislated-in-principle successor: under DBFO Tranche 2 the SOA is slated to be replaced by a Client Advice Record (CAR). Tranche 2 was not yet passed as at this build. See 'reform_watch'. Do not hardcode 'SOA' as the only advice-record type — classify by role in the advice process, carry the statutory label as an attribute.",
+    "legislative_currency_note": "Provisions verified against AustLII / ASIC sources as at 2026-08. The SOA regime (s946A) is current but has a proposed successor: under DBFO Tranche 2 the SOA is slated to be replaced by a Client Advice Record (CAR). Tranche 2 was not yet passed as at this build. See 'reform_watch'. Do not hardcode 'SOA' as the only advice-record type — classify by role in the advice process, carry the statutory label as an attribute.",
     "not_legal_advice": "This maps documents to provisions to drive classification. It is not legal advice and does not substitute for a financial-services lawyer's sign-off, especially on the AFSL boundary and on reform timing.",
     "consumers": "Each document entry feeds: (1) new-to-industry teaching layer, (2) classifier identification hints, (3) version-tracking logic. Single source of truth — do not fork copies into the UI or classifier."
   },
@@ -24,8 +24,7 @@
       "plain": "Advice given where the provider has considered one or more of the client's objectives, financial situation or needs (or a reasonable person would expect them to have). Triggers the SOA/ROA regime and the best-interests duty (s961B).",
       "documents": [
         "soa",
-        "roa",
-        "car"
+        "roa"
       ]
     },
     {
@@ -34,8 +33,9 @@
       "provision": "s766B(4)",
       "plain": "Financial product advice that is not personal advice. No SOA; instead a general-advice warning is required.",
       "provision_warning": "s949A",
-      "documents": [
-        "general_advice_warning"
+      "documents": [],
+      "not_yet_document_types": [
+        "general advice warning — usually a paragraph inside another document rather than a file of its own; not modelled as a type (see #23)"
       ]
     },
     {
@@ -51,8 +51,9 @@
     {
       "id": "further_advice",
       "name": "Further advice",
-      "provision": "s946B(1)-(3A); reg 7.7.10AE",
-      "plain": "Subsequent personal advice to a client with an existing SOA, where there is no material change in circumstances or basis of advice. May be recorded via ROA instead of a fresh SOA.",
+      "provision": "notional s946B(2)-(3), as substituted by reg 7.7.10AE",
+      "plain": "Subsequent personal advice to a client with an existing SOA, where their circumstances and the basis of advice are not significantly different. May be recorded via ROA instead of a fresh SOA.",
+      "same_as": "documents[roa].legislation.situations[further_advice]. This entry is the TYPE of advice; that one is the ROA SITUATION it permits. Same id on purpose — they are the same thing seen from two sides. The other two ROA situations (no_buy_sell, small_investment) have no advice_types entry because they describe when an ROA is allowed, not a kind of advice.",
       "documents": [
         "roa"
       ]
@@ -66,12 +67,12 @@
     }
   ],
   "advice_process_stages": [
-    {"stage": 1, "name": "Engagement & disclosure", "plain": "The relationship is established; the client is told who the provider is, what they offer, and how they're paid — before any service is provided.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg"]},
-    {"stage": 2, "name": "Discovery / fact-find", "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile"]},
-    {"stage": 3, "name": "Advice construction", "plain": "Recommendations are formed and the reasoning/basis for advice is documented.", "governing_provisions": ["s961B", "s961G (appropriate advice)"], "typical_docs": ["soa"]},
-    {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B + reg 7.7.10AE (ROA path)"], "typical_docs": ["soa", "roa"]},
-    {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "application_forms"]},
-    {"stage": 6, "name": "Ongoing service & review", "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement"]}
+    {"stage": 1, "name": "Engagement & disclosure", "plain": "The relationship is established; the client is told who the provider is, what they offer, and how they're paid — before any service is provided.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg", "file_note"]},
+    {"stage": 2, "name": "Discovery / fact-find", "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile", "file_note"]},
+    {"stage": 3, "name": "Advice construction", "plain": "Recommendations are formed and the reasoning/basis for advice is documented.", "governing_provisions": ["s961B", "s961G (appropriate advice)"], "typical_docs": ["file_note", "soa", "pds"]},
+    {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa", "file_note"]},
+    {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "pds", "file_note"], "not_yet_document_types": ["product application forms — not yet a document type (see #23)"]},
+    {"stage": 6, "name": "Ongoing service & review", "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "file_note"]}
   ],
   "version_status_values": {
     "current": "The live, in-force version of this document for this client (or this edition, for licensee/issuer-wide docs).",
@@ -104,7 +105,7 @@
         "what_it_is": "The formal written record of personal financial advice given to a retail client, together with the reasons for it.",
         "why_it_exists": "Required by s946A so the client can understand and decide whether to rely on the advice. It makes the basis of advice, risks, costs, and remuneration explicit and reviewable.",
         "where_it_sits": "Advice construction and delivery (stages 3-4). The centrepiece deliverable of the advice process.",
-        "two_weeks_in_note": "If you learn to recognise one document, make it this. Everything else is input to it, disclosure around it, a lighter follow-up to it (ROA), or its implementation (ATP). Note the coming CAR reform — same role, new label."
+        "two_weeks_in_note": "If you learn to recognise one document, make it this. Everything else is input to it, disclosure around it, a lighter follow-up to it (ROA), or its implementation (ATP). Note the proposed CAR reform (not yet law) — same role, new label."
       },
       "classifier_hints": {
         "title_patterns": ["Statement of Advice", "SOA", "Statement of Advice prepared for"],
@@ -139,26 +140,79 @@
       "advice_record_role": true,
       "legislation": {
         "primary": "s946B — situations in which an SOA is not required (the ROA pathway)",
-        "four_kinds": [
+        "situation_count_note": "THREE situations, not four. ASIC's own FAQ (Table 1) lists three, and s946B(7) is not a separate 'hold / no action' basis: the Act's s946B(7) is the no-buy/sell provision, and reg 7.7.10AAA is the regulation that substitutes a notional version of it and sets its content requirements — its title is literally 'Record of advice without a recommendation to purchase or sell'. Carrying them as two bases counted one situation twice. Advice to HOLD is not a basis at all: it is what the advice recommends, and it sits under further advice where there is a prior SOA, or under no buy or sell where there is not. Decided 17 Sep 2026; see issue #33.",
+        "unresolved": "ASIC's 2021 media release describes INFO 266 as explaining 'four exemptions from providing a statement of advice'. Only three ROA situations have been found. The fourth may be a different exemption entirely rather than a fourth ROA basis. Recorded so nobody re-derives the question from scratch; it does not change the three below.",
+        "evidence_note": "ONLY THE FURTHER-ADVICE SITUATION HAS BEEN MATCHED AGAINST REAL TEXT. Each situation carries an `example_status` saying whether a real document of that kind exists to test against. Two of the three have none, so their signals are a reading of the legislation rather than anything measured, and should be treated as a starting point to correct against real firm files — not as calibrated. Stated here rather than left to be inferred from silence, because a signal list looks equally authoritative whether or not anything checked it.",
+        "signal_note": "Each situation carries `basis_signals`, split into `declared` and `inferred`. DECLARED phrases are the document stating its own basis — naming the situation or citing the provision. INFERRED phrases describe the shape of the recommendation, which suggests a basis without asserting one. Where any situation is declared, only declared signals decide: a document that says which situation it was written under outranks a basis guessed from how the advice reads. Inferred signals decide only when nothing is declared anywhere. Signals are deliberately narrow, because a signal that fires wrongly produces a confident wrong proposal while one that fails to fire produces \"which kind is this?\" — the honest answer, and this flag's default.",
+        "calibration_note": "Measured against ASIC INFO 266 attachment 1 (further advice; retain existing products and increase insurance cover). Two lessons, both from real text. First, \"you will retain your existing policy features and benefits\" describes a CONSEQUENCE of advice, not a recommendation to hold — so retain/continue-to-hold phrasing was removed entirely. Second, that ROA's own words include \"My advice is to make no changes to your XYZ Superannuation Fund\" while it also increases insurance cover. Under the three-situation model that document is further advice whose RECOMMENDATION is partly no-change, which is exactly the distinction the old four-basis list could not express.",
+        "situations": [
           {
+            "id": "further_advice",
             "kind": "Further advice",
-            "basis": "s946B(1)-(3A) + reg 7.7.10AE",
-            "when": "Existing SOA client; no material change in circumstances or basis of advice."
+            "basis": "notional s946B(2)-(3), as substituted by reg 7.7.10AE",
+            "when": "The client has a previous SOA (or pre-licensing advice), their relevant circumstances are not significantly different from when that advice was given, and the basis of the further advice is not significantly different either.",
+            "example_status": "Real text available, and it is the only situation with any. All three ASIC INFO 266 example ROAs cite notional s946B(2) and reg 7.7.10AE — including attachment 2, titled 'No change advice', which relies on this situation because the client had an SOA from 2018.",
+            "basis_signals": {
+              "declared": [
+                "further advice",
+                "further personal advice",
+                "no material change",
+                "your circumstances have not changed",
+                "basis of advice has not changed"
+              ],
+              "inferred": [
+                "Statement of Advice dated",
+                "prior Statement of Advice",
+                "previous Statement of Advice"
+              ]
+            }
           },
           {
-            "kind": "No-action / 'hold' recommendation",
-            "basis": "s946B(7)",
-            "when": "Advice to take no action; no prior SOA required."
+            "id": "no_buy_sell",
+            "kind": "No buy or sell product advice",
+            "basis": "notional s946B(7)-(8), as substituted by reg 7.7.10AAA",
+            "when": "The advice does not recommend or state an opinion on acquiring or disposing of a specific financial product, and does not recommend modifying an investment strategy or a contribution level for a product the client holds.",
+            "further_conditions": "AND the provider and certain associates receive no remuneration or benefit in relation to the advice, and conflicts are disclosed to the client. This limb is easy to miss and it is decisive: for a client on an ongoing fee arrangement it will usually fail, which is why an annual-review 'no change' recommendation is normally documented as FURTHER advice rather than under this situation. Content alone never establishes this basis.",
+            "absorbed": "This entry previously appeared twice — as 'hold / no-action (s946B(7))' and as 'no buy/sell (reg 7.7.10AAA)'. They are one situation. See situation_count_note and issue #33.",
+            "example_status": "NO REAL EXAMPLE. Written from the legislation only. ASIC published no example of this situation. Recorded as a known gap on issues #33 and #35, with the decision not to source one artificially.",
+            "basis_signals": {
+              "declared": [
+                "7.7.10AAA",
+                "s946B(7)",
+                "946B(7)",
+                "no recommendation to acquire or dispose",
+                "no recommendation to buy or sell",
+                "not a recommendation to acquire or dispose"
+              ],
+              "inferred": [
+                "does not recommend that you acquire",
+                "does not recommend that you dispose",
+                "take no action",
+                "no action is required",
+                "no action at this time",
+                "make no changes",
+                "no changes are recommended",
+                "we recommend no change",
+                "remain invested"
+              ]
+            }
           },
           {
+            "id": "small_investment",
             "kind": "Small investment advice",
             "basis": "s946AA + reg 7.7.09A",
-            "when": "Advice value under the threshold; timing rules in reg 7.7.09A(10)-(12)."
-          },
-          {
-            "kind": "No recommendation to buy/sell",
-            "basis": "reg 7.7.10AAA",
-            "when": "Personal advice with no purchase/sell recommendation; content per reg 7.7.10AAA."
+            "when": "Advice relating to financial investments in certain products not exceeding $15,000. Timing rules in reg 7.7.09A(10)-(12).",
+            "example_status": "NO REAL EXAMPLE. INFO 266 attachment 3 was assumed to be this one from its 'Stockbroker' title; its text contains neither 's946AA' nor 'small investment', and it cites reg 7.7.10AE. See issue #33.",
+            "basis_signals": {
+              "declared": [
+                "small investment advice",
+                "s946AA",
+                "946AA",
+                "reg 7.7.09A",
+                "7.7.09A"
+              ],
+              "inferred": []
+            }
           }
         ],
         "retention": "7 years after the day the further advice is provided (reg 7.7.09(3); reg 7.7.05; reg 7.7.08)",
@@ -166,9 +220,9 @@
       },
       "teaching": {
         "what_it_is": "A shorter record of personal advice used in place of a full SOA in specific situations the Act allows.",
-        "why_it_exists": "Reduces paperwork for routine or narrow advice while keeping a durable record. There are four distinct legislative bases — it's cleanest to think of four kinds of ROA.",
+        "why_it_exists": "Reduces paperwork for routine or narrow advice while keeping a durable record. There are three situations in which it is allowed, and which one applies changes what the record must contain. Note that what the advice RECOMMENDS — increase cover, switch, no change — is a separate thing from which situation permits the ROA. Conflating the two is a common mistake.",
         "where_it_sits": "Advice delivery and ongoing review (stages 4-6).",
-        "two_weeks_in_note": "The most common kind (further advice) points back to an earlier SOA. An ROA with no prior SOA on file isn't automatically wrong — the 'hold', small-investment, and no-buy/sell kinds don't need one — but it's worth flagging to confirm which kind it is."
+        "two_weeks_in_note": "The most common kind (further advice) points back to an earlier SOA. An ROA with no prior SOA on file isn't automatically wrong — the no-buy/sell and small-investment situations don't need one — but it's worth flagging to confirm which kind it is."
       },
       "classifier_hints": {
         "title_patterns": [
@@ -179,7 +233,7 @@
           "client name",
           "adviser",
           "reference to prior SOA (for further-advice kind)",
-          "the further advice / change / hold recommendation",
+          "the recommendation — a change, or no change (what it recommends is separate from which situation permits the ROA)",
           "basis on which recommendations are made",
           "date"
         ],
@@ -197,7 +251,7 @@
         {
           "doc": "soa",
           "relationship": "references_prior",
-          "note": "The further-advice ROA depends on an existing SOA; the other three kinds do not."
+          "note": "The further-advice ROA depends on an existing SOA; the other two situations do not."
         },
         {
           "doc": "authority_to_proceed",
@@ -205,7 +259,7 @@
           "note": "Where the ROA advises an action the client then authorises."
         }
       ],
-      "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the four kinds — it changes both content expectations and whether a prior SOA is required."
+      "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the three situations — it changes both content expectations and whether a prior SOA is required."
     },
     {
       "id": "authority_to_proceed",
@@ -408,7 +462,7 @@
       },
       "teaching": {
         "what_it_is": "A questionnaire and resulting classification of the client's investment risk tolerance.",
-        "why_it_exists": "Evidences that recommended investments match the client's risk tolerance, supporting best interests.",
+        "why_it_exists": "The benchmark the advice's appropriateness is measured against. If it is wrong or missing, the advice cannot be shown to suit the client.",
         "where_it_sits": "Discovery / fact-find (stage 2), feeding advice construction.",
         "two_weeks_in_note": "The risk category should be echoed in the SOA's recommendations. A mismatch between the two is exactly what a reviewer looks for."
       },
@@ -443,6 +497,68 @@
         }
       ],
       "version_notes": "Per client, dated. A re-assessment supersedes the prior profile."
+    },
+    {
+      "id": "file_note",
+      "name": "File Note",
+      "abbrev": "File Note",
+      "category": "input",
+      "advice_record_role": false,
+      "legislation": {
+        "primary": "Not a standalone statutory document. Evidences the research and strategy work behind personal advice — safe harbour steps 3-6 (s961B(2)(c)-(f)) — and is kept under the s912G record-keeping obligation.",
+        "note": "No section prescribes its form or title, which is why the titles vary by firm. Its absence is not itself a breach; what it evidences is."
+      },
+      "teaching": {
+        "what_it_is": "An adviser's own record of an interaction or of the research behind a recommendation. Often the interaction is with the PRODUCT PROVIDER rather than the client — calling a fund about a balance, a rollover or a policy — as well as client meetings and calls.",
+        "why_it_exists": "Safe harbour steps 3-6 (make reasonable inquiries, assess competence, investigate products, base judgements on the client's circumstances) happen before the advice record is written and leave no other paper trail. The file note is that trail.",
+        "where_it_sits": "Any stage. Most often advice construction (stage 3), but also the first call, fact-find meetings, implementation and review calls.",
+        "two_weeks_in_note": "A file note is ABOUT advice; it is never the advice. It routinely names a provider and the documents it concerns, which is exactly why it gets mistaken for them. 'File Note - <fund>' records a conversation WITH that fund; it is not that fund's document."
+      },
+      "classifier_hints": {
+        "title_patterns": [
+          "File Note",
+          "Meeting Note",
+          "Client Meeting Note",
+          "Adviser Note"
+        ],
+        "key_fields": [
+          "client name",
+          "date of the interaction",
+          "the product provider or company contacted",
+          "who was spoken to, and in what capacity",
+          "what was discussed with them",
+          "decision or next step",
+          "adviser name"
+        ],
+        "distinguishing_signals": [
+          "written in the adviser's voice, recording what happened, not addressed to the client",
+          "past tense narrative of a meeting, a call to a provider, or a piece of research",
+          "frequently records a conversation with a PRODUCT PROVIDER, not the client — so a fund's name in it is who was contacted, not who issued it",
+          "no recommendation given TO the client, and no signature block",
+          "often names the documents it is about — 'an SOA will be prepared', 'the PDS was provided'",
+          "title commonly carries the subject after a dash or 'on' — 'File Note - <provider>', 'File Note on <topic>' — so what follows is the subject, not the document type"
+        ],
+        "confusable_with": [
+          "soa — a file note DESCRIBES advice being prepared; the SOA IS the advice. Not an advice record: advice_record_role is false",
+          "roa — both are short and narrative, but an ROA is given to the client as the advice record; a file note stays on the firm's file",
+          "pds — a file note naming a product's PDS is a cross-reference, not the PDS. Rank on where the match falls, not that it appears",
+          "application_forms — both may carry a provider's name, but an application form INSTRUCTS the provider; a file note merely records talking to them",
+          "authority_to_proceed — an ATP is signed by the client and authorises action; a file note is unsigned and authorises nothing"
+        ]
+      },
+      "links_to": [
+        {
+          "doc": "soa",
+          "relationship": "evidences",
+          "note": "Evidences the research and reasoning behind the advice record it precedes."
+        },
+        {
+          "doc": "fact_find",
+          "relationship": "supplements",
+          "note": "Records inquiries made where the fact find was incomplete (safe harbour step 2)."
+        }
+      ],
+      "version_notes": "Per interaction, not per client or per event. A client accumulates many; they are discrete records, never superseded — a later note does not replace an earlier one."
     },
     {
       "id": "fee_disclosure_statement",
@@ -501,15 +617,145 @@
         "rationale": "Groups every document belonging to one advisory decision, using the document-to-document links. Reconstructs 'the advice and everything behind it'."
       }
     },
+    "renaming": {
+      "rule": "Documents and folders are renamed. Every rename is tracked: the original name, the new name, who renamed it and when — and users can see who renamed it, so they know who to follow up with questions.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q8). The tracking needs the audit log (GH#7)."
+    },
+    "stage_label": {
+      "rule": "The advice process stage is shown on each document, read from advice_process_stages[].typical_docs. It is not a folder layer.",
+      "why": "An event usually holds one or two documents per stage, so stage folders would mostly hold a single file. Decided 9 Oct 2026.",
+      "every_stage_label": "Any stage"
+    },
     "advice_event": {
-      "definition": "A single advisory decision and all documents that belong to it: the advice record (SOA/ROA/CAR), the inputs that fed it (fact find, risk profile), the implementation (authority to proceed), and supporting product disclosure (PDS) used for that decision.",
+      "definition": "A single advisory decision and all documents that belong to it: the advice record (SOA or ROA), the inputs that fed it (fact find, risk profile), the implementation (authority to proceed), and supporting product disclosure (PDS) used for that decision.",
       "identity": "Derived from the advice record at its centre. Keyed on client + advice-record date + subject matter/scope.",
-      "naming_pattern": "YYYY-MM — <subject matter> [<record type> · <sub-kind if ROA>]",
+      "naming_pattern": "YYYY-MM — <subject matter>",
       "examples": [
-        "2024-03 — Retirement & Super Consolidation [SOA]",
-        "2025-06 — Insurance Top-Up [ROA · further advice]"
+        "2024-03 — Retirement & Super Consolidation",
+        "2025-06 — Insurance Top-Up"
       ],
-      "sequence_note": "A client accumulates multiple advice events over time (e.g. super advice year 1, insurance year 2). Each is its own nested folder. Events are ordered by date but NOT assumed to be related unless documents link them."
+      "naming_note": "The folder holds every document of the event — fact find, risk profile, SOA or ROA, authority to proceed, PDS — so it is not named after any one of them. The record type and ROA situation belong in each document's filename, where they describe that document alone. Decided 9 Oct 2026.",
+      "subject": {
+      "purpose": "The <subject matter> in the event folder name. Read from the advice record's own statement of scope — what it says the advice is about — never from the whole document. Decided on #10 (1 Oct 2026).",
+      "why_not_whole_document": "An SOA must describe the client's relevant circumstances, so the whole document reads the client's balance sheet ('$100,000 in a superannuation fund', 'a $440,000 mortgage', 'Centrelink Family Tax Benefit'), and its 'what my advice does not cover' section names areas the advice excludes. On the six public SOAs/ROAs the whole document gave 4–7 areas every time; the scope statement gave the right subject every time it found one.",
+      "scope_phrases": [
+        "asked for my advice about",
+        "asked for our advice about",
+        "wanted advice about",
+        "want advice about",
+        "this advice is about",
+        "my advice is about",
+        "my advice is to",
+        "our advice is to"
+      ],
+      "scope_phrases_note": "Each phrase starts a scope statement; the statement runs to the end of its sentence. Taken from the six public samples — firms word it in their own templates, so expect to add phrases from the failure log.",
+      "join": " & ",
+      "no_scope_found": "No subject is proposed; the reviewer supplies it. Never guessed from the rest of the document.",
+      "also_mentioned": "Areas found anywhere else in the document are listed for the reviewer to add, never put in the name automatically.",
+      "areas": [
+        {
+          "name": "Superannuation",
+          "signals": [
+            "superannuation",
+            "super fund",
+            "your super",
+            "rollover",
+            "concessional contribution",
+            "salary sacrifice"
+          ]
+        },
+        {
+          "name": "Retirement",
+          "signals": [
+            "retirement",
+            "account-based pension",
+            "transition to retirement",
+            "pension"
+          ]
+        },
+        {
+          "name": "Insurance",
+          "signals": [
+            "insurance",
+            "life cover",
+            "death cover",
+            "tpd",
+            "total and permanent disab",
+            "income protection",
+            "ip policy",
+            "salary continuance",
+            "trauma",
+            "critical illness",
+            "sum insured",
+            "risk insurance",
+            "personal risk",
+            "risk advice",
+            "risk cover",
+            "risk protection",
+            "risk policy",
+            "risk policies",
+            "protect your family",
+            "protect yourself",
+            "protect yourselves",
+            "protect your income",
+            "die or become",
+            "become sick",
+            "become ill",
+            "sick or injured",
+            "ill or injured",
+            "unable to work"
+          ],
+          "excluded_signals_note": "Bare 'risk', 'protect' and 'cover' are deliberately absent: in real SOAs they mostly mean risk profile, market risk, 'to protect advisers' and 'does not cover'."
+        },
+        {
+          "name": "Investment",
+          "signals": [
+            "invest",
+            "portfolio",
+            "managed fund",
+            "shares"
+          ]
+        },
+        {
+          "name": "Estate planning",
+          "signals": [
+            "estate plan",
+            "your will",
+            "wills",
+            "binding nomination",
+            "binding death benefit",
+            "beneficiar"
+          ],
+          "excluded_signals_note": "Not bare 'will' — it matches the verb."
+        },
+        {
+          "name": "Debt management",
+          "signals": [
+            "debt",
+            "mortgage",
+            "home loan",
+            "gearing"
+          ]
+        },
+        {
+          "name": "Aged care",
+          "signals": [
+            "aged care",
+            "residential care",
+            "home care"
+          ]
+        },
+        {
+          "name": "Centrelink",
+          "signals": [
+            "centrelink",
+            "age pension",
+            "social security"
+          ]
+        }
+      ]
+    },
+    "sequence_note": "A client accumulates multiple advice events over time (e.g. super advice year 1, insurance year 2). Each is its own nested folder. Events are ordered by date but NOT assumed to be related unless documents link them."
     },
     "special_folders": [
       {
@@ -538,7 +784,8 @@
       "stages": {
         "5": {
           "name": "Implementation / execution",
-          "default": "flat",
+          "default": "by_doc_type",
+          "default_decided": "Bella, 20 Oct 2026: a folder per document type by default. The firm can choose any option.",
           "options": {
             "flat": "All implementation documents sit directly in the advice-event folder.",
             "by_provider": "Sub-folder per product issuer.",
@@ -548,7 +795,7 @@
             "by_provider": "The RECEIVING product issuer — the entity the form instructs. Not merely the first firm named: an application involving a rollover also names the funds being transferred out of, often prominently, and a balance question can name several. Where the receiving issuer cannot be told from the outgoing ones, this is an unresolved key, not a guess. Also unreadable on a scanned signed form until OCR lands.",
             "by_doc_type": "The classified doc_type — already produced, needs no extraction."
           },
-          "cross_provider_reference": "A rollover form is evidence about two providers: the one receiving and the one being left. It files ONCE, under the receiving issuer, and is REFERENCED from the outgoing provider rather than copied — the same rule shared_document_rule already applies across advice events. Never duplicate a signed form: two copies leaves it ambiguous which is the record. Whether firms want the outgoing reference at all is a per-firm question to ask, not to assume.",
+          "cross_provider_reference": "A rollover form is evidence about two providers: the one receiving and the one being left. It is NAMED FOR and files ONCE under the RECEIVING account (the account the funds are rolled over to), never under the fund being left, and is never copied: two copies leaves it ambiguous which is the record. Whether the outgoing provider also gets a reference to it is the firm's choice (configurable; default not yet decided). Decided by Bella, 20 Oct 2026.",
           "trade_off": "by_provider splits one advice event's implementation across folders when an event has both a platform application and an insurer's. Some firms want exactly that; confirm with the firm rather than assuming."
         }
       },
@@ -558,6 +805,30 @@
     "accuracy_mechanism": "Because a document is placed by two axes that must agree (correct client AND a coherent advice event), a document naming a client but referencing a non-existent event, or vice versa, is a disagreement that fires a flag. Single-axis filing would silently misplace it.",
     "human_in_the_loop": "Event grouping is always a proposal a human confirms, never silent auto-bundling. Confidence is visible per document and per event. Mis-grouping is expected early because it depends on link accuracy — the fiddliest part of the system.",
     "build_note": "Client-outer/event-inner is a nesting rule over results already produced. Keep the storage layer abstracted so the folder scheme (and later, local-folder vs cloud-bucket) can change without touching the classifier."
+  },
+  "client_model": {
+    "status": "Started (GH#6). Finds the names a document gives for its client; does not yet choose one.",
+    "name_labels": ["client name", "account name", "soa for"],
+    "name_labels_source": "Only labels seen in the real samples: 'Client name:' in INFO 266 att 1 and att 2 and the INFO 267 SOA; 'Account name:' in the INFO 266 att 3 stockbroker ROA; 'SOA for' in the running header of the example SOA inside RG 90 ('SOA for Brad and Zara Black', every page from p31). Add a label when a real document uses one, not before.",
+    "joint_client": {
+      "rule": "A joint client is one client with one shared client folder, e.g. 'Black, Brad & Zara'. The names are kept together, never split into two folders or chosen between.",
+      "decided": "Bella, 9 Oct 2026 (GH#61).",
+      "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026."
+    },
+    "entity_client": {
+      "rule": "A trust, SMSF or company is the client in its own right. Its folder uses the entity's own name, and each entity has its own folder, separate from the people behind it.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q2)."
+    },
+    "same_surname": {
+      "rule": "Clients who share a surname are told apart by first name: 'Surname, First name'. In practice two clients share only the surname, not the full name.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q3).",
+      "open": "Two different clients with the same full name is not covered by this rule; under the several_names fallback it goes to the adviser."
+    },
+    "several_names": {
+      "rule": "Several names on one document usually share a surname with different first names: file under the surname. If a trustee is named, file under the trust. If neither works, flag it and ask the adviser. Never guess.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q4).",
+      "spouse_named_not_client": "Often only one spouse is the client — usually the husband — and the other is named as context (e.g. INFO 267: advice for John; his wife Jane is named, and insurance advice for her is excluded). The folder uses the client's name only. When both spouses attend and the advice is for both, it is joint advice and joint_client applies. Bella, 13 Oct 2026."
+    }
   },
   "summary_feature": {
     "status": "PLANNED — a later phase, after classification and filing are working and trusted.",
@@ -579,20 +850,268 @@
       "sequencing": "Do not build this until classification and grouping are reliable. A summary built on mis-grouped documents is confidently wrong."
     }
   },
+  "confidence_policy": {
+    "purpose": "The classifier reports its own confidence. That number is a claim by the model about itself, not a measurement, and nothing checked it before acting on it. This turns it into evidence that can be checked: every phrase the model says it matched is looked for in the document, and the scope gate's independent reading is compared against the type the model chose.",
+    "direction_rule": "Verification can only LOWER the acted-on confidence, never raise it. A model that quotes accurately has told the truth about its own reasoning; it has not thereby proved the answer right. Allowing evidence to inflate a number the model invented would launder a guess into a measurement.",
+    "two_numbers": "`confidence_raw` keeps the model's own figure unchanged, so drift in the model is visible over time and the two can be compared in the failure log. `confidence` is what the system acts on, and is what review_policy's thresholds are applied to.",
+    "signal_verification": {
+      "rule": "Each phrase in `matched_signals` must actually occur in the extracted text. The proportion that do becomes a multiplier.",
+      "matching": "Case-insensitive, with ALL whitespace removed from both sides before comparing — not exact, and not merely whitespace-collapsed. PDF extraction splits words internally: the real ASIC samples produce 'A ustralian S ecurities' and 'h is advice', where the space sits inside the word, so collapsing runs of spaces does not help. Exact or collapsed matching would report honest quotes as fabricated on almost every real PDF, and a check that fires on everything gets ignored.",
+      "matching_trade_off": "Removing whitespace makes matching looser, and a short signal can match inside an unrelated word ('ROA' sits inside 'BROADWAY'). Tolerable here in a way it is not in the scope gate, because this only decides whether to LOWER confidence: a loose match declines to penalise and never promotes anything. Wrongly calling an honest quote fabricated is the more damaging error, because it sends correct classifications of ordinary documents to review.",
+      "no_signals_factor": 0.5,
+      "no_signals_why": "A model naming a type while quoting nothing has given an answer with no working. That is not a fabrication, so it is not zero, but it is not evidence either. Halved rather than rejected, because the flag and the review threshold still get to see the proposal."
+    },
+    "scope_agreement": {
+      "rule": "The scope gate reads the title region deterministically, by knowledge-base title patterns, with no model involved. Where it names a type and the classifier names a different one, two independent readings disagree.",
+      "agree_factor": 1.0,
+      "disagree_factor": 0.6,
+      "no_scope_type_factor": 1.0,
+      "no_scope_type_why": "The gate having no opinion is not disagreement. It only reads the first 500 characters, so a document whose title sits below that window leaves it silent — that is absence of evidence, and must not be scored as evidence of absence.",
+      "why_it_is_worth_something": "The gate is not smarter than the classifier, and on its own it is weak — it matches title strings. Its value is INDEPENDENCE: it cannot be wrong in the same way a language model is wrong, so agreement between them is worth more than either alone. This is the same argument filing_model.accuracy_mechanism makes about two axes having to agree."
+    },
+    "formula": "confidence = confidence_raw x signal_factor x scope_factor, clamped to [0, 1]. Deliberately multiplicative and deliberately simple: a reviewer looking at a lowered number should be able to see which of the two checks lowered it, and by how much, without reading Python.",
+    "calibration_status": "The two factors are judgements, not fitted values — nothing has been measured against a scored sample set, because the classifier is not wired to one. They encode a direction (unverified quotes and cross-reading disagreement should both reduce trust) and a rough weight, not an observed error rate."
+  },
+  "settings": {
+    "purpose": "Three settings that must not depend on each other (CLAUDE.md ground rule #4, issue #11). Changing one may change only its own part of a result — tests/test_settings.py holds that line. Values live here, not in Python (ground rule #1).",
+    "display_mode": {
+      "value": "teach",
+      "options": {
+        "teach": "Each result carries its document type's `teaching` block from `documents`, for staff new to the industry.",
+        "off": "No teaching text. Classification, flags and review are unchanged."
+      },
+      "implemented": true,
+      "override": "A request may ask for either option (`/ingest?display=off`). It is a reading preference, not a safety control, so a caller choosing it is fine."
+    },
+    "filing_mode": {
+      "value": "client_event",
+      "options": {
+        "client_event": "Client folder, then advice-event folder inside it (filing_model.axes).",
+        "flat": "Client folder only, no event nesting."
+      },
+      "implemented": false,
+      "note": "Declared so the three settings sit together; it has no behaviour until the full proposed path lands (#10). Changes only the proposed path, never classification or confidence."
+    },
+    "classification_engine": {
+      "value": "llm",
+      "options": {
+        "llm": "classifier.py — a model on this machine (Ollama), hints from `classifier_hints`.",
+        "keyword": "harness.py's keyword matcher, same hints. Not wired into the app."
+      },
+      "implemented": false,
+      "note": "Declared, not switchable yet. Making it a setting is how harness.py and the live app can coexist as two engines behind one interface (#3, #11)."
+    }
+  },
+  "review_policy": {
+    "purpose": "Decides whether a classification is confident enough to act on, or must go to a human first. Ground rule #2: nothing files silently, and a document that cannot be placed confidently routes to _Needs review WITH A REASON rather than leaving the pipeline. The reason is the point — 'needs review' on its own tells a reviewer nothing about what to look at.",
+    "threshold_meaning": "The classifier's confidence must MEET OR EXCEED the type's threshold for the proposal to stand on its own. Below it, the document still gets its proposed type and its reasoning — it is not discarded — but it is marked needs_review with the low_confidence reason.",
+    "calibration_status": "A domain judgement, not a measurement. Set 1 Oct 2026 by Bella: every type is held to one firm-safe level of 0.90, set once for the whole domain, because every document in a client file is critical to accurate documentation — supporting documents included. 100% is the wish and not statistically attainable. The model is diagnostic screening in health: the tool screens, a person confirms, and a high bar means 'when in doubt, refer'. A score only means something once it is validated on real cases: with every document correct, 6 documents only show true accuracy is at least ~61% (95% confidence), 30 show ~89%, 50 show ~93%. Proving 90% per type needs roughly 35–50 consecutive correct real documents of that type. Until the failure log holds that, most documents will go to review, which is intended.",
+    "why_per_type": "A single global threshold treats every document as equally expensive to misplace, and they are not. Misfiling a PDS puts a product brochure in the wrong folder. Misfiling an SOA puts the advice record — the centre of the advice event, the thing every other document links to — under the wrong client or the wrong event.",
+    "default_threshold": 0.90,
+    "screening_model": {
+      "principle": "Screen, then confirm — the model from diagnostic screening in health, adopted 1 Oct 2026 (Bella).",
+      "why": "A wrong financial record does real harm: an SOA filed under the wrong client or event, a misread risk profile, a tax or fee document in the wrong file can mislead an adviser, a compliance reviewer or a regulator. The cost of a miss is far higher than the cost of an extra review.",
+      "stage_one": "The tool screens. It is tuned so it rarely lets a wrong answer through unchecked, and accepts sending extra documents to a person to do so.",
+      "stage_two": "A person confirms. The final call on every document is human; the tool's job is to make that call faster, never to replace it.",
+      "consequence": "One firm-safe level of 0.90, reasons on every referral, and trust earned per document type from the failure log — not assumed. When in doubt, refer."
+    },
+    "minimum_threshold": 0.90,
+    "minimum_note": "The firm-safe level: 0.90, set once here at the domain level and applying to every firm and every document type (Bella, 1 Oct 2026). A firm cannot lower it — it is a safety control, not a convenience, and lowering a bar is how a busy queue gets emptied by letting documents through unchecked. A type may be held ABOVE it if its failure log ever argues for that; never below.",
+    "default_note": "Applies to any document type without its own entry, so adding a type to `documents` needs no edit here (ground rule #1). Equal to the firm-safe level: a new type starts at it, never below.",
+    "thresholds": {
+      "soa": {
+        "value": 0.90,
+        "why": "The advice record, and the centre of an advice event — version status, superseding, event grouping and every links_to relationship key on finding the right one. A wrong SOA is not one misfiled document; it is an advice event assembled around the wrong document."
+      },
+      "roa": {
+        "value": 0.90,
+        "why": "Also an advice record (advice_record_role is true), with the same event-grouping weight as an SOA. It carries the roa_basis_unconfirmed question regardless of confidence, so a low-confidence ROA is a document a reviewer is already being asked about."
+      },
+      "authority_to_proceed": {
+        "value": 0.90,
+        "why": "A signed client authorisation, and the link between advice and what was actually implemented. atp_without_advice_record is one of the three high-severity flags in the set, so a misread ATP either fires it wrongly or hides a genuine gap."
+      },
+      "fee_disclosure_statement": {
+        "value": 0.90,
+        "why": "Fee disclosure and ongoing-fee consent carry their own compliance exposure, and fds_era_mismatch depends on this type being identified correctly before the pre/post-DBFO check can run at all."
+      },
+      "fact_find": {
+        "value": 0.90,
+        "why": "Evidence of safe harbour steps 1-2 — what the adviser knew about the client when advising. A supporting document, but the advice is only as sound as the record of the client it rests on, and fact_find_after_soa sequencing depends on it."
+      },
+      "risk_profile": {
+        "value": 0.90,
+        "why": "Key to accurate documentation: the risk profile is what the advice's appropriateness is measured against. risk_mismatch is high severity and compares its CONTENT to an SOA's recommendations, so a misread risk profile undermines the check that matters most."
+      },
+      "fsg": {
+        "value": 0.90,
+        "why": "Evidence of what disclosure the client received, and which edition. The same edition goes to many clients, but filing the wrong edition — or another document as an FSG — leaves the client's file unable to show they were given it. Raised from 0.60 on 1 Oct 2026: no document type is low-stakes."
+      },
+      "pds": {
+        "value": 0.90,
+        "why": "Issued by the product provider, not the firm, and links to the advice event that recommended the product. A misread PDS breaks that link and can hide which product disclosure supported the advice. Raised from 0.60 on 1 Oct 2026: no document type is low-stakes."
+      },
+      "file_note": {
+        "value": 0.90,
+        "why": "Often the only record of a conversation: client instructions, a phone discussion, verbal consent, the reasoning behind advice. In a complaint or review it may be the evidence. It is also the ROA's lookalike — a file note describes advice being discussed or prepared — so a misread one is mistaken for an advice record or loses its place in the event."
+      }
+    },
+    "reason_codes": {
+      "unreadable": "The file could not be opened at all — encrypted with a user password, corrupt, truncated, or not really a PDF. A property of the FILE, and the most specific answer available: nothing was read, so nothing else can be said about it. Distinct from a file that opened and held no text, and from one that was read in full and matched nothing. Before this existed the pipeline raised and returned HTTP 500, so a reviewer got a stack trace instead of a document.",
+      "no_selectable_text": "The file opened but carries no extractable text — a scan or a photograph of a document. Nothing is wrong with it; it simply cannot be read without OCR (#5). It is NOT out of scope: a scanned Statement of Advice is still a Statement of Advice, and treating it as 'not advice' is what #22 was about.",
+      "out_of_scope": "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see.",
+      "unknown_type": "The classifier returned no type. Distinct from out_of_scope: the title gate DID match something, so the document looks like one of ours and the classifier still could not name it.",
+      "low_confidence": "The classifier named a type but below that type's threshold. The proposal and its reasoning are still returned — a reviewer confirming a correct low-confidence answer is useful failure-log data.",
+      "classifier_unavailable": "The classifier could not be reached at all. Not a property of the document, and must never be recorded as a classification failure against it.",
+      "flagged_blocking": "A flag fired that blocks on its own. Usually high severity, but a rule may override its severity’s default — multi_doc_bundle is medium and blocks, because filing a two-document bundle as one document destroys a record rather than mislabelling one. Named for what it does rather than for its severity, because those came apart the moment overrides existed."
+    },
+    "destination": "_Needs review",
+    "correction_reasons": {
+      "purpose": "Why a reviewer's answer differs from the tool's — or that it does not. The failure log's one-line why (ground rule #6) is built from one of these codes, never typed: a free-text box at the end of a review is exactly where a client name gets written by somebody being helpful. Adding a reason is a knowledge-base edit, not a code change.",
+      "codes": {
+        "confirmed": "The tool's type was right; the document was held for review anyway — low confidence, a blocking flag, or out of scope. Logged because thresholds are calibrated from confirmations as much as from corrections: a type a reviewer confirms nearly every time it is held is being held too often.",
+        "lookalike": "The document quotes, cites or resembles another type and was read as that one — an SOA that refers to a PDS, an ROA read as an SOA, an FSG section inside an SOA.",
+        "non_standard_title": "The document's own title is missing, firm-branded or worded differently from the title patterns, so the tool had no title to go on.",
+        "poor_text": "The text the tool read was incomplete or garbled — a scan, a partial extraction, a redacted or image-heavy page. A property of the file rather than of the rules.",
+        "bundle": "One file holds more than one document, and the tool named only one of them.",
+        "knowledge_base_gap": "None of the above: the knowledge base is missing a rule. The record says a gap exists; what the gap is belongs in an issue, not in the log."
+      }
+    },
+    "forces_review_decision": "RESOLVED by multi_doc_bundle. Severity sets the default (edge_case_flags.severity_forces_review: only high blocks). A rule may override it with its own `forces_review`. Medium stays non-blocking by default because roa_basis_unconfirmed fires on every ROA and a queue that asks about every document gets ignored — see the direction note on #20. multi_doc_bundle is medium and overrides to blocking, because filing a two-document bundle as one document destroys a record rather than mislabelling one. It is the only override today.",
+    "certainty_decision": {
+      "rule": "Everything the tool proposes needs 100% certainty: document type, client name, the advice stage, and the new document name. In practice a person confirms every one before anything is filed. Nothing is filed automatically, at any confidence.",
+      "why": "Any of these being wrong can lead to heavy compliance fines and problems with regulators.",
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q7). Matches CLAUDE.md ground rule 2: everything is a proposal a human approves.",
+      "consequence": "The 0.90 thresholds no longer decide whether to file; every document is confirmed. They can still decide how a proposal is shown (e.g. 'likely' vs 'needs a closer look'). How that works on screen is for Delia and Bella to agree; thresholds are unchanged until then."
+    }
+  },
+  "approval_policy": {
+    "purpose": "Who may approve a filing proposal, what they check, and which flags block approval outright. Decided by Bella on 1 Oct 2026 for the Approve/Edit/Reject screen (build step 5, #4). Read by that screen; never restated in code (ground rule #1).",
+    "default_for_any_firm": "A sensible default for an Australian advice practice. Firms differ — a small practice may have no paraplanner, or an adviser who is also compliance — and adjusting roles per firm waits for a real pilot (#26 rule).",
+    "roles": {
+      "admin": {
+        "who": "Client services / administration.",
+        "can_view": true,
+        "can_edit": true,
+        "can_approve": false,
+        "can_clear_hard_stop": false
+      },
+      "paraplanner": {
+        "who": "Drafts advice and researches products under an adviser; does not sign advice.",
+        "can_view": true,
+        "can_edit": true,
+        "can_approve": false,
+        "can_clear_hard_stop": false
+      },
+      "adviser": {
+        "who": "Authorised representative / relevant provider. Gives and signs the advice and holds the best-interests duty for it.",
+        "can_view": true,
+        "can_edit": true,
+        "can_approve": true,
+        "can_clear_hard_stop": false
+      },
+      "compliance": {
+        "who": "Compliance officer acting for the licensee, which must monitor advice quality.",
+        "can_view": true,
+        "can_edit": true,
+        "can_approve": true,
+        "can_clear_hard_stop": true,
+        "sees_all_clients": true
+      }
+    },
+    "approvers": [
+      "adviser",
+      "compliance"
+    ],
+    "approvers_note": "Only an adviser or a compliance officer approves. Everyone else can prepare and correct a proposal, which saves the adviser time without moving the decision.",
+    "own_clients_only": [
+      "soa",
+      "roa",
+      "authority_to_proceed",
+      "fee_disclosure_statement"
+    ],
+    "own_clients_only_note": "An adviser approves these only for their own clients: one adviser must not sign off another's advice record. Compliance may approve any.",
+    "edit_may_change": [
+      "document type",
+      "client",
+      "advice event",
+      "date",
+      "filename"
+    ],
+    "reviewer_check": "Read the title and skim the content to confirm the name and the filing are right.",
+    "checks_by_type": {
+      "fsg": "Right licensee and edition; dated before the advice was given.",
+      "fact_find": "Right client; dated before the SOA it underpins.",
+      "risk_profile": "Right client; the risk category is stated.",
+      "file_note": "Right client; a note ABOUT advice, never the advice itself.",
+      "pds": "The product is one recommended or considered in the advice.",
+      "soa": "Right client; the advice-as-at (commencement) date; the subject from its own scope.",
+      "roa": "As SOA, plus which of the three ROA situations applies.",
+      "authority_to_proceed": "Signed; links to the SOA or ROA it authorises.",
+      "fee_disclosure_statement": "Right client; the period; consent signed."
+    },
+    "flag_effects": {
+      "hard_stop": "Approve is unavailable until the problem is fixed. Only compliance may clear it.",
+      "warning": "Shown to the approver, who may still approve."
+    },
+    "flag_effect_by_rule": {
+      "atp_without_advice_record": "hard_stop",
+      "risk_mismatch": "hard_stop",
+      "fact_find_after_soa": "hard_stop",
+      "multi_doc_bundle": "hard_stop",
+      "no_date": "warning",
+      "fds_era_mismatch": "warning",
+      "roa_basis_unconfirmed": "warning"
+    },
+    "flag_effect_by_rule_why": {
+      "atp_without_advice_record": "Implementation with no advice on file is a serious compliance gap.",
+      "risk_mismatch": "Goes straight to whether the advice is appropriate.",
+      "fact_find_after_soa": "Suggests the advice was written before the client was understood.",
+      "multi_doc_bundle": "Filing a bundle as one document loses a record; stop until split.",
+      "no_date": "The approver can read the date and enter it.",
+      "fds_era_mismatch": "Often only an old template, but worth a look.",
+      "roa_basis_unconfirmed": "Asks which ROA situation applies; the approver answers it."
+    },
+    "not_yet_decided": [
+      "roa_without_soa",
+      "superseding_ambiguity",
+      "advice_record_label_shift",
+      "low_confidence",
+      "unknown_type"
+    ],
+    "not_yet_decided_note": "Rules Bella has not yet placed as hard stop or warning. Until she does, the screen treats them as warnings — and low_confidence and unknown_type already send the document to review.",
+    "proposed_warnings_not_yet_rules": {
+      "fsg_edition_out_of_date": "The FSG edition was not the one in force at the advice date. Needs edition dates per licensee.",
+      "pds_product_not_in_advice": "The PDS's product is not named in the SOA or ROA. Needs cross-document state (#8).",
+      "file_note_names_provider": "A file note naming a provider is easily mistaken for that provider's document."
+    }
+  },
   "edge_case_flags": {
     "purpose": "Rules that route a document to the internal human-review queue instead of forcing a category. Each fires a flag; it does not silently reclassify.",
+    "evaluation_values": {
+      "stateless": "Everything the rule needs is inside the one document. Answerable at ingest, with no other file on record.",
+      "stateful": "Needs other documents for the same client — a prior SOA, an earlier fact find, a competing current version. Not answerable until documents persist across requests."
+    },
+    "evaluation_note": "Every rule declares which it is, so the flagging engine can never claim to have evaluated a rule whose evidence it does not hold. Declaring a rule stateless says it CAN be answered at ingest, not that it is implemented yet.",
+    "severity_forces_review": {
+      "high": true,
+      "medium": false,
+      "low": false
+    },
+    "severity_note": "Whether a flag on its own sends a document to _Needs review. A flag is always SHOWN; this decides whether it blocks. High severity means the document cannot be acted on until a person looks. Medium and low attach a question to a proposal that still stands on its own confidence — a rule can override its severity with `forces_review` — see review_policy.forces_review_decision.",
     "rules": [
-      {"id": "roa_without_soa", "trigger": "Further-advice-style ROA identified but no prior SOA on file for the client", "why": "Further-advice ROA (s946B(1)-(3A)/reg 7.7.10AE) depends on an existing SOA. BUT hold (s946B(7)), small-investment (s946AA), and no-buy/sell (reg 7.7.10AAA) ROAs do not — so this is a 'confirm which kind', not an automatic error.", "severity": "medium"},
-      {"id": "atp_without_advice_record", "trigger": "Authority to Proceed with no matching SOA/ROA on file", "why": "An authorisation to implement advice that isn't on file — either a bundle-split miss or a genuine gap.", "severity": "high"},
-      {"id": "fact_find_after_soa", "trigger": "Fact Find dated later than the SOA it should underpin", "why": "Advice may predate the information it was supposedly based on (best-interests concern).", "severity": "medium"},
-      {"id": "risk_mismatch", "trigger": "Risk Profile category not reflected in SOA recommendations", "why": "Possible best-interests/suitability gap (s961B).", "severity": "high"},
-      {"id": "multi_doc_bundle", "trigger": "Single file appears to contain more than one document type (classic: SOA + appended Authority to Proceed)", "why": "Needs splitting before records and links are accurate.", "severity": "medium"},
-      {"id": "advice_record_label_shift", "trigger": "Document plays the advice-record role but titling is ambiguous between SOA and CAR", "why": "During the DBFO transition both may appear; capture the correct statutory label. DORMANT: 'car' is not a document type while DBFO Tranche 2 is unlegislated, so nothing fires this today. Kept because the rule becomes live the moment the successor type is added back — see reform_watch.", "severity": "low", "status": "dormant"},
-      {"id": "fds_era_mismatch", "trigger": "Fee/consent document format doesn't match the expected pre/post-DBFO-Tranche-1 era for its date", "why": "Ongoing-fee consent mechanics changed under DBFO; wrong-era format may indicate a compliance gap.", "severity": "medium"},
-      {"id": "no_date", "trigger": "No date extractable from a document type that requires one for sequencing", "why": "Version tracking and advice-timing checks impossible without a date.", "severity": "medium"},
-      {"id": "low_confidence", "trigger": "Classifier confidence below threshold", "why": "Ambiguous or poor-quality document; needs a human eye.", "severity": "medium"},
-      {"id": "unknown_type", "trigger": "No document type matched with sufficient confidence", "why": "Possibly out-of-scope or a novel/edge document.", "severity": "low"},
-      {"id": "superseding_ambiguity", "trigger": "Two candidate 'current' documents of the same type and scope for one client", "why": "Cannot determine which is in force.", "severity": "high"}
+      {"id": "roa_basis_unconfirmed", "evaluation": "stateless", "trigger": "Any document classified as an ROA. Fires on every one, not on an anomaly.", "why": "An ROA is permitted in three situations — further advice (reg 7.7.10AE), no buy or sell (reg 7.7.10AAA), small investment (s946AA) — and which one applies changes the content the record must contain and whether a prior SOA is required at all. The document type does not settle it, so filing an ROA without recording its basis loses the fact that determines what a compliant record looks like. This is a confirmation, never an error: all three are valid.", "severity": "medium", "asks": "Which of the three situations is this? Where the text supports exactly one, the flag proposes it with the phrases it matched, so a reviewer confirms or corrects one thing rather than starting from scratch.", "determination_values": {"proposed": "Signals for exactly one basis. The flag names it and cites the matched phrases.", "ambiguous": "Signals for more than one basis. The flag lists the candidates; it does not pick.", "absent": "No basis signal found. The honest default — the flag asks which kind, and proposes nothing."}, "signal_source": "documents[roa].legislation.situations[].basis_signals", "not_to_be_confused_with": "roa_without_soa asks a cross-document question (is there a prior SOA on file?) and needs state this rule does not. They can both fire on the same document and they are asking different things."},
+      {"id": "roa_without_soa", "evaluation": "stateful", "trigger": "Further-advice-style ROA identified but no prior SOA on file for the client", "why": "A further-advice ROA (notional s946B(2)-(3) / reg 7.7.10AE) depends on an existing SOA. The other two situations — no buy or sell (reg 7.7.10AAA) and small investment (s946AA) — do not, so this is a 'confirm which kind', not an automatic error.", "severity": "medium"},
+      {"id": "atp_without_advice_record", "evaluation": "stateful", "trigger": "Authority to Proceed with no matching SOA/ROA on file", "why": "An authorisation to implement advice that isn't on file — either a bundle-split miss or a genuine gap.", "severity": "high"},
+      {"id": "fact_find_after_soa", "evaluation": "stateful", "trigger": "Fact Find dated later than the SOA it should underpin", "why": "Advice may predate the information it was supposedly based on (best-interests concern).", "severity": "medium"},
+      {"id": "risk_mismatch", "evaluation": "stateful", "trigger": "Risk Profile category not reflected in SOA recommendations", "why": "Possible best-interests/suitability gap (s961B).", "severity": "high"},
+      {"id": "multi_doc_bundle", "evaluation": "stateless", "trigger": "Single file appears to contain more than one document type (classic: SOA + appended Authority to Proceed)", "why": "Needs splitting before records and links are accurate. Left unsplit, the appended document never becomes a record of its own — so atp_without_advice_record fires on correctly-executed advice, which is the fastest way to get a firm to ignore the review queue.", "severity": "medium", "forces_review": true, "forces_review_why": "Overrides the severity default. Medium normally attaches a question without blocking, because a queue that asks about every document gets ignored. This rule is the override review_policy.forces_review_decision records: filing a two-document bundle as one document destroys a record rather than mislabelling one, and unlike a basis confirmation it cannot be corrected later from what was filed.", "asks": "Does this file hold more than one document, and if so where does the second start?", "never_split_automatically": "The flag proposes candidate boundaries as evidence; a human approves any split. A missed bundle is a flag nobody actioned. A WRONG split silently destroys a record by cutting a document in half, and nothing downstream can tell that it happened. Ground rule #2 applies with force.", "detection": {"pagination_restart": {"strength": "strong", "rule": "A page-number marker reading 'page 1 of N' on any page other than the first. A document's own pagination restarting mid-file is direct evidence of a boundary, independent of titles, headers and type.", "pattern": "\\bpage\\s+(\\d{1,3})\\s+of\\s+(\\d{1,3})\\b", "pattern_note": "The gap is tolerant because extraction pads it — the real RG 90 sample yields 'Page 2          of 23'.", "evidence": "Validated on samples/soa_atp/asic-rg90-example-soa-with-atp.pdf, which is RG 90 itself followed by an example SOA whose footer restarts at 'Page 1 of 23' on page 31. Correctly silent on every single-document sample tested."}, "title_transition": {"strength": "weaker", "rule": "The document type implied by each page's leading region, read with the same title patterns the scope gate uses. A running header produces a CONSTANT type across pages; a boundary produces a CHANGE. So the signal is the transition, not the presence of a second type's name.", "why_not_frequency": "Suppressing types that appear on most pages looks sensible and is wrong: in a real bundle the larger document's own running header legitimately appears on most pages of the whole file, so frequency-based suppression hides exactly the boundary being looked for.", "excursion_rule": "A transition A -> B is ignored where A reappears after B, AND where B already appeared before it. Both halves are needed: the first ignores the departure into a section, the second ignores the file handing itself back to the type it already was. A section inside one document returns to its parent; an appended document does not. This is what separates a PDS with a 'risk profile' section from a PDS with something genuinely appended — without the second half, the RETURN from the excursion is reported as a boundary.", "known_weakness": "A heading that names another document type, never returning to the parent, still reads as a boundary — a late 'Financial Services Guide' heading inside an SOA, for example. Candidates are evidence for a human, not a decision, so a wrong candidate costs a look rather than a record.", "evidence": "Validated on two real ASIC documents that contain an appended Authority to Proceed as their final page: asic-cp284-example-soa-attachment.pdf (soa -> authority_to_proceed at p56) and asic-rg90-example-soa-2013.pdf (at p40). Also correctly suppressed a pds -> risk_profile -> pds excursion in unisuper-flexi-pension-pds.pdf."}, "leading_region_chars": 500, "leading_region_note": "The same window scope_gate.py reads, for the same reason: a document names other types in its body, and only the top of a page is its own heading."}},
+      {"id": "advice_record_label_shift", "evaluation": "stateless", "trigger": "Document plays the advice-record role but titling is ambiguous between SOA and CAR", "why": "During the DBFO transition both may appear; capture the correct statutory label. DORMANT: 'car' is not a document type while DBFO Tranche 2 is unlegislated, so nothing fires this today. Kept because the rule becomes live the moment the successor type is added back — see reform_watch.", "severity": "low", "status": "dormant"},
+      {"id": "fds_era_mismatch", "evaluation": "stateless", "trigger": "Fee/consent document format doesn't match the expected pre/post-DBFO-Tranche-1 era for its date", "why": "Ongoing-fee consent mechanics changed under DBFO; wrong-era format may indicate a compliance gap.", "severity": "medium"},
+      {"id": "no_date", "evaluation": "stateless", "trigger": "No date extractable from a document type that requires one for sequencing", "why": "Version tracking and advice-timing checks impossible without a date.", "severity": "medium"},
+      {"id": "low_confidence", "evaluation": "stateless", "trigger": "Classifier confidence below threshold", "why": "Ambiguous or poor-quality document; needs a human eye.", "severity": "medium"},
+      {"id": "unknown_type", "evaluation": "stateless", "trigger": "The classifier returned no document type at all. Distinct from low_confidence, where it named a type below that type's threshold.", "why": "Possibly out-of-scope or a novel/edge document.", "severity": "low"},
+      {"id": "superseding_ambiguity", "evaluation": "stateful", "trigger": "Two candidate 'current' documents of the same type and scope for one client", "why": "Cannot determine which is in force.", "severity": "high"}
     ]
   }
 }
