@@ -788,6 +788,10 @@
       "decided": "Bella, 9 Oct 2026 (GH#61).",
       "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026."
     },
+    "name_format": {
+      "rule": "Folder names use normal capitals whatever the document uses: 'JOHN SMITH' becomes 'Smith, John'. Titles are kept: 'Dr John Smith' becomes 'Smith, Dr John'.",
+      "decided": "Bella, 14 Oct 2026. Titles kept because clients, especially doctors, expect them."
+    },
     "entity_client": {
       "rule": "A trust, SMSF or company is the client in its own right. Its folder uses the entity's own name, and each entity has its own folder, separate from the people behind it.",
       "decided": "Bella, 13 Oct 2026 (GH#61 Q2)."

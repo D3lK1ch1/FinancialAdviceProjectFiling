@@ -43,6 +43,35 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-14 — Client name format; next fixes from Bella's code review
+
+### Decided
+- (Bella) Folder names use normal capitals and keep titles after the comma:
+  `JOHN SMITH` → `Smith, John`, `Dr John Smith` → `Smith, Dr John`.
+  Recorded as `client_model.name_format`; not built yet (#6).
+
+### Known gaps
+(Bella's review of the code, 14 Oct. Nothing here is built; each is its own branch + PR for Delia.)
+- **Client names (`clients.py`, #6):** `JOHN SMITH` (all capitals) is not found;
+  `Anna van der Berg` is cut to `Anna` (van, der, de, von dropped); `ABC Pty Ltd` is
+  not found, though companies, trusts and SMSFs are clients (`entity_client`);
+  `Mr John Smith` should give `Smith, Mr John` (`name_format`).
+- **Dates (`dates.py`, #48):** two different "Date of advice" dates silently picks the
+  first; it should go to a person. `03/04/24` (two-digit year) is ignored.
+- **"date of advice" is written in `dates.py`:** move it to `knowledge_base.json` (ground rule 1).
+- **INFO 267 subject:** "want advice about" matched a negated sentence. Skip negated
+  sentences or prefer the "Scope of my advice" section. Correct answer: Personal Insurance.
+- **Who did it:** `/review/correction` records no reviewer, which "show who renamed it"
+  needs (`filing_model.renaming`, #7).
+- **Confirm everything:** a person confirms type, client, stage and name on every
+  document (`review_policy.certainty_decision`). Agree the screen with Bella before
+  changing the 0.90 thresholds.
+- **Tidy:** stale comments in `app.py` ("no classifier yet", a duplicated comment) and
+  `.github/workflows/tests.yml` ("docs/ gitignored"); the skip message in `conftest.py`
+  points to a README heading renamed 13 Oct; `harness.py` still needs `sample_documents.json`.
+
+---
+
 ## 2026-10-13 — `docs/` added and corrected 
 
 ### Added
