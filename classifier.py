@@ -32,10 +32,13 @@ document. Respond with ONLY a JSON object, no prose, no markdown fences:
 
 {{"doc_type": {_DOC_TYPE_ENUM}, "confidence": 0.0-1.0, "matched_signals": ["..."]}}
 
-matched_signals must be short phrases actually present in the document text
-that support your answer (e.g. a title phrase, a key field you found).
+matched_signals must be 3-6 short quotes, each 3 to 8 words, copied
+exactly from the "Document text" section below: same words, same
+punctuation. Prefer headings, titles and labelled lines. Never quote the
+hints, never summarise, never give a field label or category name. If you
+cannot copy a phrase exactly, leave it out.
 
-Classifier hints:
+Hints (descriptions of each type, NOT text to quote):
 {hints_block}
 
 Document text (may be truncated):
@@ -57,7 +60,7 @@ def classify(text: str) -> dict:
     try:
         response = requests.post(
             OLLAMA_URL,
-            json={"model": MODEL, "prompt": prompt, "stream": False, "format": "json"},
+            json={"model": MODEL, "prompt": prompt, "stream": False, "format": "json", "options": {"temperature": 0}},
             timeout=180,
         )
         response.raise_for_status()
