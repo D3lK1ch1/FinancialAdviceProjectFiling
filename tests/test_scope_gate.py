@@ -204,24 +204,20 @@ def test_a_new_advice_record_type_needs_no_code_change():
         }
     )
 
-    import tempfile
+    import kb as kb_module
 
-    with tempfile.TemporaryDirectory() as tmp:
-        (Path(tmp) / "knowledge_base.json").write_text(json.dumps(kb))
-        cwd = Path.cwd()
-        try:
-            import os
+    real = kb_module.KB
+    kb_module.KB = kb
+    try:
+        reloaded = importlib.reload(sg)
 
-            os.chdir(tmp)
-            reloaded = importlib.reload(sg)
-
-            assert "successor_advice_record" in reloaded.IN_SCOPE_TYPES
-            result = reloaded.check_scope("Successor Advice Record\nPrepared 1 July 2026")
-            assert result["in_scope"] is True
-            assert result["likely_type"] == "successor_advice_record"
-        finally:
-            os.chdir(cwd)
-            importlib.reload(sg)
+        assert "successor_advice_record" in reloaded.IN_SCOPE_TYPES
+        result = reloaded.check_scope("Successor Advice Record\nPrepared 1 July 2026")
+        assert result["in_scope"] is True
+        assert result["likely_type"] == "successor_advice_record"
+    finally:
+        kb_module.KB = real
+        importlib.reload(sg)
 
 
 def test_advice_record_role_survives_the_removed_successor_type():
