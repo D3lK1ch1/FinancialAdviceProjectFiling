@@ -302,3 +302,40 @@ def test_engine_identity_asks_the_same_server_classify_uses(mock_get):
 
     asked = {call.args[0] for call in mock_get.call_args_list}
     assert asked == {"http://localhost:11434/api/version", "http://localhost:11434/api/tags"}
+
+
+# --- engine_version (#7) -------------------------------------------------------
+
+
+def test_engine_version_is_the_five_fields_that_decide_an_answer():
+    from classifier import PROMPT_VERSION, engine_version
+    from kb import KB
+
+    identity = {"model": "llama3.1", "model_digest": "46e0c10c", "ollama_version": "0.40.6",
+                "identity_error": "not part of the stamp"}
+
+    assert engine_version(identity) == {
+        "model": "llama3.1",
+        "model_digest": "46e0c10c",
+        "ollama_version": "0.40.6",
+        "kb_version": KB["meta"]["version"],
+        "prompt_version": PROMPT_VERSION,
+    }
+
+
+def test_prompt_version_changes_when_the_hints_change(monkeypatch):
+    import importlib
+
+    import classifier
+    import kb
+
+    before = classifier.PROMPT_VERSION
+    edited = json.loads(json.dumps(kb.KB))
+    edited["documents"][0]["classifier_hints"]["title_patterns"].append("A new title")
+    monkeypatch.setattr("kb.KB", edited)
+    try:
+        assert importlib.reload(classifier).PROMPT_VERSION != before
+    finally:
+        monkeypatch.undo()
+        importlib.reload(classifier)
+    assert classifier.PROMPT_VERSION == before
