@@ -257,3 +257,26 @@ def test_every_basis_says_whether_a_real_example_exists():
 
     untested = [k["id"] for k in kinds if k["example_status"].startswith("NO REAL EXAMPLE")]
     assert set(untested) == {"small_investment", "no_buy_sell"}
+
+
+# --- ambiguous_client (#6) ---------------------------------------------------------
+
+
+def _client_flag(pages):
+    return [f for f in evaluate_flags("soa", "\n".join(pages), pages) if f["id"] == "ambiguous_client"]
+
+
+def test_ambiguous_client_fires_on_two_different_clients_and_proposes_neither():
+    [flag] = _client_flag(["Client name: George Baker", "Account name: Wendy Zhang"])
+
+    assert flag["severity"] == _RULES["ambiguous_client"]["severity"] == "high"
+    assert flag["names"] == ["Baker, George", "Zhang, Wendy"]
+    assert "proposed" not in flag
+
+
+@pytest.mark.parametrize("pages", [
+    ["Client name: George Baker", "Client name: GEORGE BAKER"],   # one client, said twice
+    ["Financial Services Guide"],                                 # no client at all
+])
+def test_ambiguous_client_is_silent_when_there_is_nothing_to_choose_between(pages):
+    assert _client_flag(pages) == []
