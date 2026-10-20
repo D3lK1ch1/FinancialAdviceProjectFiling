@@ -228,3 +228,77 @@ def test_connection_settings_come_from_the_environment(mock_post, monkeypatch):
         monkeypatch.undo()
         importlib.reload(config)
         importlib.reload(classifier)
+
+
+# --- engine_identity (#7) -----------------------------------------------------
+# Which exact model answered. Ollama's real shapes: /api/version returns
+# {"version": ...}; /api/tags lists pulled models with their digests.
+
+_TAGS = {"models": [
+    {"name": "qwen2.5:3b", "digest": "357c53fb"},
+    {"name": "llama3.1:latest", "digest": "46e0c10c"},
+]}
+
+
+def _get_returning(version=None, tags=None, fail=None):
+    def fake_get(url, timeout):
+        if fail and fail in url:
+            raise requests.exceptions.ConnectionError("refused")
+        response = Mock()
+        response.raise_for_status = Mock()
+        response.json.return_value = version if url.endswith("/api/version") else tags
+        return response
+    return fake_get
+
+
+@patch("classifier.requests.get")
+def test_engine_identity_reads_the_digest_of_the_model_in_use(mock_get):
+    from classifier import engine_identity
+
+    mock_get.side_effect = _get_returning({"version": "0.40.6"}, _TAGS)
+
+    assert engine_identity() == {
+        "model": "llama3.1",
+        "model_digest": "46e0c10c",  # "llama3.1" is listed as "llama3.1:latest"
+        "ollama_version": "0.40.6",
+    }
+
+
+@patch("classifier.requests.get")
+def test_engine_identity_says_so_when_the_model_is_not_pulled(mock_get):
+    from classifier import engine_identity
+
+    mock_get.side_effect = _get_returning({"version": "0.40.6"}, {"models": [_TAGS["models"][0]]})
+
+    identity = engine_identity()
+
+    assert identity["model_digest"] is None
+    assert identity["ollama_version"] == "0.40.6"
+    assert "llama3.1:latest is not pulled" in identity["identity_error"]
+
+
+@patch("classifier.requests.get")
+def test_engine_identity_never_raises_when_ollama_is_down(mock_get):
+    from classifier import engine_identity
+
+    mock_get.side_effect = _get_returning(fail="/api/")
+
+    identity = engine_identity()
+
+    assert identity["model"] == "llama3.1"
+    assert identity["model_digest"] is None
+    assert identity["ollama_version"] is None
+    assert "version: refused" in identity["identity_error"]
+    assert "digest: refused" in identity["identity_error"]
+
+
+@patch("classifier.requests.get")
+def test_engine_identity_asks_the_same_server_classify_uses(mock_get):
+    from classifier import engine_identity
+
+    mock_get.side_effect = _get_returning({"version": "0.40.6"}, _TAGS)
+
+    engine_identity()
+
+    asked = {call.args[0] for call in mock_get.call_args_list}
+    assert asked == {"http://localhost:11434/api/version", "http://localhost:11434/api/tags"}

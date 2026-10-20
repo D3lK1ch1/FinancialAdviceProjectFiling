@@ -13,6 +13,7 @@ import json
 
 import requests
 
+from config import OLLAMA_BASE_URL
 from config import OLLAMA_MODEL as MODEL
 from config import OLLAMA_TIMEOUT_SECONDS as TIMEOUT_SECONDS
 from config import OLLAMA_URL
@@ -52,6 +53,52 @@ def _parse_response(raw: str) -> dict:
         if cleaned.startswith("json"):
             cleaned = cleaned[4:]
     return json.loads(cleaned.strip())
+
+
+def _full_tag(model: str) -> str:
+    # Ollama lists "llama3.1" as "llama3.1:latest"; a name without a tag means latest.
+    return model if ":" in model else f"{model}:latest"
+
+
+def engine_identity() -> dict:
+    """Exactly which model answered, as Ollama reports it right now (#7).
+
+    The tag "llama3.1" names whatever was last pulled under it, so the next
+    `ollama pull` can change every classification without any line of this
+    project changing. The digest names the model's exact weights: a different
+    digest is a different classifier, and the samples need re-running. Ollama
+    also updated itself during the #59 experiment, so its version is recorded
+    too.
+
+    The digest comes from /api/tags. /api/show, which #7 first pointed to,
+    returns no digest (checked against Ollama 0.40.6).
+
+    Never raises. A value that can't be read is None with the reason in
+    `identity_error`, because a classification that happened is still a
+    classification. It is just one whose engine nobody can vouch for.
+    """
+    identity = {"model": MODEL, "model_digest": None, "ollama_version": None}
+    errors = []
+    try:
+        response = requests.get(f"{OLLAMA_BASE_URL}/api/version", timeout=5)
+        response.raise_for_status()
+        identity["ollama_version"] = response.json().get("version")
+    except (requests.RequestException, ValueError) as e:
+        errors.append(f"version: {_error_text(e)}")
+    try:
+        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
+        response.raise_for_status()
+        wanted = _full_tag(MODEL)
+        match = next((m for m in response.json().get("models", []) if _full_tag(m.get("name", "")) == wanted), None)
+        if match is None:
+            errors.append(f"digest: {wanted} is not pulled on this Ollama")
+        else:
+            identity["model_digest"] = match.get("digest")
+    except (requests.RequestException, ValueError) as e:
+        errors.append(f"digest: {_error_text(e)}")
+    if errors:
+        identity["identity_error"] = "; ".join(errors)
+    return identity
 
 
 def _error_text(e: Exception) -> str:

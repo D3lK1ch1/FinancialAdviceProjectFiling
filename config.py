@@ -14,6 +14,8 @@ also let a path in. This module reads settings and knows no paths.
 import os
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
+# The same server's root, for asking it which model and version it is running.
+OLLAMA_BASE_URL = OLLAMA_URL.rsplit("/api/", 1)[0]
 # A different model is a different classifier. Change it only deliberately,
 # and re-run the samples when you do.
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.1")
