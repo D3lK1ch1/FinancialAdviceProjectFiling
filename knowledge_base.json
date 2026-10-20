@@ -827,6 +827,11 @@
       "sequencing": "Do not build this until classification and grouping are reliable. A summary built on mis-grouped documents is confidently wrong."
     }
   },
+  "scope_gate": {
+    "purpose": "How scope_gate.py reads each document's title_patterns. The patterns live on each document type; this is the window they are matched in.",
+    "title_window_chars": 500,
+    "title_window_why": "Documents commonly name OTHER types in their body (an FSG explains what a PDS is). Scanning the whole text picks up those mentions as false positives, so only the presumed title and heading region is checked. Moved here from scope_gate.py (#7)."
+  },
   "confidence_policy": {
     "purpose": "The classifier reports its own confidence. That number is a claim by the model about itself, not a measurement, and nothing checked it before acting on it. This turns it into evidence that can be checked: every phrase the model says it matched is looked for in the document, and the scope gate's independent reading is compared against the type the model chose.",
     "direction_rule": "Verification can only LOWER the acted-on confidence, never raise it. A model that quotes accurately has told the truth about its own reasoning; it has not thereby proved the answer right. Allowing evidence to inflate a number the model invented would launder a guess into a measurement.",

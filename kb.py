@@ -28,6 +28,7 @@ REQUIRED_SECTIONS = (
     "edge_case_flags",
     "filing_model",
     "review_policy",
+    "scope_gate",
     "settings",
 )
 
