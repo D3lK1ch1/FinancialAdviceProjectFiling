@@ -149,3 +149,82 @@ def test_classify_sends_temperature_zero_as_a_number(mock_post):
     assert options["temperature"] == 0
     # Ollama rejects "0" (a string) with a 500, and ignores a misspelled key.
     assert not isinstance(options["temperature"], str)
+
+
+# --- Connection settings and error text (#7) -------------------------------
+
+
+@patch("classifier.requests.post")
+def test_classify_keeps_ollamas_own_error_message(mock_post):
+    # What Ollama returns for a model that was never pulled: a 404 whose body
+    # says why. The status line alone tells a reviewer nothing to act on.
+    body = Mock()
+    body.json.return_value = {"error": "model 'llama3.2' not found, try pulling it first"}
+    mock_response = Mock()
+    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+        "404 Client Error: Not Found", response=body
+    )
+    mock_post.return_value = mock_response
+
+    result = classify("some document text")
+
+    assert "404 Client Error" in result["classifier_error"]
+    assert "model 'llama3.2' not found" in result["classifier_error"]
+
+
+@patch("classifier.requests.post")
+def test_classify_error_without_a_body_is_unchanged(mock_post):
+    body = Mock()
+    body.json.side_effect = ValueError("no JSON body")
+    mock_response = Mock()
+    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+        "500 Server Error", response=body
+    )
+    mock_post.return_value = mock_response
+
+    assert classify("some document text")["classifier_error"] == "500 Server Error"
+
+
+def test_connection_settings_default_to_the_values_the_project_runs_with(monkeypatch):
+    import importlib
+
+    import classifier
+    import config
+
+    for name in ("OLLAMA_URL", "OLLAMA_MODEL", "OLLAMA_TIMEOUT"):
+        monkeypatch.delenv(name, raising=False)
+    try:
+        importlib.reload(config)
+        reloaded = importlib.reload(classifier)
+        assert reloaded.OLLAMA_URL == "http://localhost:11434/api/generate"
+        assert reloaded.MODEL == "llama3.1"
+        assert reloaded.TIMEOUT_SECONDS == 180
+    finally:
+        monkeypatch.undo()
+        importlib.reload(config)
+        importlib.reload(classifier)
+
+
+@patch("requests.post")
+def test_connection_settings_come_from_the_environment(mock_post, monkeypatch):
+    import importlib
+
+    import classifier
+    import config
+
+    monkeypatch.setenv("OLLAMA_URL", "http://other-host:11434/api/generate")
+    monkeypatch.setenv("OLLAMA_MODEL", "some-model")
+    monkeypatch.setenv("OLLAMA_TIMEOUT", "30")
+    mock_post.return_value = _mock_ollama_response(VALID_JSON)
+    try:
+        importlib.reload(config)
+        reloaded = importlib.reload(classifier)
+        reloaded.classify("some document text")
+
+        assert mock_post.call_args.args[0] == "http://other-host:11434/api/generate"
+        assert mock_post.call_args.kwargs["json"]["model"] == "some-model"
+        assert mock_post.call_args.kwargs["timeout"] == 30
+    finally:
+        monkeypatch.undo()
+        importlib.reload(config)
+        importlib.reload(classifier)
