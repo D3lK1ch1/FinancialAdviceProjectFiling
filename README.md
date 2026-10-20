@@ -1,318 +1,238 @@
 # Advice Document Classifier & Filing System
-Classifies and files financial-advice documents for Australian advice firms.
 
-A public demonstration of where the pipeline and review UI are heading:
-**https://advice-document-classifier.vercel.app**, built from
-[`ahaythorpe/advice-document-classifier`](https://github.com/ahaythorpe/advice-document-classifier)
+A tool that reads a financial-advice firm's client documents, works out what each
+one is, and suggests where to file it. A person approves every suggestion.
 
-The purpose of this project is to build upon the referred public demo from pilot stage to an actual product.
+Public demo of where this is heading: **https://advice-document-classifier.vercel.app**
+(built from [`ahaythorpe/advice-document-classifier`](https://github.com/ahaythorpe/advice-document-classifier)).
+This repo takes that demo from pilot towards a working product.
 
-> **`samples/` is not in this git repo.** Sample documents are gitignored on purpose. `docs/` (spec, planning and handover documents) is in the repo since 13 Oct 2026, after it was confirmed the spec can be shared but not the samples. A fresh clone will build and pass most tests but won't have the samples.
+- **New to the project, or from finance/accounting?** Read [Why this exists](#why-this-exists) and [Where it stands](#where-it-stands).
+- **Reviewing or testing it?** Go to [Quick start](#quick-start).
+- **Contributing code?** Read [For contributors](#for-contributors) and `CLAUDE.md`.
 
-## Run it
+---
 
-Works on **macOS and Windows**. Where the commands differ, both are shown. On a
-Mac, use the **Terminal** app; on Windows, **PowerShell**.
+## Why this exists
 
-**What you need first**
-- **Python 3.10 or newer.** Check with `python3 --version` (Mac) or `python --version`
-  (Windows). On a Mac, install it from [python.org](https://www.python.org/downloads/)
-  if the version is older or missing.
-- **[Ollama](https://ollama.com/download)**, which runs the AI model on your own
-  computer. Install it like any app. On a Mac it lives in the menu bar (top right);
-  on Windows, in the system tray (bottom right).
-- **The `samples/` folder**, from Delia directly (it is not in git, see below).
+Australian financial-advice firms hold many regulated documents for each client:
+Statements of Advice (SOA), Records of Advice (ROA), Financial Services Guides
+(FSG), Product Disclosure Statements (PDS), fact finds, risk profiles, fee
+consents and more. Under the Corporations Act, firms have to keep these records
+and be able to produce the right one when asked.
+
+Today, staff file them **by hand**. The main advice platforms *store* documents,
+but none of them *reads* a document and says "this is an ROA for this client,
+from this advice event". When filing goes wrong, the firm loses time and runs a
+compliance risk: if a record can't be found, the firm can't show the advice was
+properly documented.
+
+**What this tool does for a firm:**
+
+| Step | What happens |
+|---|---|
+| 1. Read | Takes a PDF and pulls out its text. |
+| 2. Identify | Decides which of 9 document types it is (SOA, ROA, FSG, PDS, Authority to Proceed, Fact Find, Risk Profile, File Note, Fee Disclosure Statement) and quotes the exact words that gave it away. |
+| 3. Check | Raises compliance flags. For example, an ROA is only allowed in three specific situations, so the tool asks someone to confirm which one applies. |
+| 4. Propose | Suggests a folder (client → advice event) and a standard file name. |
+| 5. Ask a person | Shows how confident it is. A staff member approves or rejects. Anything uncertain goes to a "Needs review" pile with the reason. |
+
+**What it deliberately does not do:**
+- **It never files anything on its own.** Every document is a proposal that a person confirms. A wrongly filed client record is a compliance problem, so the bar is certainty, not "probably".
+- **It never writes or recommends financial advice.** It only describes documents that already exist.
+- **It is not legal advice.** The document rules are mapped to the legislation and ASIC guidance to drive classification, and they still need sign-off from a professional.
+
+**Why it matters:** advice practices are small (around 2.5 advisers on average)
+and cost-squeezed, and the planned move from SOAs to Client Advice Records will
+make every firm rework its record-keeping. An advice-specific filing assistant
+that sits on top of existing systems, rather than replacing them, fills a gap
+nobody currently covers. The full case is in `docs/3_BUSINESS_CASE.md`.
+
+---
+
+## Quick start
+
+Works on **macOS** and **Windows**. Use **Terminal** on a Mac and **PowerShell** on Windows.
+
+**You need**
+- **Python 3.10+.** Check with `python3 --version` (Mac) or `python --version` (Windows). Get it from [python.org](https://www.python.org/downloads/).
+- **[Ollama](https://ollama.com/download)**, which runs the AI model locally. Install it like any app.
+- **The `samples/` folder**, from Delia directly. It is not in git (see [Client documents and samples](#client-documents-and-samples)). You can run the app without it; you just won't have test documents.
 
 **One-time setup**
 
-1. Get the code and go into its folder:
-   ```
-   git clone https://github.com/D3lK1ch1/FinancialAdviceProjectFiling.git
-   cd FinancialAdviceProjectFiling
-   ```
-   On a Mac, the first `git` command may offer to install "command line developer
-   tools". Accept, wait for it to finish, then run the command again. Put the
-   `samples/` folder from Delia inside this project folder.
-2. Make a private Python environment for the project, so nothing clashes with
-   anything else on your computer:
+```
+git clone https://github.com/D3lK1ch1/FinancialAdviceProjectFiling.git
+cd FinancialAdviceProjectFiling
+```
 
-   | Mac | Windows |
-   |---|---|
-   | `python3 -m venv .venv` | `python -m venv .venv` |
-   | `source .venv/bin/activate` | `.venv\Scripts\activate` |
+| | Mac | Windows |
+|---|---|---|
+| Create environment | `python3 -m venv .venv` | `python -m venv .venv` |
+| Activate it | `source .venv/bin/activate` | `.venv\Scripts\activate` |
 
-   Your prompt now starts with `(.venv)`. From here on, **`python` works the same
-   on both**.
-3. Install what the app needs:
-   ```
-   python -m pip install -r requirements.txt
-   ```
-4. Download the AI model (about 5 GB, once):
-   ```
-   ollama pull llama3.1
-   ```
+Your prompt now starts with `(.venv)`, and `python` works the same on both systems.
 
-**Every time you use it**
+```
+python -m pip install -r requirements.txt
+ollama pull llama3.1          # about 5 GB, once
+```
 
-1. **Start Ollama** (open the Ollama app), then open
-   **http://localhost:11434** in your browser. It must say **"Ollama is running"**.
-2. In Terminal / PowerShell, inside the project folder:
+On a Mac, the first `git` command may offer to install "command line developer
+tools". Accept, then run the command again.
 
-   | Mac | Windows |
-   |---|---|
-   | `source .venv/bin/activate` | `.venv\Scripts\activate` |
+**Each time**
 
+1. Open the Ollama app. Check that **http://localhost:11434** says "Ollama is running".
+2. Activate the environment (table above), then run:
    ```
    python -m uvicorn app:app --port 8000
    ```
 3. Open **http://127.0.0.1:8000/** and drop a PDF on the page.
-4. To stop: press `Ctrl+C` in Terminal / PowerShell (on a Mac too, it's `Ctrl`,
-   not `Cmd`).
+4. Stop with `Ctrl+C` (also `Ctrl` on a Mac, not `Cmd`).
 
-**If the card says "Couldn't reach the classifier … connection refused"**
-(`WinError 10061` on Windows, `Errno 61` on a Mac), Ollama isn't running. It has
-nothing to do with Wi-Fi: the app and Ollama talk to each other *inside* your
-computer. Start Ollama, check http://localhost:11434 again, and drop the file
-again. The first document after a few idle minutes can take a minute while the
-model loads; that is normal.
+**"Couldn't reach the classifier … connection refused"** (`WinError 10061` /
+`Errno 61`) means Ollama isn't running. This has nothing to do with Wi-Fi. Start
+Ollama and drop the file again. The first document after a few idle minutes can
+take about a minute while the model loads.
 
 ## Reviewing a document
 
-Every result card ends in **Your verdict**. Nothing is ever filed or moved — a
-verdict is **recorded**, so the tool can be measured and improved.
+Each result card ends in **Your verdict**. Nothing is filed or moved. Your
+verdict is **recorded** so the tool's accuracy can be measured.
 
-- **Approve** — the tool named the document type correctly.
-- **Reject** — it didn't. Choose **what it actually is** and **why** it was wrong:
+- **Approve**: the document type is right.
+- **Reject**: it's wrong. Pick **what it actually is** and **why**:
 
-  | reason | when to pick it |
+  | reason | when |
   |---|---|
-  | lookalike | it quotes, cites or resembles another type (an SOA that refers to a PDS) |
-  | non standard title | its own title is missing, firm-branded or worded unusually |
-  | poor text | the text was garbled or incomplete (a scan, an image-heavy page) |
+  | lookalike | it quotes or resembles another type (e.g. an SOA that refers to a PDS) |
+  | non standard title | its title is missing, firm-branded or unusual |
+  | poor text | the text was garbled or incomplete (scan, image-heavy page) |
   | bundle | one file holds more than one document |
-  | knowledge base gap | none of the above: the tool is missing a rule |
+  | knowledge base gap | none of the above: a rule is missing |
 
-  There is no free-text box on purpose: a typed note is where a client's name ends
-  up. The full meaning of each reason shows on screen when you pick it.
-- A document the tool couldn't place ("Not recognised") offers Reject only.
+  There is no free-text box, on purpose: typed notes are where client names leak in.
+- A "Not recognised" document offers Reject only.
 
-**Your verdicts are real data.** Each one is a line in `failure_log.jsonl` in the
-project folder, recorded against a code made from the file's contents — never the
-file name. They are how the 90% review level gets checked against reality. When
-you've finished a review session, **send `failure_log.jsonl` to Delia.**
+Each verdict becomes one line in `failure_log.jsonl`, recorded against a
+fingerprint of the file's contents, never its name. **When you finish a review
+session, send `failure_log.jsonl` to Delia.** Those lines are how the tool's
+accuracy is checked against reality.
 
-Ollama is used for the purposes of this project, but API keys from LLMs such as Anhropic (Claude) and OpenAI (Codex) can be considered and built upon.
+---
 
-## Run the tests
+## For contributors
+
+**Read `CLAUDE.md` first.** It holds the ground rules: the knowledge base is the
+source of truth, nothing files silently, storage stays abstracted, and work
+lands on a branch and goes through a PR. If your change conflicts with it, raise
+that before opening the PR, not after.
+
+### How a document flows through
+
+`POST /ingest` in `app.py`, in order:
+
+1. **`parser.py`** extracts text with `pypdf` in layout mode.
+2. **`scope_gate.py`** checks the first 500 characters against the knowledge base's title patterns. It is deterministic, with no AI involved.
+3. **`classifier.py`** runs only when the document is in scope. It sends the text and every type's hints to local Ollama `llama3.1` at temperature 0, and gets back `{doc_type, confidence, matched_signals}`.
+4. **`confidence.py`** checks the model's claim: are the quotes really in the text, and does the type agree with the scope gate?
+5. **`flags.py`**, **`clients.py`**, **`review.py`**, **`filing.py`** and **`display.py`** add the compliance flags, found client names, the review decision, the filing proposal and the teaching text.
+
+Nothing is persisted. Each request goes PDF in, JSON out.
+
+### Project layout
+
+```
+app.py              FastAPI app: POST /ingest, POST /review/correction, GET /review/options
+parser.py           PDF -> text + metadata
+scope_gate.py       deterministic in-scope check from title patterns
+classifier.py       LLM classification via local Ollama
+confidence.py       verifies the model's quotes and confidence
+flags.py            compliance flags (edge_case_flags in the knowledge base)
+clients.py          finds client names labelled in the document
+dates.py            advice-date extraction
+review.py           review decision + recording verdicts
+filing.py           proposed folder and file name
+storage.py          storage seam: local folder now, cloud later
+display.py          teaching mode
+failure_log.py      de-identified verdict log (failure_log.jsonl)
+static/index.html   drop-zone UI served at /
+knowledge_base.json document types, hints, flags, policies (v0.3)
+harness.py          older batch keyword-matcher prototype (see below)
+tests/              pytest suite
+docs/               spec, planning and handover documents
+samples/            NOT in git: 10 real sample PDFs, shared separately
+```
+
+`harness.py` is a separate, older track. It runs a keyword matcher against
+synthetic text (`harness_demo_fixture.json`) and has two known bugs: ties are
+broken by knowledge-base order, and dates are grouped as strings. Whether it becomes an offline batch tester or is
+retired is still undecided.
+
+### Run the tests
 
 ```
 python -m pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-`requirements-dev.txt` is `requirements.txt` plus `pytest` and `httpx`.
+Use `python -m pytest`, not bare `pytest`. On Windows the bare command depends on
+`PATH`. `requirements-dev.txt` adds `pytest` and `httpx` to `requirements.txt`.
 
-Use the `python -m pytest` form, not bare `pytest` — on Windows the bare
-command depends on Python's `Scripts/` folder being on `PATH`, which isn't
-guaranteed. `python -m pytest` always resolves to the same interpreter you
-just used to run `python -m uvicorn` above.
+- Tests that read real PDFs are marked `@pytest.mark.samples`. **On a fresh clone they skip, they don't fail.** They run once `samples/` is in place.
+- `tests/test_e2e.py` also needs Ollama running with `llama3.1`. It calls the model for real.
+- CI (`.github/workflows/tests.yml`) runs `python -m pytest` on Python 3.10 and 3.12 for every PR and every push to `main`. CI has no samples and no Ollama, so those tests skip there.
 
-Runs everything under `tests/`. Root `conftest.py` puts the project root on
-`sys.path` so test files can `import parser`, `scope_gate`, `classifier`, `app`
-directly — no package/src layout needed.
+### Before opening a PR
 
-| test file | covers |
-|---|---|
-| `tests/test_parser.py` | `parse_pdf()` against all 10 real `samples/*.pdf` |
-| `tests/test_scope_gate.py` | `check_scope()` against all 10 samples (correct type per filename prefix), the 2026-08-22 FSG/SOA cross-reference regression, and an out-of-scope text case |
-| `tests/test_classifier.py` | `_parse_response()` (plain/fenced/malformed JSON) and `classify()` (success, missing optional fields, request exception, malformed JSON, missing `response` key) — `requests.post` mocked, no Ollama needed |
-| `tests/test_e2e.py` | Full `POST /ingest` pipeline (parse → scope_gate → classify), one real sample per doc type, plus an out-of-scope (text-less) PDF. **Needs Ollama running with `llama3.1` pulled — hits it for real, not mocked.** On a misclassification, also writes a `failure_log.jsonl` entry |
-| `tests/test_failure_log.py` | `log_failure()` appends correctly-shaped JSON Lines records; handles `None` predicted type; appends without overwriting; the record carries **only** the five de-identified fields, and `logged_at` is UTC |
+- Work on a branch (`feature/…`, `fix/…`, `docs/…`), one unit of work per branch. Never commit to `main`.
+- `python -m pytest` passes locally.
+- Document rules go in `knowledge_base.json`, never hardcoded in Python.
+- Update `CHANGELOG.md` in the same PR, and link the GitHub issue the PR closes or opens.
 
-**On a bare clone** (no `samples/`, no `docs/`) the tests that read real PDFs are
-marked `@pytest.mark.samples` and skip with a reason; everything else runs. Expect
-skips, not failures. Once `samples/` is in place they run. `tests/test_e2e.py`'s
-sample tests additionally need Ollama with `llama3.1`, as above.
+### The failure log must stay de-identified
 
-## Failure log
+`failure_log.jsonl` is committed and shared, unlike `samples/`. Every record holds
+exactly five fields. `document_id` is the SHA-256 of the file, never a filename
+or path. `note` is a reason code, never free text, so no names, account numbers
+or figures. Its field names match the planned `failure_log` SQLite table in
+`docs/2_ARCHITECTURE.md`. The full rule is in `failure_log.py`'s docstring, and
+`tests/test_failure_log.py` fails if a field is added. The file won't exist
+until the first verdict is recorded.
 
-`failure_log.py` — `log_failure(document_id, predicted_type, correct_type, note)`
-appends one JSON Lines record per misclassification to `failure_log.jsonl` at the
-project root. Field names match `docs/2_ARCHITECTURE.md`'s `failure_log` SQLite
-table, so this moves into SQLite later (unit #9) without a schema change.
+### Client documents and samples
 
-**The record must stay de-identified.** Unlike `samples/`, `failure_log.jsonl` is
-committed and shared — it travels. `document_id` is a filename or a hash, never a
-path (a path leaks a client in the folder name even when the filename is clean).
-`note` carries the classification decision only — never a name, an account number,
-or a figure read out of the document. The full rule with worked examples is in
-`failure_log.py`'s docstring; `tests/test_failure_log.py` asserts the record's exact
-field set, so a new field fails that test before it can reach a shared file. Open
-questions on the format are tracked in the issues, not here.
+- **Client documents never enter git.** `.gitignore` blocks `*.pdf`, `*.docx`, `*.doc` and `*.zip` anywhere in the tree. This is not retroactive: if a client document was ever committed, raise it before pushing.
+- **`samples/` is shared outside git** (drive link or direct transfer from Delia), because the samples aren't cleared for a public repo. To add your own, name it `TYPE_Description.pdf` (e.g. `FSG_YourProvider.pdf`), send the file separately, and add its expected result to `docs/sample_documents.labelling.md` through a PR.
+- **`docs/` is in git** (since 13 Oct 2026). Change it through a PR like any other file.
 
-A reviewer's verdict reaches the log through `POST /review/correction`
-(`review.record_correction()`): `document_id` is the SHA-256 `/ingest` returns —
-never a filename, which is routinely the client's name — and the note is a reason
-code from `review_policy.correction_reasons`, never free text. Confirmations are
-logged as well as corrections, because thresholds are calibrated from both. The
-Approve / Reject buttons on the page call it (see Reviewing a document, above),
-with their choices read from `GET /review/options`. `tests/test_e2e.py` is the other
-caller, comparing the classifier against hand labels on the public samples. `failure_log.jsonl` won't exist
-until the first misclassification happens; that's expected, not a bug.
-
-## What actually happens when you drop a PDF
-
-`POST /ingest` runs, in order:
-
-1. **`parser.py`** — `parse_pdf()`. Extracts text via `pypdf` with
-   `extraction_mode="layout"` (fixes a real reading-order bug — see
-   `docs/SESSION_NOTE_2026-08-22.md` bug #1). Returns filename, page count, char
-   count, `has_selectable_text`, extracted text.
-2. **`scope_gate.py`** — `check_scope()`. Deterministic title-pattern check against
-   `knowledge_base.json`, first 500 chars only (not whole-document — see bug #2 in
-   the same session note for why). In scope means a title pattern of any
-   document type in `knowledge_base.json` matched; anything else gets
-   `in_scope: false`.
-3. **`classifier.py`** — `classify()`, only if in scope. Sends the text + every
-   document type's `classifier_hints` from `knowledge_base.json` to a local Ollama
-   `llama3.1` model, expects strict JSON back: `{doc_type, confidence,
-   matched_signals}`.
-
-Nothing is persisted (no DB, no filing yet). Every request is stateless — parse in,
-JSON out.
-
-## Dependencies
-
-```
-python -m pip install -r requirements.txt
-```
+### Dependencies
 
 | package | version | used by |
 |---|---|---|
 | `fastapi` | 0.128.0 | `app.py` |
 | `uvicorn` | 0.39.0 | running the app |
 | `pypdf` | 6.15.0 | `parser.py` |
-| `python-multipart` | 0.0.22 | `app.py` — FastAPI cannot declare the upload endpoint without it |
-| `requests` | 2.32.4 | `classifier.py` (talks to Ollama's HTTP API) |
-| `cryptography` | 50.0.2 | `pypdf`, to open encrypted PDFs, including owner-locked ones anyone can read |
+| `python-multipart` | 0.0.22 | `app.py` (file upload) |
+| `requests` | 2.32.4 | `classifier.py` → Ollama |
+| `cryptography` | 50.0.2 | `pypdf`, for encrypted PDFs |
 
-**Python 3.10 or newer.** `failure_log.py` annotates a parameter `str | None`,
-which is a `TypeError` at import time on 3.9 — the failure is an import error
-with no obvious link to the Python version, so it's worth stating here.
+Python 3.10+ is required. `failure_log.py` uses `str | None`, which fails at
+import on 3.9 with an error that doesn't mention the version.
 
-Test-only dependencies (`pytest`, and `httpx` for FastAPI's `TestClient`) are
-deliberately not in `requirements.txt` — the app doesn't run them. They live in
-`requirements-dev.txt`, which CI installs.
+Ollama is the current engine. Hosted models (Anthropic, OpenAI) could replace it
+later behind the same knowledge-base hints.
 
-Plus a running Ollama instance with `llama3.1` pulled (see above).
-
-## Project layout
-
-```
-app.py                  FastAPI app — POST /ingest, POST /review/correction, GET /review/options
-parser.py               PDF -> text + metadata (pypdf, layout mode)
-scope_gate.py           deterministic in-scope check, every type in knowledge_base.json
-classifier.py           LLM classification via local Ollama, grounded in knowledge_base.json
-static/index.html       drop-zone UI served at /
-knowledge_base.json     source of truth for document types, hints, flags (v0.3) — never
-                        hardcode doc rules in Python, see CLAUDE.md rule #1
-harness.py              older batch/keyword-matcher prototype — separate track, see below
-harness_demo_fixture.json  synthetic fixture harness.py currently runs against
-samples/                10 real, verified-native-text sample PDFs (SOA/ROA/FSG/PDS)
-docs/                   spec, architecture, session notes, to-do list — see below
-```
-
-## Two build tracks (still unmerged)
-
-- **Live app track** (`app.py` / `parser.py` / `scope_gate.py` / `classifier.py`) —
-  the one you run with the uvicorn command above. Parser → scope gate → LLM
-  classifier are wired, and `/ingest` shows a filing proposal. Nothing is filed yet,
-  and 2 of the 12 flag rules (`edge_case_flags` in `knowledge_base.json`) run.
-- **Harness/validation track** (`harness.py`) — batch keyword-matcher, currently runs
-  against `harness_demo_fixture.json` (synthetic text), not the real `samples/` PDFs.
-  Has two known unfixed bugs (KB-array-order tie-breaking, string-sorted date
-  grouping) — see `docs/TO_DO_LIST.md` item 2.
-
-Not yet decided whether `harness.py` becomes the offline batch tester alongside the
-live app, or gets replaced by it. 
-
-## Status / what's not built yet
-
-- No filing — `/ingest` proposes an event folder and a file name for each
-  document, but the client folder stays empty until a client can be chosen (#6),
-  and nothing is ever moved or renamed.
-- Flags: the single-document rules (ROA situation, bundle) run on every upload;
-  the rules that need other documents on file wait on persistence.
-- Approve / Reject records a verdict on the type. Not yet: correcting the client,
-  date or filename; roles (who may approve); hard stops greying out Approve.
-
-**What's next, in order:** #59 (classifier evidence as exact quotes, so correct
-documents stop going to review) → #48 (SOA dates) → #6 (choose the client). Domain
-questions waiting on Bella are collected in #61.
-
-## Contributing
-
-**Read `CLAUDE.md` first.** It's not optional decoration — it's the ground rules
-(knowledge base is the source of truth, nothing files silently, storage stays
-abstracted) and the build sequence this project follows one step at a time. If a
-change you're making conflicts with something in there, that's a conversation before
-a PR, not after.
-
-**Branches:**
-- `main` is always runnable — `python -m uvicorn app:app` and `python -m pytest`
-  both pass on it.
-- Work in a branch per unit of work, not per session: `feature/<short-name>` for new
-  capability (e.g. `feature/filing-engine`), `fix/<short-name>` for a bug, matching the build sequence you're picking up.
-- One branch = one reviewable change. If you notice something unrelated while in
-  there,  open a separate branch for it later — don't fold it into the current PR (see Commit Hygiene in `CLAUDE.md`).
-- Open a PR into `main` when the unit is done and tests pass locally. Small, frequent
-  PRs over one large one — same logic as the commit hygiene rule.
-
-**Before opening a PR:**
-- `python -m pytest` runs with no failures. On a bare clone the sample-backed tests
-  skip with a reason — put `samples/` and `docs/sample_documents.labelling.md` in
-  place (see below) to run them; they're not in git. `tests/test_e2e.py`'s sample
-  tests also need Ollama running locally with `llama3.1` pulled — see Run it, above.
-- CI (`.github/workflows/tests.yml`) runs the same `python -m pytest` on Python 3.10
-  and 3.12 for every PR and every push to `main`, from a fresh install of
-  `requirements-dev.txt`. It has no `samples/`, so the sample-backed tests skip
-  there — that is expected. Nothing in CI calls Ollama.
-- If your change touches document classification rules, the rule lives in
-  `knowledge_base.json`, not hardcoded in Python (ground rule #1).
-- If you hit a misclassification while testing, it's logged to `failure_log.jsonl`
-  (tracked in git — don't gitignore it locally). It's the shared record both of us
-  improve the classifier against.
-- Update `CHANGELOG.md` with what you finished, and `docs/TO_DO_LIST.md` if you
-  closed or opened an item.
-
-**Client documents never enter git.** `.gitignore` blocks `*.pdf`, `*.docx`, `*.doc`
-and `*.zip` by extension anywhere in the tree — a path rule like `samples/` misses a
-PDF dropped at the repo root. It is **not retroactive**: it stops the next commit, it
-does not scrub history. If a client document is already committed, raise it before
-pushing on top of it.
-
-**`samples/` — shared outside git; `docs/` — in git:**
-`samples/` is gitignored — sample advice documents aren't cleared for a public repo,
-and it doesn't need to grow the repo's size. Get the current copies from me directly
-(drive link / direct transfer, not a PR) and drop them in at `samples/` so the code
-and docs above still find them. `docs/` is tracked in git since 13 Oct 2026; change
-it through a PR like any other file. If you have your own reference/sample documents to add for your own use,
-follow the existing `TYPE_Description.pdf` naming (e.g. `FSG_YourProvider.pdf`) and
-add a matching entry in `docs/sample_documents.labelling.md` with the expected
-classification. Send new samples the same way (not as a PR); the labelling entry
-goes in through a PR.
-
-## Docs map
-These are the documents handed off from me with the collaborator, as project's scaffold and used as reference while project is being built.
+### Docs map
 
 | file | what's in it |
 |---|---|
-| `docs/SYSTEM.md` | the spec — build from this |
-| `docs/SYSTEM_v2.md` | a second spec draft, not yet reconciled with v1 (open item) |
-| `docs/1_PRD.md`, `2_ARCHITECTURE.md`, `3_BUSINESS_CASE.md` | planning docs |
-| `docs/ARCHITECTURE_TRACE.md` | what maps to what across the docs |
+| `docs/SYSTEM.md` | the spec: build from this |
+| `docs/GROUND_TRUTH.md` | the anchor decisions, including the review-level rule |
+| `docs/1_PRD.md`, `docs/2_ARCHITECTURE.md`, `docs/3_BUSINESS_CASE.md` | product, architecture and business case |
+| `docs/advice_classification_reference.md` | the legal basis for each document type and ROA situation |
 | `docs/HANDOVER.md` | sample sourcing decisions, judgment calls, source URLs |
 | `docs/sample_documents.labelling.md` | hand-labelled expected results for `samples/` |
-
-**None of these are in the repo yet.** `.gitignore` blocked `docs/` until 9 Oct, so
-they were never committed. Adding them is #60.
+| `docs/EXPERIMENT_LOG.md` | classifier experiments: runs, scores, findings |
+| `CHANGELOG.md` | what's done, decided and still open, newest first |

@@ -59,6 +59,7 @@ def test_ingest_full_pipeline_in_scope(expected_type, filename):
             predicted_type=predicted_type,
             correct_type=expected_type,
             note=classification.get("classifier_error", "doc_type mismatch on live classification"),
+            engine_version=body["engine_version"],
         )
 
     assert "classifier_error" not in classification, classification.get("classifier_error")

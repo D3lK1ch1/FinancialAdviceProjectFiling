@@ -15,7 +15,7 @@ import pytest
 
 from flags import EVALUATORS, evaluate_flags
 
-with open("knowledge_base.json") as f:
+with open("knowledge_base.json", encoding="utf-8") as f:
     _KB = json.load(f)
 
 _RULES = {rule["id"]: rule for rule in _KB["edge_case_flags"]["rules"]}
@@ -192,14 +192,14 @@ def test_severity_and_wording_come_from_the_knowledge_base():
     assert flag["asks"] == rule["asks"]
 
 
-def test_a_new_basis_signal_needs_no_code_change(tmp_path, monkeypatch):
+def test_a_new_basis_signal_needs_no_code_change(monkeypatch):
     """Ground rule #1 again, as a property rather than a promise: a phrase
     added to a basis's `basis_signals` in the knowledge base changes the answer with
     no Python touched. This is how a signal that misfires on real firm files
     gets corrected — and how a fifth basis would be added if the law grew one.
 
-    The knowledge base is loaded at import from the working directory, so the
-    test runs the real module against an edited copy of the real file.
+    The knowledge base is loaded once at import (kb.py), so the test swaps in
+    an edited copy of it and reloads the real module against that.
     """
     import importlib
 
@@ -210,9 +210,7 @@ def test_a_new_basis_signal_needs_no_code_change(tmp_path, monkeypatch):
     roa = next(d for d in kb["documents"] if d["id"] == "roa")
     kind = next(k for k in roa["legislation"]["situations"] if k["id"] == "no_buy_sell")
     kind["basis_signals"]["declared"].append("nil-transaction basis")
-    (tmp_path / "knowledge_base.json").write_text(json.dumps(kb))
-
-    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("kb.KB", kb)
     import flags as flags_module
 
     try:

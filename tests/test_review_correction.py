@@ -191,3 +191,41 @@ def test_a_refused_correction_is_a_422_with_the_reason(log_path):
     assert res.status_code == 422
     assert "filename" in res.json()["detail"]
     assert not log_path.exists()
+
+
+def test_ingest_stamps_its_engine_and_the_stamp_round_trips_to_the_log(log_path, monkeypatch):
+    """The whole #7 path: /ingest stamps the result, the page sends the stamp
+    back with the verdict, and the log records the engine that made the
+    proposal. Ollama is stubbed: a stamp is data, whatever produced it."""
+    monkeypatch.setattr("app.engine_identity", lambda: {
+        "model": "llama3.1", "model_digest": "46e0c10c", "ollama_version": "0.40.6",
+    })
+    ingested = client.post("/ingest", files={"file": ("scan.pdf", _blank_pdf(), "application/pdf")}).json()
+
+    stamp = ingested["engine_version"]
+    assert stamp["model_digest"] == "46e0c10c"
+    assert stamp["kb_version"] == _KB["meta"]["version"]
+    assert "engine_version_error" not in ingested
+
+    res = client.post("/review/correction", json={
+        "document_id": ingested["document_id"],
+        "predicted_type": None,
+        "correct_type": "authority_to_proceed",
+        "reason": "poor_text",
+        "engine_version": stamp,
+    })
+
+    assert res.status_code == 201
+    [entry] = _entries(log_path)
+    assert entry["engine_version"] == stamp
+
+
+def test_ingest_says_why_when_the_engine_cannot_be_identified(monkeypatch):
+    monkeypatch.setattr("app.engine_identity", lambda: {
+        "model": "llama3.1", "model_digest": None, "ollama_version": None,
+        "identity_error": "version: refused; digest: refused",
+    })
+    ingested = client.post("/ingest", files={"file": ("scan.pdf", _blank_pdf(), "application/pdf")}).json()
+
+    assert ingested["engine_version"]["model_digest"] is None
+    assert ingested["engine_version_error"] == "version: refused; digest: refused"

@@ -6,11 +6,9 @@ No confidence score, no matched_signals, no edge_case_flags — that's the
 real classifier, later.
 """
 
-import json
 import re
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 # The supported set is whatever the knowledge base defines — never a list in
 # Python (CLAUDE.md rule #1). Previously this was hardcoded to four types in
@@ -59,11 +57,9 @@ _MATCHERS = {
 }
 
 
-TITLE_WINDOW = 500  # documents commonly reference OTHER types by name in
-                     # their body (an FSG explains what a PDS is) — scanning
-                     # the whole text picks up those mentions as false
-                     # positives, so only the presumed title/heading region
-                     # is checked
+# How much of the top of the document counts as its title region. The value
+# and the reason for it live in knowledge_base.json's `scope_gate` (#7).
+TITLE_WINDOW = _KB["scope_gate"]["title_window_chars"]
 
 
 def check_scope(text: str) -> dict:

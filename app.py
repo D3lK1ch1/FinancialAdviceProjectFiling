@@ -4,7 +4,6 @@ and returns the result in-memory. No classifier/filing/flagging yet.
 """
 
 import hashlib
-import json
 from io import BytesIO
 
 from fastapi import FastAPI, HTTPException, UploadFile
@@ -12,24 +11,19 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from classifier import classify
+from classifier import classify, engine_identity, engine_version
 from clients import find_client_candidates
 from filing import proposed_filing
 from display import DEFAULT_DISPLAY_MODE, DISPLAY_MODES, teaching_for
 from confidence import verify
 from flags import evaluate_flags
+from kb import KB as _KB
 from parser import parse_pdf
 from review import CorrectionRejected, assess, record_correction
 from scope_gate import check_scope
 
 app = FastAPI(title="Advice Document Filing — POC")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# UTF-8 stated, not left to the platform: Windows defaults to cp1252, which
-# garbled every em dash and curly quote in the knowledge base on the way to
-# the screen.
-with open("knowledge_base.json", encoding="utf-8") as f:
-    _KB = json.load(f)
 
 _DOC_NAMES = {doc["id"]: doc["name"] for doc in _KB["documents"]}
 
@@ -58,6 +52,15 @@ async def ingest(file: UploadFile, display: str = DEFAULT_DISPLAY_MODE):
     # per-page text alongside extracted_text would roughly double the payload
     # for a consumer that does not exist yet.
     pages = result.pop("pages")
+    # Which engine produced this result (#7). Read per document, and always
+    # present: an out-of-scope answer came from the knowledge base's title
+    # patterns, and a reviewer's verdict on it is measured against them. The
+    # page sends this back with the verdict, so the failure log records the
+    # engine that made the proposal, not whatever is running when someone clicks.
+    identity = engine_identity()
+    result["engine_version"] = engine_version(identity)
+    if "identity_error" in identity:
+        result["engine_version_error"] = identity["identity_error"]
     result.update(check_scope(result["extracted_text"]))
     result["likely_type_name"] = _DOC_NAMES.get(result["likely_type"])
     doc_type = None
@@ -114,6 +117,7 @@ class Correction(BaseModel):
     correct_type: str
     reason: str
     corrections: list[dict] = []
+    engine_version: dict | None = None
 
 
 @app.post("/review/correction", status_code=201)

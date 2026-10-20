@@ -815,6 +815,10 @@
       "decided": "Bella, 9 Oct 2026 (GH#61).",
       "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026."
     },
+    "name_format": {
+      "rule": "Folder names use normal capitals whatever the document uses: 'JOHN SMITH' becomes 'Smith, John'. Titles are kept: 'Dr John Smith' becomes 'Smith, Dr John'.",
+      "decided": "Bella, 14 Oct 2026. Titles kept because clients, especially doctors, expect them."
+    },
     "entity_client": {
       "rule": "A trust, SMSF or company is the client in its own right. Its folder uses the entity's own name, and each entity has its own folder, separate from the people behind it.",
       "decided": "Bella, 13 Oct 2026 (GH#61 Q2)."
@@ -849,6 +853,11 @@
       "hallucination_risk": "An LLM summarising a document can invent facts not present. For a compliance-adjacent tool this is a serious failure mode; summaries must be checkable against, and traceable to, the source text.",
       "sequencing": "Do not build this until classification and grouping are reliable. A summary built on mis-grouped documents is confidently wrong."
     }
+  },
+  "scope_gate": {
+    "purpose": "How scope_gate.py reads each document's title_patterns. The patterns live on each document type; this is the window they are matched in.",
+    "title_window_chars": 500,
+    "title_window_why": "Documents commonly name OTHER types in their body (an FSG explains what a PDS is). Scanning the whole text picks up those mentions as false positives, so only the presumed title and heading region is checked. Moved here from scope_gate.py (#7)."
   },
   "confidence_policy": {
     "purpose": "The classifier reports its own confidence. That number is a claim by the model about itself, not a measurement, and nothing checked it before acting on it. This turns it into evidence that can be checked: every phrase the model says it matched is looked for in the document, and the scope gate's independent reading is compared against the type the model chose.",

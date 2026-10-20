@@ -53,9 +53,22 @@ the values are knowledge-base categories — doc type ids, situation ids,
 numbers — never text copied out of a document. A free-text field here is
 exactly where a client name would eventually land, written by somebody being
 helpful at the end of the day. There is no free-text field.
+
+WHICH ENGINE (#7). A verdict measures one classifier: one model's exact
+weights, one Ollama runtime, one knowledge-base version, one prompt. When any
+of those changes, earlier verdicts measure something that no longer runs, and
+an accuracy figure that mixes them describes no classifier at all. So every
+record carries `engine_version`, the stamp /ingest put on the proposal the
+reviewer judged. It is None for a caller that had none to give, and for every
+line written before this field existed.
+
+Its shape is constrained like `corrections`: exactly five keys, each value an
+identifier — letters, digits and . _ : - / only, no spaces. A digest or a
+version number fits; "John Smith" doesn't.
 """
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -98,12 +111,36 @@ def _check_corrections(corrections: list[dict]) -> list[dict]:
     return checked
 
 
+ENGINE_VERSION_FIELDS = ("model", "model_digest", "ollama_version", "kb_version", "prompt_version")
+
+_IDENTIFIER = re.compile(r"[A-Za-z0-9._:/-]{1,100}")
+
+
+def _check_engine_version(engine_version: dict | None) -> dict | None:
+    if engine_version is None:
+        return None
+    if not isinstance(engine_version, dict) or set(engine_version) != set(ENGINE_VERSION_FIELDS):
+        raise ValueError(
+            f"engine_version must have exactly the fields {list(ENGINE_VERSION_FIELDS)} — "
+            f"the stamp /ingest returned, passed back unchanged."
+        )
+    for field, value in engine_version.items():
+        # None is a real answer: Ollama was down, or the model wasn't pulled.
+        if value is not None and not (isinstance(value, str) and _IDENTIFIER.fullmatch(value)):
+            raise ValueError(
+                f"engine_version.{field} must be an identifier (letters, digits, "
+                f". _ : - /), not free text — see the de-identification rule."
+            )
+    return {field: engine_version[field] for field in ENGINE_VERSION_FIELDS}
+
+
 def log_failure(
     document_id: str,
     predicted_type: str | None,
     correct_type: str,
     note: str,
     corrections: list[dict] | None = None,
+    engine_version: dict | None = None,
 ) -> None:
     entry = {
         "document_id": document_id,
@@ -113,6 +150,7 @@ def log_failure(
         # Always present, so a reader never has to branch on whether the key
         # exists. Empty means the document type was the only thing corrected.
         "corrections": _check_corrections(corrections or []),
+        "engine_version": _check_engine_version(engine_version),
         "logged_at": datetime.now(timezone.utc).isoformat(),
     }
     with open(FAILURE_LOG_PATH, "a") as f:
