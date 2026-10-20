@@ -22,14 +22,12 @@ No usable date means no proposed name, with the reason. A filename built on a
 guessed date reorders a client's advice history the moment it is sorted.
 """
 
-import json
 import re
 from pathlib import PurePath
 
 from dates import extract_dates
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 _ABBREV = {doc["id"]: doc["abbrev"] for doc in _KB["documents"]}
 _ROA_SITUATIONS = {

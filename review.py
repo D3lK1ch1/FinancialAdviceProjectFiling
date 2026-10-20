@@ -20,13 +20,11 @@ confirming a correct low-confidence answer is exactly the failure-log evidence
 ground rule #6 exists to collect.
 """
 
-import json
 import re
 
 from failure_log import log_failure
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 _POLICY = _KB["review_policy"]
 _THRESHOLDS = _POLICY["thresholds"]
@@ -170,6 +168,7 @@ def record_correction(
     correct_type: str,
     reason: str,
     corrections: list[dict] | None = None,
+    engine_version: dict | None = None,
 ) -> None:
     """Write a reviewer's verdict on one document to the failure log.
 
@@ -224,8 +223,10 @@ def record_correction(
             correct_type,
             f"reviewer:{reason}",
             corrections=corrections,
+            engine_version=engine_version,
         )
     except ValueError as e:
-        # An unknown correction kind or an extra field — failure_log.py's own
+        # An unknown correction kind, an extra field, or a malformed engine
+        # stamp — failure_log.py's own
         # guard. Surfaced as the same rejection, so a caller has one thing to catch.
         raise CorrectionRejected(str(e)) from e

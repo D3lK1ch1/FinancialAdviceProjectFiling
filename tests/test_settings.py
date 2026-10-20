@@ -19,7 +19,7 @@ from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 import app as app_module
 from display import teaching_for
 
-with open("knowledge_base.json") as f:
+with open("knowledge_base.json", encoding="utf-8") as f:
     _KB = json.load(f)
 
 _SETTINGS = _KB["settings"]

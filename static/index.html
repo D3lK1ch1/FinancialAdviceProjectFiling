@@ -560,7 +560,10 @@ function verdictBlock(predictedType) {
     </div>`;
 }
 
-function wireVerdict(documentId, predictedType) {
+// engineVersion is the stamp /ingest put on this result (#7), sent back
+// unchanged: the verdict is about the engine that made THIS proposal, which
+// may not be the one running by the time somebody clicks.
+function wireVerdict(documentId, predictedType, engineVersion) {
   const box = result.querySelector('.verdict');
   if (!box || !reviewOptions) return;
   const form = box.querySelector('.reject-form');
@@ -594,6 +597,7 @@ function wireVerdict(documentId, predictedType) {
           predicted_type: predictedType || null,
           correct_type: correctType,
           reason: reason,
+          engine_version: engineVersion || null,
         }),
       });
       if (res.status === 201) {
@@ -645,7 +649,7 @@ function render(data) {
         <div class="card-body">${verdictBlock(null)}</div>
         ${metaGrid(data)}
       </div>`;
-    wireVerdict(data.document_id, null);
+    wireVerdict(data.document_id, null, data.engine_version);
     return;
   }
 
@@ -801,7 +805,7 @@ function render(data) {
       </div>
       ${metaGrid(data)}
     </div>`;
-  wireVerdict(data.document_id, c.doc_type);
+  wireVerdict(data.document_id, c.doc_type, data.engine_version);
 }
 
 async function sendFile(file) {

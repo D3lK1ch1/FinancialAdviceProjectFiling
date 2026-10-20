@@ -13,15 +13,46 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
-## 2026-10-20 — README rewritten for two audiences
+## 2026-10-20 — README rewritten for two audiences; every result names its engine (#7)
+
+### Added
+- **`engine_version` on every `/ingest` result:** model, model digest, Ollama
+  version, knowledge-base version and prompt version. The tag `llama3.1` names
+  whatever was last pulled, so a pull could change every answer with no line of
+  this repo changing. The digest names the exact weights.
+  - Read from Ollama for every document, not once at startup: Ollama updated
+    itself during the #59 experiment while the app kept running.
+  - `prompt_version` is a hash of the prompt and hints, so editing either one
+    changes it without anyone bumping a number.
+  - If Ollama can't be asked, values are `None` and `engine_version_error` says why.
+- **`failure_log.jsonl` records carry the stamp.** The page sends back the stamp
+  of the proposal being judged, not whatever is running when someone clicks.
+  Exactly five fields, identifier characters only, so no free text can be written.
+  Lines written before today have no stamp.
+- `kb.py`: one loader for `knowledge_base.json`. It finds the file next to
+  itself, reads UTF-8, and stops at startup naming any missing section.
+- `config.py`: `OLLAMA_URL`, `OLLAMA_MODEL` and `OLLAMA_TIMEOUT` env vars. The
+  defaults are the old hardcoded values, so nothing changes unless you set one.
+- 21 tests. 414 pass.
 
 ### Changed
 - `README.md` now opens with a plain-language section for finance and accounting
   readers (the problem, what the tool does, what it never does, why it matters),
   then a status summary, then a shortened quick start. Contributor detail moved
   under one "For contributors" heading.
+- Nine modules import the knowledge base from `kb.py` instead of each opening it.
+- `TITLE_WINDOW` (500) moved from `scope_gate.py` into the knowledge base's new
+  `scope_gate` section, with its reason (ground rule #1).
+- `failure_log.py`'s record has a seventh field, `engine_version`; the
+  exact-field test was updated deliberately.
 
 ### Fixed
+- **The model was sent garbled hints on Windows.** Eight of nine modules read
+  the knowledge base without UTF-8, so `—` reached the classifier as `â€”`. Two
+  tests passed only because they garbled it the same way; they now read UTF-8 too.
+- The app no longer depends on the folder it is started from to find the knowledge base.
+- `classify()` keeps Ollama's own error text. A missing model now says
+  "model '…' not found, try pulling it first", not only "404 Client Error".
 - README no longer says `docs/` is missing. The docs map lists the files that
   actually exist (it named `SYSTEM_v2.md` and `ARCHITECTURE_TRACE.md`, which
   don't, and left out `GROUND_TRUTH.md`, `EXPERIMENT_LOG.md` and
@@ -30,6 +61,29 @@ overwrites a finished step (see Contributing in `README.md`).
 - The project layout lists every module, including `clients.py`, `confidence.py`,
   `dates.py`, `display.py`, `filing.py`, `flags.py`, `review.py` and `storage.py`.
 - "What's next" now includes #66.
+
+### Decided
+- `config.py` holds the env vars, not `classifier.py`. `tests/test_storage.py`
+  bans `os` in classification code as its marker for file access (ground rule
+  #3). Env vars aren't storage, and loosening the guard would let paths in too.
+- The digest comes from Ollama's `/api/tags`. #7 said `/api/show`, which returns
+  no digest (checked against Ollama 0.40.6).
+
+### Checked
+- Live: `ROA_INFO266_att2` → `roa`, stamped `llama3.1` / `46e0c10c…` / Ollama
+  `0.40.6` / KB `0.3` / prompt `208f9650f7f8`. Approve wrote the same stamp to the log.
+- With `OLLAMA_MODEL=nope`, the stamp reads `nope:latest is not pulled on this Ollama`.
+
+### Known gaps
+- `app.py` still finds `static/` relative to the starting folder, so the app
+  must be started from the repo. Fixing it needs `pathlib` in `app.py`, which the
+  storage guard forbids, so it needs its own decision.
+- `multi_doc_bundle.leading_region_chars` (500) duplicates
+  `scope_gate.title_window_chars`; they must be kept equal by hand.
+- `docs/2_ARCHITECTURE.md`'s planned `failure_log` table has no `engine_version` column yet.
+- The stamp isn't shown on the result card, only in the response and the log.
+- Who made a verdict or a rename (`filing_model.renaming`) needs logins
+  (`approval_policy`), not #7. Move it to its own issue.
 
 ---
 

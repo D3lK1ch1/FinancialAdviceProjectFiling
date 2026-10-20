@@ -16,11 +16,9 @@ rule the knowledge base declares stateless — so the engine can never report
 having checked something it had no evidence for.
 """
 
-import json
 import re
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 _RULES = {rule["id"]: rule for rule in _KB["edge_case_flags"]["rules"]}
 

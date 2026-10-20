@@ -24,6 +24,7 @@ DEIDENTIFIED_FIELDS = {
     "correct_type",
     "note",
     "corrections",
+    "engine_version",
     "logged_at",
 }
 
@@ -221,3 +222,56 @@ def test_every_known_kind_explains_itself():
     assert CORRECTION_KINDS
     for kind, description in CORRECTION_KINDS.items():
         assert kind.islower() and description.strip(), kind
+
+
+# --- engine_version (#7) -----------------------------------------------------
+
+STAMP = {
+    "model": "llama3.1",
+    "model_digest": "46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e",
+    "ollama_version": "0.40.6",
+    "kb_version": "0.3",
+    "prompt_version": "a1b2c3d4e5f6",
+}
+
+
+def test_the_engine_stamp_is_recorded_as_given(tmp_path, monkeypatch):
+    log_path = tmp_path / "failure_log.jsonl"
+    monkeypatch.setattr("failure_log.FAILURE_LOG_PATH", log_path)
+
+    log_failure("a.pdf", "fsg", "pds", "note", engine_version=STAMP)
+
+    assert json.loads(log_path.read_text())["engine_version"] == STAMP
+
+
+def test_no_stamp_is_recorded_as_none_not_left_out(tmp_path, monkeypatch):
+    log_path = tmp_path / "failure_log.jsonl"
+    monkeypatch.setattr("failure_log.FAILURE_LOG_PATH", log_path)
+
+    log_failure("a.pdf", "fsg", "pds", "note")
+
+    assert json.loads(log_path.read_text())["engine_version"] is None
+
+
+def test_a_value_ollama_could_not_supply_is_recorded_as_none(tmp_path, monkeypatch):
+    log_path = tmp_path / "failure_log.jsonl"
+    monkeypatch.setattr("failure_log.FAILURE_LOG_PATH", log_path)
+
+    log_failure("a.pdf", "fsg", "pds", "note", engine_version={**STAMP, "model_digest": None})
+
+    assert json.loads(log_path.read_text())["engine_version"]["model_digest"] is None
+
+
+@pytest.mark.parametrize("stamp", [
+    {**STAMP, "reviewer": "x"},                      # a field too many
+    {k: v for k, v in STAMP.items() if k != "model"},  # a field too few
+    {**STAMP, "model": "John Smith"},                # free text: has a space
+    {**STAMP, "kb_version": 3},                      # not a string
+], ids=["extra field", "missing field", "free text", "not a string"])
+def test_a_malformed_stamp_is_refused_not_written(tmp_path, monkeypatch, stamp):
+    log_path = tmp_path / "failure_log.jsonl"
+    monkeypatch.setattr("failure_log.FAILURE_LOG_PATH", log_path)
+
+    with pytest.raises(ValueError, match="engine_version"):
+        log_failure("a.pdf", "fsg", "pds", "note", engine_version=stamp)
+    assert not log_path.exists()

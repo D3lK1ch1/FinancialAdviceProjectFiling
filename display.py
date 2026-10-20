@@ -10,10 +10,8 @@ text beside it; it never reads or changes the classification, the flags or
 the review decision. tests/test_settings.py holds that line.
 """
 
-import json
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 _SETTING = _KB["settings"]["display_mode"]
 _DOCS = {doc["id"]: doc for doc in _KB["documents"]}

@@ -33,6 +33,16 @@ def log_path(tmp_path, monkeypatch):
     return path
 
 
+# What /ingest returned and the page sends back unchanged (#7).
+_STAMP = {
+    "model": "llama3.1",
+    "model_digest": "46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e",
+    "ollama_version": "0.40.6",
+    "kb_version": "0.3",
+    "prompt_version": "a1b2c3d4e5f6",
+}
+
+
 def _send(predicted_type, correct_type, reason):
     """Exactly the body the page sends (see send() in static/index.html)."""
     return client.post("/review/correction", json={
@@ -40,6 +50,7 @@ def _send(predicted_type, correct_type, reason):
         "predicted_type": predicted_type,
         "correct_type": correct_type,
         "reason": reason,
+        "engine_version": _STAMP,
     })
 
 
@@ -82,3 +93,22 @@ def test_page_reads_the_choices_rather_than_keeping_a_copy():
         assert not re.search(rf"['\"]{re.escape(value)}['\"]", script), (
             f"{value!r} is written into the page instead of read from /review/options"
         )
+
+
+def test_the_verdict_carries_the_stamp_of_the_proposal_it_judged(log_path):
+    res = _send("pds", "pds", _OPTIONS["approve_reason"])
+    assert res.status_code == 201
+    [entry] = [json.loads(line) for line in log_path.read_text().splitlines()]
+    assert entry["engine_version"] == _STAMP
+
+
+def test_a_malformed_stamp_is_a_422_not_a_500(log_path):
+    res = client.post("/review/correction", json={
+        "document_id": _DOC_ID,
+        "predicted_type": "pds",
+        "correct_type": "pds",
+        "reason": _OPTIONS["approve_reason"],
+        "engine_version": {**_STAMP, "model": "John Smith"},
+    })
+    assert res.status_code == 422
+    assert not log_path.exists()
