@@ -9,6 +9,7 @@ Deliberately does NOT resolve which of the ROA's three situations applies (that'
 a "confirm which kind" flag for the flagging engine, not a classifier job).
 """
 
+import hashlib
 import json
 
 import requests
@@ -44,6 +45,12 @@ Hints (descriptions of each type, NOT text to quote):
 Document text (may be truncated):
 {text[:6000]}
 """
+
+
+# A fingerprint of everything the model is told except the document itself:
+# the instructions and the hints. Editing either changes it, with nobody
+# having to remember to bump a number.
+PROMPT_VERSION = hashlib.sha256(_build_prompt("").encode("utf-8")).hexdigest()[:12]
 
 
 def _parse_response(raw: str) -> dict:
@@ -99,6 +106,24 @@ def engine_identity() -> dict:
     if errors:
         identity["identity_error"] = "; ".join(errors)
     return identity
+
+
+def engine_version(identity: dict) -> dict:
+    """The stamp for one result: which model, runtime, rules and prompt (#7).
+
+    Everything that decides an answer besides the document. Git versions the
+    rules and the prompt; the model and runtime live outside the repo, which
+    is why `identity` is read from Ollama for every document rather than once
+    at startup — Ollama updates itself while the app runs. Same five fields
+    every time, None where a value couldn't be read.
+    """
+    return {
+        "model": identity["model"],
+        "model_digest": identity["model_digest"],
+        "ollama_version": identity["ollama_version"],
+        "kb_version": _KB["meta"]["version"],
+        "prompt_version": PROMPT_VERSION,
+    }
 
 
 def _error_text(e: Exception) -> str:

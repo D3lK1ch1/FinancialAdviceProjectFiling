@@ -168,6 +168,7 @@ def record_correction(
     correct_type: str,
     reason: str,
     corrections: list[dict] | None = None,
+    engine_version: dict | None = None,
 ) -> None:
     """Write a reviewer's verdict on one document to the failure log.
 
@@ -222,8 +223,10 @@ def record_correction(
             correct_type,
             f"reviewer:{reason}",
             corrections=corrections,
+            engine_version=engine_version,
         )
     except ValueError as e:
-        # An unknown correction kind or an extra field — failure_log.py's own
+        # An unknown correction kind, an extra field, or a malformed engine
+        # stamp — failure_log.py's own
         # guard. Surfaced as the same rejection, so a caller has one thing to catch.
         raise CorrectionRejected(str(e)) from e
