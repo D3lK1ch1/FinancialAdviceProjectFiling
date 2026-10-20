@@ -13,6 +13,59 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-21 — The client folder is proposed (#6)
+
+### Added
+- **Client folder on the card.** The "Would be filed as" section now fills the
+  Client folder row, e.g. `Baker, George`. Still a proposal a person confirms.
+- **`choose_client()`** proposes a client only when every name the document
+  gives agrees. `John Smith` next to `Smith` is one client.
+- **`ambiguous_client` flag (high).** Two different clients, or a joint client
+  next to one of its members (`Brad and Zara Black` and `Brad Black`): no folder,
+  every name listed, none chosen. The adviser picks.
+- **Folder names follow Bella's rules:** `JOHN SMITH` → `Smith, John`,
+  `Dr John Smith` → `Smith, Dr John`, `Anna van der Berg` → `van der Berg, Anna`,
+  `Brad and Zara Black` → `Black, Brad & Zara`.
+- **Entity clients:** `ABC Pty Ltd`, `Smith Family Trust` and SMSFs are filed
+  under their own name. `John Smith ATF Smith Family Trust` → `Smith Family Trust`.
+- 57 tests. 471 pass.
+
+### Fixed
+(The 14 Oct review's client-name misses.)
+- Names in capitals (`JOHN SMITH`) are found.
+- `Anna van der Berg` is no longer cut to `Anna`.
+- `ABC Pty Ltd`, `SMITH FAMILY SMSF` and "as trustee for" are found.
+
+### Decided
+- No folder rather than a guess when a name can't be read safely: one word
+  only (`Smith`), or a joint client with two different surnames.
+- The client is still not passed to the review decision. A person confirms
+  the client on every document, so a proposed client mustn't make a document look safer.
+
+### Checked
+- All 10 samples, live: `Rossi, Nick`, `Baker, George`, `Zhang, Wendy`,
+  `Patel, John` (not his wife Jane), `Black, Brad & Zara`. FSGs and PDSs:
+  none, "the document labels no client". No false `ambiguous_client`.
+- Delia's end-to-end check on the card: _to fill in_.
+
+### Known gaps
+**For Bella:**
+- Should `ambiguous_client` block Approve, or warn? A warning for now (`not_yet_decided`).
+- Are the titles, surname particles and entity-marker lists right? All marked
+  "proposed, not yet confirmed".
+- Joint folders keep the document's name order, because a name doesn't say who
+  the husband is (`joint_client.order`).
+- How should a joint folder be named when the two surnames differ?
+
+**Not built:**
+- Matching on DOB, address or account number, and `family_key`. These need a
+  firm client list to match against, and none exists.
+- No real sample names a trust or company client, so entity handling is tested
+  on made-up names only.
+- `MCDONALD` becomes `Mcdonald`. Names the document writes in mixed case are kept as written.
+
+---
+
 ## 2026-10-20 — README rewritten for two audiences; every result names its engine (#7)
 
 ### Added
