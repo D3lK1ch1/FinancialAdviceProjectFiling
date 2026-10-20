@@ -6,11 +6,9 @@ No confidence score, no matched_signals, no edge_case_flags — that's the
 real classifier, later.
 """
 
-import json
 import re
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 # The supported set is whatever the knowledge base defines — never a list in
 # Python (CLAUDE.md rule #1). Previously this was hardcoded to four types in

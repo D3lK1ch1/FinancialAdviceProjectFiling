@@ -4,7 +4,6 @@ and returns the result in-memory. No classifier/filing/flagging yet.
 """
 
 import hashlib
-import json
 from io import BytesIO
 
 from fastapi import FastAPI, HTTPException, UploadFile
@@ -18,18 +17,13 @@ from filing import proposed_filing
 from display import DEFAULT_DISPLAY_MODE, DISPLAY_MODES, teaching_for
 from confidence import verify
 from flags import evaluate_flags
+from kb import KB as _KB
 from parser import parse_pdf
 from review import CorrectionRejected, assess, record_correction
 from scope_gate import check_scope
 
 app = FastAPI(title="Advice Document Filing — POC")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# UTF-8 stated, not left to the platform: Windows defaults to cp1252, which
-# garbled every em dash and curly quote in the knowledge base on the way to
-# the screen.
-with open("knowledge_base.json", encoding="utf-8") as f:
-    _KB = json.load(f)
 
 _DOC_NAMES = {doc["id"]: doc["name"] for doc in _KB["documents"]}
 

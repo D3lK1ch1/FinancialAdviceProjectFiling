@@ -27,11 +27,9 @@ visible and so the two can be compared in the failure log, and `confidence` is
 what the system acts on and what review_policy's thresholds apply to.
 """
 
-import json
 import re
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 _POLICY = _KB["confidence_policy"]
 _SIGNALS = _POLICY["signal_verification"]

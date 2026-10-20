@@ -20,13 +20,11 @@ confirming a correct low-confidence answer is exactly the failure-log evidence
 ground rule #6 exists to collect.
 """
 
-import json
 import re
 
 from failure_log import log_failure
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 _POLICY = _KB["review_policy"]
 _THRESHOLDS = _POLICY["thresholds"]

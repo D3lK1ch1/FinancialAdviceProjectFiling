@@ -16,8 +16,7 @@ import requests
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL = "llama3.1"
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 _HINTS = {doc["id"]: doc["classifier_hints"] for doc in _KB["documents"]}
 

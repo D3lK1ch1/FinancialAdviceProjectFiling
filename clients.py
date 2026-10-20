@@ -1,8 +1,6 @@
-import json
 import re
 
-with open("knowledge_base.json") as f:
-    _KB = json.load(f)
+from kb import KB as _KB
 
 _NAME_LABELS = _KB["client_model"]["name_labels"]
 
