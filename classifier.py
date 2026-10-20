@@ -13,9 +13,9 @@ import json
 
 import requests
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "llama3.1"
-
+from config import OLLAMA_MODEL as MODEL
+from config import OLLAMA_TIMEOUT_SECONDS as TIMEOUT_SECONDS
+from config import OLLAMA_URL
 from kb import KB as _KB
 
 _HINTS = {doc["id"]: doc["classifier_hints"] for doc in _KB["documents"]}
@@ -54,13 +54,31 @@ def _parse_response(raw: str) -> dict:
     return json.loads(cleaned.strip())
 
 
+def _error_text(e: Exception) -> str:
+    """The exception, plus Ollama's own explanation when it sent one.
+
+    On an HTTP error, str(e) is only "404 Client Error: Not Found for url ...".
+    The reason a person can act on — "model 'llama3.2' not found, try pulling
+    it first" — is in the response body's `error` field, and was discarded.
+    """
+    response = getattr(e, "response", None)
+    if response is not None:
+        try:
+            detail = response.json().get("error")
+        except ValueError:
+            detail = None
+        if detail:
+            return f"{e} — Ollama says: {detail}"
+    return str(e)
+
+
 def classify(text: str) -> dict:
     prompt = _build_prompt(text)
     try:
         response = requests.post(
             OLLAMA_URL,
             json={"model": MODEL, "prompt": prompt, "stream": False, "format": "json", "options": {"temperature": 0}},
-            timeout=180,
+            timeout=TIMEOUT_SECONDS,
         )
         response.raise_for_status()
         raw = response.json()["response"]
@@ -70,7 +88,7 @@ def classify(text: str) -> dict:
             "doc_type": None,
             "confidence": 0.0,
             "matched_signals": [],
-            "classifier_error": str(e),
+            "classifier_error": _error_text(e),
         }
 
     return {
