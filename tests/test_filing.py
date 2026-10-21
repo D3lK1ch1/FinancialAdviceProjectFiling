@@ -264,3 +264,46 @@ def test_proposed_filing_without_a_date_says_why_for_each_part():
 
     assert result["event_folder"] is None and result["event_reason"]
     assert result["filename"] is None and result["filename_reason"]
+
+
+# --- Client in the file name, and the planning step folder (decided 21 Oct) ---
+
+from filing import client_prefix, step_folder  # noqa: E402
+
+
+@pytest.mark.parametrize("folder, prefix", [
+    ("Nguyen, Lan", "Nguyen_Lan"),
+    ("Black, Brad & Zara", "Black_Brad_Zara"),       # a couple: both first names, husband first
+    ("Smith Family Trust", "Smith Family Trust"),    # no comma: used whole
+    (None, None),
+])
+def test_client_prefix_is_surname_then_first_names(folder, prefix):
+    assert client_prefix(folder) == prefix
+
+
+def test_the_file_name_starts_with_the_client():
+    result = proposed_filename("soa", _dated(date(2024, 3, 14), "declared"), [], "a.pdf", "Nguyen, Lan")
+
+    assert result["filename"] == "Nguyen_Lan_2024-03-14 SOA.pdf"
+
+
+def test_no_client_means_no_client_part_never_a_guess():
+    result = proposed_filename("soa", _dated(date(2024, 3, 14), "declared"), [], "a.pdf", None)
+
+    assert result["filename"] == "2024-03-14 SOA.pdf"
+
+
+@pytest.mark.parametrize("doc_type, folder", [
+    ("fact_find", "1 Goals and situation"),
+    ("risk_profile", "1 Goals and situation"),
+    ("soa", "2 Advice"),
+    ("roa", "2 Advice"),
+    ("pds", "2 Advice"),
+    ("authority_to_proceed", "3 Implementation"),
+])
+def test_each_type_has_its_planning_step_folder(doc_type, folder):
+    assert step_folder(doc_type)["folder"] == folder
+
+
+def test_a_type_with_no_step_folder_files_at_the_event_level():
+    assert step_folder("file_note")["folder"] is None

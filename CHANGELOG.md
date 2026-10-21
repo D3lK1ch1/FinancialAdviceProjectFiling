@@ -30,9 +30,16 @@ overwrites a finished step (see Contributing in `README.md`).
 - `docs/GROUND_TRUTH.md` "Decided 21 Oct 2026", `docs/SYSTEM.md` sections 4 and 5, and
   `CLAUDE.md` domain facts, all to match.
 
+### Added (filing)
+- `filing.client_prefix()` and the client in front of every proposed file name:
+  `Nguyen_Lan_2024-03-14 SOA.pdf`, `Black_Brad_Zara_...`. No client chosen means no client
+  part, never a guess.
+- `filing.step_folder()` and `step_folder` / `step_reason` on every `/ingest` filing
+  proposal, read from `filing_model.stage_folders`. 13 tests. 446 pass.
+
 ### Known gaps
-- Step folders and the client part of file names are decided but not built
-  (`filing.py`, #70).
+- Placing the step folder under its event needs grouping (#8). Numbering duplicates
+  (` 2`) needs the other files on hand, so it belongs to filing, not the proposal.
 - To confirm with Bella: PDS and every ROA in `2 Advice`. Couples who aren't husband
   and wife: order not decided.
 

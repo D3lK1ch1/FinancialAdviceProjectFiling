@@ -110,7 +110,8 @@ documents above (a file note, an ROA, a fee statement).
   ROA, PDS), `3 Implementation` (ATP). Steps 1 and 6 are relationship-level, so no folder.
   Replaces the 9 Oct "stage is a label only" answer. Why: filing by client alone can be
   done by procedure; the value is each document placed with its advice and step.
-  `advice_process_stages`, `filing_model.stage_folders`. Not built yet (#70).
+  `advice_process_stages`, `filing_model.stage_folders`, `filing.step_folder()`. Placing the
+  step folder under its event needs grouping (#8).
   - **To confirm:** PDS and every ROA (including a review ROA) in `2 Advice`.
 - **File names:** `Surname_First name_YYYY-MM-DD Type[ — qualifier].pdf`, e.g.
   `Nguyen_Lan_2024-03-14 SOA.pdf`. A couple who share a surname: both first names,

@@ -624,6 +624,8 @@
     },
     "file_name": {
       "pattern": "<Surname>_<First name>_<YYYY-MM-DD> <abbrev>[ — <qualifier>].<ext>",
+      "separator": "_",
+      "client_parts": "Read from the client folder name 'Surname, First name' or 'Surname, First & Second': the surname, then each first name. A folder with no comma (a trust or company) is used whole.",
       "examples": ["Nguyen_Lan_2024-03-14 SOA.pdf", "Nguyen_Lan_2024-02-20 Fact Find.pdf", "Nguyen_Lan_2025-06-02 ROA — further advice.pdf"],
       "rule": "The file name starts with the client, surname then first name, joined by underscores. The date and type follow as before (decided on #10, 1 Oct 2026). The advice record type goes in the file name, never in a folder name.",
       "couple": "A couple who share a surname: both first names, husband first, as for the folder. Black_Brad_Zara_2024-03-14 SOA.pdf",
@@ -632,7 +634,7 @@
       "no_client": "No client chosen means no client part: the name is not guessed, and the person chooses the client before filing.",
       "decided": "Bella, 21 Oct 2026 (PR #69 comments).",
       "open": "Couples who are not husband and wife: order not decided yet.",
-      "status": "Decided, not built: filing.proposed_filename still makes '2024-03-14 SOA.pdf'."
+      "status": "Built in filing.proposed_filename (21 Oct 2026). Numbering duplicates needs the other files on hand, so it happens when filing, not here."
     },
     "stage_label": {
       "rule": "The planning step is shown on each document, read from advice_process_stages[].typical_docs. Since 21 Oct 2026 the practical steps are also a folder layer inside the event: see stage_folders.",
@@ -649,7 +651,7 @@
       ],
       "pds_and_roa": "To confirm with Bella: a PDS files in 2 Advice because it is given with the advice that recommends the product (a copy in the client file is the proof, 29 Sep 2026). Every ROA files in 2 Advice, including one from a review.",
       "no_folder": "A type in no folder (file note, FSG, FDS) files at the event level, or where special_folders puts it.",
-      "status": "Decided, not built: filing.py does not make step folders yet (#70)."
+      "status": "Built in filing.step_folder (21 Oct 2026). The step folder is proposed per document; joining it under the event folder needs grouping (#8)."
     },
     "advice_event": {
       "definition": "A single advisory decision and all documents that belong to it: the advice record (SOA or ROA), the inputs that fed it (fact find, risk profile), the implementation (authority to proceed), and supporting product disclosure (PDS) used for that decision.",

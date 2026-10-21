@@ -5,12 +5,15 @@ and only after a person approves (ground rule #2). Nothing here knows about
 paths either — a name is a plain string, and the backend decides what it
 means on its medium (ground rule #3).
 
-Document filename, decided on #10 (1 Oct):
+Document filename, decided on #10 (1 Oct), with the client in front since
+21 Oct (filing_model.file_name):
 
-    YYYY-MM-DD <abbrev>[ — <qualifier>].<ext>
+    <Surname>_<First name>_YYYY-MM-DD <abbrev>[ — <qualifier>].<ext>
 
-    2024-03-14 SOA.pdf
-    2025-06-02 ROA — further advice.pdf
+    Nguyen_Lan_2024-03-14 SOA.pdf
+    Black_Brad_Zara_2025-06-02 ROA — further advice.pdf
+
+With no client chosen there is no client part: the client is never guessed.
 
 Date first so files sort chronologically inside an event folder. The short
 name is the document type's `abbrev` in knowledge_base.json, and the only
@@ -30,6 +33,7 @@ from dates import extract_dates
 from kb import KB as _KB
 
 _ABBREV = {doc["id"]: doc["abbrev"] for doc in _KB["documents"]}
+_FILE_NAME_SEPARATOR = _KB["filing_model"]["file_name"]["separator"]
 _ROA_SITUATIONS = {
     s["id"]: s["kind"]
     for doc in _KB["documents"]
@@ -53,11 +57,26 @@ def _qualifier(doc_type: str, flags: list[dict]) -> str | None:
     return None
 
 
+def client_prefix(client_folder: str | None) -> str | None:
+    """The client part of a file name, from the client folder (filing_model.file_name).
+
+    'Nguyen, Lan' -> 'Nguyen_Lan'; 'Black, Brad & Zara' -> 'Black_Brad_Zara'.
+    A folder with no comma (a trust or company) is used whole.
+    """
+    if not client_folder:
+        return None
+    if ", " not in client_folder:
+        return client_folder
+    surname, first_names = client_folder.split(", ", 1)
+    return _FILE_NAME_SEPARATOR.join([surname, *first_names.split(" & ")])
+
+
 def proposed_filename(
     doc_type: str | None,
     date_result: dict,
     flags: list[dict] | None = None,
     original_filename: str = "",
+    client_folder: str | None = None,
 ) -> dict:
     """The name a document would be filed under, or why there isn't one.
 
@@ -80,6 +99,11 @@ def proposed_filename(
     qualifier = _qualifier(doc_type, flags or [])
     if qualifier:
         name += f" — {qualifier}"
+
+    # No client chosen, no client part: the reason is in client_reason.
+    prefix = client_prefix(client_folder)
+    if prefix:
+        name = f"{prefix}{_FILE_NAME_SEPARATOR}{name}"
 
     # Only the extension is taken from the upload — never its stem.
     ext = PurePath(original_filename).suffix.lower() or ".pdf"
@@ -198,6 +222,24 @@ def advice_stages(doc_type: str | None) -> list[str]:
     return [_EVERY_STAGE] if found and len(found) == len(_STAGES) else found
 
 
+# --- Planning step folder ------------------------------------------------------
+#
+# Inside an advice event, each document sits in a folder for its practical
+# planning step (filing_model.stage_folders, decided 21 Oct). A type in no step
+# folder files at the event level.
+
+_STEP_FOLDERS = _KB["filing_model"]["stage_folders"]["folders"]
+
+
+def step_folder(doc_type: str | None) -> dict:
+    """{"folder", "reason"}: the step folder inside the event, or None and why."""
+    for folder in _STEP_FOLDERS:
+        if doc_type in folder["docs"]:
+            steps = " and ".join(str(s) for s in folder["steps"])
+            return {"folder": folder["name"], "reason": f"planning step {steps}"}
+    return {"folder": None, "reason": "no step folder for this type: it files at the event level"}
+
+
 # --- The whole proposal --------------------------------------------------------
 
 def proposed_filing(
@@ -220,13 +262,17 @@ def proposed_filing(
     """
     date_result = extract_dates({"pages": pages})
     chosen = date_result.get("chosen")
-    name = proposed_filename(doc_type, date_result, flags, original_filename)
+    client_folder = client["folder"] if client else None
+    name = proposed_filename(doc_type, date_result, flags, original_filename, client_folder)
     event = proposed_event_folder(doc_type, text, date_result)
+    step = step_folder(doc_type)
     return {
-        "client_folder": client["folder"] if client else None,
+        "client_folder": client_folder,
         "client_reason": client["reason"] if client else "no client was looked for",
         "event_folder": event["folder"],
         "event_reason": event["reason"],
+        "step_folder": step["folder"],
+        "step_reason": step["reason"],
         "stages": advice_stages(doc_type),
         "filename": name["filename"],
         "filename_reason": name["reason"],

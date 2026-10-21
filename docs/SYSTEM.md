@@ -52,8 +52,9 @@ File names: Surname_First name_YYYY-MM-DD Type[ — qualifier].pdf
             e.g. Nguyen_Lan_2024-03-14 SOA.pdf
 ```
 
-Step folders and the client part of file names were decided 21 Oct 2026 and aren't
-built yet (#70; `filing_model.stage_folders`, `filing_model.file_name`).
+Step folders and the client part of file names were decided 21 Oct 2026
+(`filing_model.stage_folders`, `filing_model.file_name`). `/ingest` proposes both per
+document; placing a document under its event still needs grouping (#8).
 
 - **Outer = client.** Matches how firms and reviewers pull files.
 - **The event folder is named after the event, not one document.** It holds the fact find, SOA or ROA, ATP and PDS together, so it is never labelled "[SOA]". The record type goes in each document's filename. Inside the event, documents sit in a folder for their practical planning step (decided 21 Oct 2026, replacing the 9 Oct label-only rule; `filing_model.stage_folders`).
