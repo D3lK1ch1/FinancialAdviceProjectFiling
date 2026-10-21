@@ -1,0 +1,29 @@
+{
+ "note": "The right answer for each public sample, for scripts/accuracy_report.py. Folder-based first pass, 21 Oct 2026; Bella to check. 'implementation_form' is not a document type yet (#74), so the report scores those separately.",
+ "labels": {
+  "foundationfp-core-fact-find-2024.pdf": "fact_find",
+  "interprac-fact-find-2018.pdf": "fact_find",
+  "unisuper-flexi-pension-pds.pdf": "pds",
+  "unisuper-lifetime-income-pds.pdf": "pds",
+  "unisuper-personal-account-pds.pdf": "pds",
+  "capitaleyes-risk-profiling-questionnaire.pdf": "risk_profile",
+  "equipsuper-risk-profile-questionnaire.pdf": "risk_profile",
+  "incapital-rpq-2024.pdf": "risk_profile",
+  "llwa-risk-profile-questionnaire.pdf": "risk_profile",
+  "morningstar-neo-risk-tolerance-questionnaire.pdf": "risk_profile",
+  "asic-info266-att1-further-advice-2024.pdf": "roa",
+  "asic-info266-att2-no-change-2024.pdf": "roa",
+  "asic-info266-att3-stockbroker-2021.pdf": "roa",
+  "asic-cp284-example-soa-attachment.pdf": "soa",
+  "asic-rg90-example-soa-2013.pdf": "soa",
+  "asic-rg90-example-soa-with-atp.pdf": "soa",
+  "clearview-wealthfoundations-application.pdf": "implementation_form",
+  "masonstevens-super-pension-application.pdf": "implementation_form",
+  "leveraged-nominate-broker-or-adviser.pdf": "implementation_form",
+  "bt-panorama-transfer-to-pension-btf31892.pdf": "implementation_form",
+  "rei-super-pension-application.pdf": "implementation_form",
+  "ato-nat75359-rollover-whole-balance.pdf": "implementation_form",
+  "bt-panorama-request-to-transfer-btf32020.pdf": "implementation_form",
+  "rest-super-transfer-whole-balance.pdf": "implementation_form"
+ }
+}

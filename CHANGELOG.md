@@ -42,6 +42,10 @@ overwrites a finished step (see Contributing in `README.md`).
   shows real results without waiting. Mock files are never included.
   First run (qwen3:8b, 24 PDFs): 7 typed right, 17 held, 2 application forms misread as a
   PDS (#74). None file themselves yet: no document gets a full path until grouping (#8).
+- **Accuracy report** (`scripts/accuracy_report.py`, labels in
+  `docs/reference/public_sample_labels.json`): scores the tool on the public samples and
+  counts documents that were wrong but would have filed themselves. Baseline: 7 of 16
+  known types right (44%); 2 wrong and not held (application forms read as a PDS).
 - **Implementation forms taxonomy** from Bella: 13 kinds, 6 providers, sample links
   (`docs/reference/implementation_forms.json`, #74).
 - `docs/README.md` (which doc is for what), `docs/UI_INTEGRATION.md`,
