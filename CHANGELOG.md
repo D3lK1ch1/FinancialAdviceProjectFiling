@@ -13,6 +13,21 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-21: React front end from the demo
+
+### Added
+- `frontend/`: the demo's React screens, the latest version from
+  `ahaythorpe/advice-document-classifier` (not the 10am `adf-react.zip`). Runs on
+  made-up `sample-data.json` only. Not connected to the backend yet.
+- `frontend/README.md`: what the page needs (the manifest), where each field
+  comes from in `/ingest`, the gaps, and the steps to connect it.
+
+### Known gaps
+- The React page has no Edit, no failure-log verdicts and no display mode. The
+  current `static/index.html` has all three, so it stays until they carry over.
+
+---
+
 ## 2026-10-20 — README rewritten for two audiences; every result names its engine (#7)
 
 ### Added
