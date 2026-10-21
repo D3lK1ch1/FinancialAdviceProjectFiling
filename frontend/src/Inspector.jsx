@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Icon, FileIcon, Confidence, StatusBadge, Type, Finding } from './atoms.jsx';
 import { pct, plural } from './model.js';
 
@@ -22,7 +23,71 @@ function Summary({ d, doc, ev }) {
   );
 }
 
-export default function Inspector({ d, doc, decision, onDecide, onStep, onClose }) {
+// A verdict for the failure log (/review/correction): a reason code, never free
+// text, because a free-text box is where a client's name gets typed.
+async function sendVerdict(doc, correctType, reason) {
+  const res = await fetch('/review/correction', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ document_id: doc.document_id, predicted_type: doc.type, correct_type: correctType,
+      reason, corrections: [], engine_version: doc.engine_version || null }),
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || `answered ${res.status}`);
+}
+
+function Verdict({ doc, decision, server, onDecide }) {
+  const canRecord = server.mode === 'live' && !!doc.document_id && !!server.options;
+  const [rejecting, setRejecting] = useState(false);
+  const [type, setType] = useState('');
+  const [reason, setReason] = useState('');
+  const [status, setStatus] = useState(null);
+  useEffect(() => { setRejecting(false); setType(''); setReason(''); setStatus(null); }, [doc.doc_id]);
+
+  const record = async (correctType, code) => {
+    if (!canRecord) return;
+    try { await sendVerdict(doc, correctType, code); setStatus('Recorded in the failure log.'); }
+    catch (e) { setStatus(`Not recorded: ${e.message}`); }
+  };
+  const approve = () => {
+    onDecide('approve');
+    setRejecting(false);
+    // Only a held document's approval says something: the tool was right and held it anyway.
+    if (doc.needs_review && doc.type) record(doc.type, server.options.approve_reason);
+  };
+  const reject = () => {
+    if (!canRecord) { onDecide('reject'); return; }
+    setRejecting(true);
+  };
+  const submit = () => { onDecide('reject'); setRejecting(false); record(type, reason); };
+
+  return (
+    <div className="insp-foot">
+      <div className="acts">
+        <button className="btn yes" aria-pressed={decision === 'approve'} onClick={approve}><Icon id="check" />Approve</button>
+        <button className="btn no" aria-pressed={decision === 'reject'} onClick={reject}><Icon id="x" />Reject</button>
+      </div>
+      {rejecting && (
+        <div className="verdict">
+          <label>What is it?
+            <select value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="">Choose a type</option>
+              {server.options.document_types.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select></label>
+          <label>Why was it wrong?
+            <select value={reason} onChange={(e) => setReason(e.target.value)}>
+              <option value="">Choose a reason</option>
+              {server.options.reject_reasons.map((r) => <option key={r.code} value={r.code} title={r.meaning}>{r.code.replace(/_/g, ' ')}</option>)}
+            </select></label>
+          <button className="btn sm primary" disabled={!type || !reason} onClick={submit}>Record</button>
+        </div>
+      )}
+      <small>{status || (canRecord
+        ? (decision ? (decision === 'approve' ? 'Approved.' : 'Rejected.') : 'A person decides. Verdicts go to the failure log.')
+        : (decision ? `${decision === 'approve' ? 'Approved' : 'Rejected'}. Not recorded: demo.` : 'A person decides. Not recorded: demo.'))}</small>
+    </div>
+  );
+}
+
+export default function Inspector({ d, doc, decision, server, onDecide, onStep, onClose }) {
   if (!doc) {
     return (
       <aside className="insp" aria-label="Document details">
@@ -85,13 +150,7 @@ export default function Inspector({ d, doc, decision, onDecide, onStep, onClose 
         </div>
       </div>
 
-      <div className="insp-foot">
-        <div className="acts">
-          <button className="btn yes" aria-pressed={decision === 'approve'} onClick={() => onDecide('approve')}><Icon id="check" />Approve</button>
-          <button className="btn no" aria-pressed={decision === 'reject'} onClick={() => onDecide('reject')}><Icon id="x" />Reject</button>
-        </div>
-        <small>{decision ? `${decision === 'approve' ? 'Approved' : 'Rejected'} in this demo only. Nothing is saved.` : 'Nothing is filed until a person decides.'}</small>
-      </div>
+      <Verdict doc={doc} decision={decision} server={server || {}} onDecide={onDecide} />
     </aside>
   );
 }

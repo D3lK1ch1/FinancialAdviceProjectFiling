@@ -63,6 +63,10 @@ def _document(result: dict) -> dict:
     filing = result.get("filing") or {}
     return {
         "doc_id": result["document_id"][:16],
+        # What a verdict sent to /review/correction needs: the full fingerprint
+        # and the engine that made this proposal (#7).
+        "document_id": result["document_id"],
+        "engine_version": result.get("engine_version"),
         "source_name": result.get("filename") or "document.pdf",
         "type": doc_type,
         "type_label": entry.get("abbrev") or "UNKNOWN",

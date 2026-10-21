@@ -330,6 +330,10 @@ h1{font-size:26px;line-height:1.2;letter-spacing:-.024em;margin:0 0 10px;font-we
 .slider{display:flex;align-items:center;gap:10px;margin:4px 0 2px;font-size:12.5px}
 .slider input{flex:1;max-width:260px;accent-color:var(--accent)}
 .batch.testing .slider input{accent-color:var(--warn)}
+.verdict{display:grid;gap:8px;margin:10px 0 4px;font-size:12.5px;color:var(--mute)}
+.verdict label{display:grid;gap:3px}
+.verdict select{border:1px solid var(--line);background:var(--sheet);color:var(--fg);border-radius:6px;padding:4px 6px;font-size:12.5px}
+.verdict .btn{justify-self:start}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .isec{padding:12px 0;border-bottom:1px solid var(--hair)}
 .isec:last-child{border-bottom:0}

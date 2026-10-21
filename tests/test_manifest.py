@@ -110,3 +110,13 @@ def test_the_one_click_floor_comes_from_the_knowledge_base():
     one_click = build_manifest([_result()])["local"]["default"]["one_click"]
 
     assert (one_click["floor"], one_click["testing_lowest"]) == (0.9, 0.7)
+
+
+def test_a_document_carries_what_a_verdict_needs():
+    """/review/correction takes the full SHA-256 and the engine stamp, never a file name."""
+    result = _result()
+    result["engine_version"] = {"model": "llama3.1"}
+    [doc] = build_manifest([result])["local"]["default"]["documents"]
+
+    assert doc["document_id"] == "a" * 64
+    assert doc["engine_version"] == {"model": "llama3.1"}

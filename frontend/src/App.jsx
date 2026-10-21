@@ -104,6 +104,15 @@ export default function App() {
   // is read, and logged. Anything else is flagged for a person. A document a
   // person has undone is never filed again by the batch.
   const [line, setLine] = useState(() => startLine(d));
+  // The backend's mode and review options. Verdicts are written to the failure
+  // log only in live mode, and only for documents the real tool read (they
+  // carry a document_id); the made-up demo and demo-mode clicks never are.
+  const [server, setServer] = useState({ mode: null, options: null });
+  useEffect(() => {
+    Promise.all([fetch('/api/mode').then((r) => r.json()), fetch('/review/options').then((r) => r.json())])
+      .then(([m, o]) => setServer({ mode: m.mode, options: o }))
+      .catch(() => setServer({ mode: 'none', options: null }));
+  }, []);
   const decided = useRef({});
   const undone = useRef(new Set());
   decided.current = decisions;
@@ -249,7 +258,7 @@ export default function App() {
           </main>
 
           {showInspector && (
-            <Inspector d={d} doc={doc} decision={decisions[selected]}
+            <Inspector d={d} doc={doc} decision={decisions[selected]} server={server}
               onDecide={decide} onStep={step} onClose={() => setSelected(null)} />
           )}
         </div>
