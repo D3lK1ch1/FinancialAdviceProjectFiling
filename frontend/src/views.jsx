@@ -11,7 +11,7 @@ export function Overview({ d, go, startTour }) {
   const check = count('bad');
   const clients = new Set(d.events.map((e) => e.client)).size;
   const stats = [
-    { n: d.batch.documents, l: 'Documents', s: `${count('ok')} ready to file in one click`, to: 'events', dot: 'ok' },
+    { n: d.batch.documents, l: 'Documents', s: `${count('ok')} ready to batch file`, to: 'events', dot: 'ok' },
     { n: d.events.length, l: 'Advice events', s: `for ${plural(clients, 'client', 'clients')}`, to: 'tree' },
     { n: held, l: 'Needs review', s: 'held by the tool, with a reason', to: 'review', c: held ? 'warn' : '', dot: 'warn' },
     { n: check, l: 'Worth checking', s: 'a person looks before filing', to: 'events', c: check ? 'bad' : '', dot: 'bad' },
@@ -21,8 +21,8 @@ export function Overview({ d, go, startTour }) {
       <p className="eyebrow">{d.dataset_label} · {d.batch.documents} files</p>
       <h1>{{ public: 'Real published PDFs and a tool that won’t guess', local: 'Your documents, read and proposed for filing' }[d.dataset] || 'A messy client folder in, a proposed filing out'}</h1>
       <p className="lede">The tool reads each document and works out what it is, which client it is for and which{' '}
-        <em>advice event</em> it belongs to: one piece of advice and every document behind it. The confident ones are filed in one click. The rest wait for a
-        person. Every filing is logged and can be undone.</p>
+        <em>advice event</em> it belongs to: one piece of advice and every document behind it. The confident ones are filed together in one batch: 70% sure or more in this demo, 90% or more in
+        real use. The ones it is unsure of are flagged and a person decides. Every filing is logged and can be undone.</p>
       {d.dataset_note && <div className="box sub set-note"><Icon id="info" /><span>{d.dataset_note}</span></div>}
       {startTour && <button className="btn primary tour-cta" onClick={startTour}><Icon id="play" />Take the 1-minute tour</button>}
       <div className="stats">
@@ -84,7 +84,7 @@ function BatchBar({ d, decisions, onBatch }) {
   return (
     <div className={`batch ${testing ? 'testing' : ''}`}>
       <div className="batch-tx">
-        <b>File the confident ones in one click{testing && <span className="test-tag">Testing</span>}</b>
+        <b>Batch file the confident ones{testing && <span className="test-tag">Testing</span>}</b>
         <label className="slider">
           <span>Line: <strong>{pct(level)}%</strong></span>
           <input type="range" min={Math.round(rule.lowest * 100)} max={99} step={1} value={Math.round(level * 100)}
@@ -308,7 +308,7 @@ const STEPS = [
   ['Identify', 'Each document is typed (SOA, ROA, FSG, Fact Find, Risk Profile…), dated and matched to a client and advice event.'],
   ['Check', 'Rules from the knowledge base look for gaps and mismatches a person should check, such as a risk profile that does not match the SOA.'],
   ['Propose', 'A folder is proposed: the client, then the advice event. If the tool is unsure it holds the document and says why.'],
-  ['File', 'The confident ones are filed in one click. The rest wait for a person. Every filing is logged and can be undone.'],
+  ['File', 'The confident ones are filed together in one batch: 70% or more in this demo, 90% or more in real use. The ones it is unsure of are flagged and a person decides. Every filing is logged and can be undone.'],
 ];
 
 export function About({ whyLocal }) {
@@ -329,7 +329,7 @@ export function About({ whyLocal }) {
       </div>
 
       <p className="eyebrow">How it works</p>
-      <h1>Five steps. A person always has the final say.</h1>
+      <h1>Five steps. Anything the tool is unsure of, a person decides.</h1>
       <ol className="steps">
         {STEPS.map(([k, p], i) => <li key={k}><div className="k"><i>{i + 1}</i>{k}</div><p>{p}</p></li>)}
       </ol>

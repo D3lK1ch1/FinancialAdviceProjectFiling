@@ -28,8 +28,8 @@ export const STEPS = [
   },
   {
     view: 'events', target: '.view:not([hidden]) .batch',
-    title: 'File the confident ones in one click',
-    body: 'Everything above the line with nothing to check is filed together. You choose the line. Try it: nothing is saved.',
+    title: 'Batch file the confident ones',
+    body: 'Everything above the line with nothing to check is filed in one batch: 70% in this demo, 90% in real use. The ones it is unsure of are flagged for a person. Try it: nothing is saved.',
   },
   {
     view: 'events', target: 'a.nav[href="#review"]', click: true,
