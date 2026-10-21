@@ -13,6 +13,27 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-21: UI integration plan; filing by planning step decided (#70, #71)
+
+### Added
+- `docs/UI_INTEGRATION.md` and `docs/ui/`: the demo's screens, what each needs
+  from this backend, and the gaps. Also how the two could join and how a
+  non-technical person would run it. For planning, nothing decided yet.
+
+### Decided
+- (Bella) Files go client → advice event → planning step, using the six-step
+  financial planning process. Only the practical steps get folders. Replaces the
+  9 Oct "stage is a label only" decision. Work tracked in #70.
+- (Bella) File names start `Surname_First name_`, and couples get both first
+  names. Recorded on PR #69.
+- (Bella) The public demo link is switched off until the real tool is ready.
+
+### Known gaps
+- Letting a firm set its own naming and filing rules through a chat box: ideas
+  in #71, after the filing basics.
+
+---
+
 ## 2026-10-20 — README rewritten for two audiences; every result names its engine (#7)
 
 ### Added
