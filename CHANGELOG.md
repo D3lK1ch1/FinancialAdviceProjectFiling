@@ -40,6 +40,8 @@ overwrites a finished step (see Contributing in `README.md`).
 - **Public documents set**: `scripts/build_public_set.py` reads the published samples
   once with the real backend and saves the answers as a second sample set, so the demo
   shows real results without waiting. Mock files are never included.
+  First run (qwen3:8b, 24 PDFs): 7 typed right, 17 held, 2 application forms misread as a
+  PDS (#74). None file themselves yet: no document gets a full path until grouping (#8).
 - **Implementation forms taxonomy** from Bella: 13 kinds, 6 providers, sample links
   (`docs/reference/implementation_forms.json`, #74).
 - `docs/README.md` (which doc is for what), `docs/UI_INTEGRATION.md`,

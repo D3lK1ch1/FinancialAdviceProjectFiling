@@ -11,7 +11,7 @@ export function Overview({ d, go, startTour }) {
   const check = count('bad');
   const clients = new Set(d.events.map((e) => e.client)).size;
   const stats = [
-    { n: d.batch.documents, l: 'Documents', s: `${count('ok')} filed automatically`, to: 'events', dot: 'ok' },
+    { n: d.batch.documents, l: 'Documents', s: `${count('ok')} confident, nothing to check`, to: 'events', dot: 'ok' },
     { n: d.events.length, l: 'Advice events', s: `for ${plural(clients, 'client', 'clients')}`, to: 'tree' },
     { n: held, l: 'Needs review', s: 'held by the tool, with a reason', to: 'review', c: held ? 'warn' : '', dot: 'warn' },
     { n: check, l: 'Worth checking', s: 'a person looks before filing', to: 'events', c: check ? 'bad' : '', dot: 'bad' },
