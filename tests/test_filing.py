@@ -238,11 +238,22 @@ def test_proposed_filing_gives_each_part():
     assert result["date"] == "2024-03-14"
 
 
-def test_proposed_filing_never_names_a_client_folder_yet():
-    result = proposed_filing("soa", " ".join(_SOA_PAGES), _SOA_PAGES, [], "a.pdf")
+def test_proposed_filing_uses_the_chosen_client_folder():
+    client = {"folder": "Baker, George", "reason": None}
+
+    result = proposed_filing("soa", " ".join(_SOA_PAGES), _SOA_PAGES, [], "a.pdf", client=client)
+
+    assert result["client_folder"] == "Baker, George"
+    assert result["client_reason"] is None
+
+
+def test_proposed_filing_with_no_client_says_why():
+    client = {"folder": None, "reason": "the document labels no client; a person chooses one"}
+
+    result = proposed_filing("soa", " ".join(_SOA_PAGES), _SOA_PAGES, [], "a.pdf", client=client)
 
     assert result["client_folder"] is None
-    assert "GH#6" in result["client_reason"]
+    assert result["client_reason"] == client["reason"]
 
 
 def test_proposed_filing_without_a_date_says_why_for_each_part():
