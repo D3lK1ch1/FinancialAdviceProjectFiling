@@ -17,5 +17,7 @@ repeating them. GitHub issues are for work to do; questions go in #61.
 | `BUSINESS_CASE.md` | Why this is worth building: the gap, customers, pricing, what evidence is still needed | Bella |
 | `archive/` | The August drafts: product, architecture, first handover. History, partly out of date | n/a |
 
+Testing on the public samples: `scripts/README.md` (two commands).
+
 Outside `docs/`: `CLAUDE.md` (standing rules for Claude), `CHANGELOG.md` (what changed,
 newest first), `README.md` (how to run it), `frontend/README.md` (the React screens).

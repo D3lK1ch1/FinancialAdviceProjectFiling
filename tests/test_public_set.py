@@ -14,6 +14,8 @@ def test_only_pdfs_under_the_given_folders_and_never_mocks(tmp_path):
     (tmp_path / "soa" / "asic-soa.pdf").write_bytes(b"%PDF")
     (tmp_path / "soa" / "notes.txt").write_text("not a pdf")
     (tmp_path / "mock" / "made-up.pdf").write_bytes(b"%PDF")
+    (tmp_path / ".results").mkdir()
+    (tmp_path / ".results" / "cached.pdf").write_bytes(b"%PDF")
     elsewhere = tmp_path.parent / "elsewhere.pdf"
     elsewhere.write_bytes(b"%PDF")
 

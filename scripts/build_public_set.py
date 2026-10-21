@@ -1,6 +1,7 @@
 """Read the public sample PDFs once with the real backend, for the demo screens.
 
-    OLLAMA_MODEL=qwen3:8b python scripts/build_public_set.py <folder> [<folder> ...]
+    python scripts/build_public_set.py              # every PDF under samples/
+    python scripts/build_public_set.py <folder> ...  # or just these folders
 
 Every PDF under the folders goes through the same steps as /ingest. Each answer is
 cached in samples/.results/ (git-ignored), so a rerun only reads new files. The
@@ -25,7 +26,8 @@ OUT = ROOT / "frontend" / "public-data.json"
 
 def public_pdfs(folders: list[str]) -> list[Path]:
     """Every PDF under the given folders, except made-up ones in a `mock` folder."""
-    return sorted(p for folder in folders for p in Path(folder).rglob("*.pdf") if "mock" not in p.parts)
+    return sorted(p for folder in folders for p in Path(folder).rglob("*.pdf")
+                  if "mock" not in p.parts and ".results" not in p.parts)
 
 
 def main(folders: list[str]) -> None:
@@ -55,4 +57,4 @@ def main(folders: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main(sys.argv[1:] or [str(ROOT / "samples")])
