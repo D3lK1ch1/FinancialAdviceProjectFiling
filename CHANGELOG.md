@@ -42,6 +42,11 @@ overwrites a finished step (see Contributing in `README.md`).
   shows real results without waiting. Mock files are never included.
   First run (qwen3:8b, 24 PDFs): 7 typed right, 17 held, 2 application forms misread as a
   PDS (#74). None file themselves yet: no document gets a full path until grouping (#8).
+- **`provider_form`: a new document type** for provider implementation forms (applications,
+  rollovers, pension starts, adviser nominations; #74). Title patterns from real forms,
+  signals for telling a form from a PDS or an ATP, a 90% threshold and a reviewer check.
+  Files in `3 Implementation`. The title check now places all 8 sample forms, including
+  the 2 that were read as a PDS, and takes no other sample.
 - **Accuracy report** (`scripts/accuracy_report.py`, labels in
   `docs/reference/public_sample_labels.json`): scores the tool on the public samples and
   counts documents that were wrong but would have filed themselves. Baseline: 7 of 16
