@@ -13,7 +13,7 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
-## 2026-10-21 — The client folder is proposed (#6); UI integration plan; filing by planning step decided (#70, #71)
+## 2026-10-21 — The client folder is proposed (#6); UI integration plan; React front end from the demo; filing by planning step decided (#70, #71)
 
 ### Added
 - **Client folder on the card.** The "Would be filed as" section now fills the
@@ -32,6 +32,11 @@ overwrites a finished step (see Contributing in `README.md`).
 - `docs/UI_INTEGRATION.md` and `docs/ui/`: the demo's screens, what each needs
   from this backend, and the gaps. Also how the two could join and how a
   non-technical person would run it. For planning, nothing decided yet.
+- `frontend/`: the demo's React screens, the latest version from
+  `ahaythorpe/advice-document-classifier` (not the 10am `adf-react.zip`). Runs on
+  made-up `sample-data.json` only. Not connected to the backend yet.
+- `frontend/README.md`: what the page needs (the manifest), where each field
+  comes from in `/ingest`, the gaps, and the steps to connect it.
 
 ### Fixed
 (The 14 Oct review's client-name misses.)
@@ -74,6 +79,8 @@ overwrites a finished step (see Contributing in `README.md`).
 - `MCDONALD` becomes `Mcdonald`. Names the document writes in mixed case are kept as written.
 - Letting a firm set its own naming and filing rules through a chat box: ideas
   in #71, after the filing basics.
+- The React page has no Edit, no failure-log verdicts and no display mode. The
+  current `static/index.html` has all three, so it stays until they carry over.
 
 ---
 
