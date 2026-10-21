@@ -21,6 +21,14 @@ overwrites a finished step (see Contributing in `README.md`).
   testing and for adding these as document types later.
 - `filing_model.stage_folders`: `3 Implementation` lists the 13 kinds as planned.
   None is a document type yet; each needs samples and testing first.
+- `docs/README.md`: which document is for what. Bella's decisions and questions live in
+  issue #61, rewritten as the one place for them.
+- `docs/reference/sample_coverage.md`: the sample coverage record from issue #35.
+
+### Changed (issues)
+- #61 rewritten: open questions on top, every decision below with its date.
+- #70 rewritten as the filing layout, with the rules from #26 and PR #28 folded in.
+  #26 and PR #28 closed.
 
 ---
 

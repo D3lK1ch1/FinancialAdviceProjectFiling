@@ -20,3 +20,8 @@ Equities and the ATO.
   `samples/implementation/` (git-ignored, like all samples), with where each came from.
 - These file in `3 Implementation` (`filing_model.stage_folders`). None are
   document types yet.
+
+## sample_coverage.md
+
+Which document types have real public examples, which are mocked, and why the gaps
+can't be filled from public sources. Moved from issue #35.
