@@ -62,6 +62,9 @@ overwrites a finished step (see Contributing in `README.md`).
   layout. #26 and PR #28 folded in and closed.
 
 ### Fixed
+- **Title check tolerates line breaks**: any whitespace between a title's words counts.
+  ASIC's RG 90 example SOAs extract as "Statement of⏎Advice" and were rejected before the
+  model saw them.
 - Client names in capitals, with particles (`van der Berg`) and entities (`Pty Ltd`,
   "as trustee for") are found (14 Oct review).
 - Reading `window.DATA` on import crashed the React page once real data replaced the demo set.
