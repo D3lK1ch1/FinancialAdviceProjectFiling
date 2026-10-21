@@ -13,6 +13,31 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-21: Every decision from 21 Oct recorded in the knowledge base and docs
+
+### Changed
+- `advice_process_stages`: the six steps of the financial planning process, replacing
+  engagement / discovery / construction / delivery / implementation / review. The fact
+  find is in steps 2 and 3, and the SOA, ROA and PDS in step 4 (#70).
+- `filing_model.stage_label`: now points to the step folders. The 9 Oct label-only
+  rule is replaced.
+
+### Added
+- `filing_model.stage_folders`: `1 Goals and situation`, `2 Advice`, `3 Implementation`.
+- `filing_model.file_name`: `Surname_First name_YYYY-MM-DD Type`, couples, duplicates.
+- `client_model.different_surnames`, and the couple rule for file names in `joint_client`.
+- `review_policy.one_click`: 90% floor for real filing (raise only), 70% for testing only.
+- `docs/GROUND_TRUTH.md` "Decided 21 Oct 2026", `docs/SYSTEM.md` sections 4 and 5, and
+  `CLAUDE.md` domain facts, all to match.
+
+### Known gaps
+- Step folders and the client part of file names are decided but not built
+  (`filing.py`, #70).
+- To confirm with Bella: PDS and every ROA in `2 Advice`. Couples who aren't husband
+  and wife: order not decided.
+
+---
+
 ## 2026-10-21 — The client folder is proposed (#6); UI integration plan; React front end from the demo; filing by planning step decided (#70, #71)
 
 ### Added

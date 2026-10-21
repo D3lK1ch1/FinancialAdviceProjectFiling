@@ -202,13 +202,14 @@ def test_every_area_in_the_kb_has_signals():
         assert area["signals"], area["name"]
 
 
-# --- Advice stage, shown per document (decided 9 Oct) --------------------------
+# --- Planning step, shown per document (9 Oct; six-step names 21 Oct, #70) --------------------------
 
 from filing import advice_stages, proposed_filing  # noqa: E402
 
 
 def test_a_type_in_two_stages_lists_both_in_order():
-    assert advice_stages("soa") == ["3 Advice construction", "4 Advice delivery"]
+    """The fact find covers goals and the financial situation (six-step process, #70)."""
+    assert advice_stages("fact_find") == ["2 Identify goals", "3 Assess the financial situation"]
 
 
 def test_a_type_at_every_stage_says_so_instead_of_listing_them():
@@ -234,7 +235,7 @@ def test_proposed_filing_gives_each_part():
 
     assert result["event_folder"] == "2024-03 — Insurance"
     assert result["filename"] == "2024-03-14 SOA.pdf"
-    assert result["stages"] == ["3 Advice construction", "4 Advice delivery"]
+    assert result["stages"] == ["4 Develop the strategic plan"]
     assert result["date"] == "2024-03-14"
 
 

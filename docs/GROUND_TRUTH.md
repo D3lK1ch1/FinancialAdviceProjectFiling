@@ -102,6 +102,40 @@ documents above (a file note, an ROA, a fee statement).
   - Engineering consequence: an FSG/PDS has no client name inside it, so the client has to
     come from **outside the document** (see engineer question below).
 
+### Decided 21 Oct 2026 (Bella)
+- **Filing layers: client → advice event → planning step.** Steps follow the six-step
+  financial planning process (define the relationship, identify goals, assess the
+  situation, develop the plan, implement, review). Only the practical steps get folders
+  inside an event: `1 Goals and situation` (fact find, risk profile), `2 Advice` (SOA,
+  ROA, PDS), `3 Implementation` (ATP). Steps 1 and 6 are relationship-level, so no folder.
+  Replaces the 9 Oct "stage is a label only" answer. Why: filing by client alone can be
+  done by procedure; the value is each document placed with its advice and step.
+  `advice_process_stages`, `filing_model.stage_folders`. Not built yet (#70).
+  - **To confirm:** PDS and every ROA (including a review ROA) in `2 Advice`.
+- **File names:** `Surname_First name_YYYY-MM-DD Type[ — qualifier].pdf`, e.g.
+  `Nguyen_Lan_2024-03-14 SOA.pdf`. A couple who share a surname: both first names,
+  husband first (`Black_Brad_Zara_...`). Different surnames: separate clients unless the
+  document explicitly says joint. Same client, date and type: the second gets ` 2`. The
+  record type goes in the file name, never a folder name. `filing_model.file_name`,
+  `client_model.different_surnames`. Open: couples who aren't husband and wife.
+- **One click and the confidence line.** One click approves every document the tool
+  didn't hold and that has nothing worth checking. A person sees the list and clicks:
+  still nothing filed automatically (13 Oct). The line for real filing stays at the
+  firm-safe 90%; a firm's slider can only raise it. While testing the prototype the slider
+  may go down to 70%, marked as testing, with nothing written. The aim is 90% or better.
+  `review_policy.one_click`. Not decided: lowering the line for one type when its failure
+  log proves it, and a "likely, please check" group for 70–89%.
+- **Every filing is logged with undo.** Undone entries stay in the log, marked undone.
+- **Status groups on screen:** each document is in exactly one: Needs review (held),
+  Worth checking (not held, has a flag), Confident.
+- **INFO 267 dropped as a question.** When the scope sentence and the model disagree on what
+  the advice is about, flag it for a person.
+- **Firm rules by chat box** (e.g. "file couples under the husband only"): ideas in #71,
+  after the filing basics.
+- **Front end:** React for the screens, Python purely the backend. FastAPI serves the built
+  page; Node is only for building it. Plan in `docs/UI_INTEGRATION.md` and
+  `frontend/README.md`. The public demo link is off until the real tool is ready.
+
 ## Known differences from existing docs (resolve, don't ignore)
 | Topic | This file | Elsewhere | Status |
 |---|---|---|---|

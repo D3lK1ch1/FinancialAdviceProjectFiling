@@ -32,7 +32,7 @@ The system has three knobs that do NOT depend on each other. Keeping them indepe
 
 ## 4. The advice process is the backbone
 
-Every document maps to a stage of advice (engagement -> discovery -> construction -> delivery -> implementation -> ongoing review) and links to specific other documents. This does two jobs:
+Every document maps to a step of the six-step financial planning process (define the relationship -> identify goals -> assess the situation -> develop the plan -> implement -> review and monitor; changed 21 Oct 2026, #70) and links to specific other documents. This does two jobs:
 
 - **Teaching:** shows a new adviser where a document sits in the sequence.
 - **Failure-catching:** lets the tool reason about order and completeness. A fact-find dated *after* the SOA it feeds, or an authority-to-proceed with no advice record behind it, is out of sequence -> flag. The stages drive *flags for a human*, never automatic rejection (real advice loops and revises).
@@ -40,21 +40,27 @@ Every document maps to a stage of advice (engagement -> discovery -> constructio
 ## 5. Filing model — nested, two axes
 
 ```
-[Client / family]
+[Surname, First name]
    [YYYY-MM — subject]                   <- one advice event
-        - advice record (SOA/ROA/CAR)
-        - inputs (fact find, risk profile)
-        - implementation (authority to proceed)
-        - supporting product disclosure (PDS)
+        1 Goals and situation/            <- fact find, risk profile      (steps 2, 3)
+        2 Advice/                         <- SOA, ROA, PDS                (step 4)
+        3 Implementation/                 <- authority to proceed         (step 5)
    _Client-level documents                <- FSG, general correspondence
    _Needs review                          <- anything not confidently placed
+
+File names: Surname_First name_YYYY-MM-DD Type[ — qualifier].pdf
+            e.g. Nguyen_Lan_2024-03-14 SOA.pdf
 ```
 
+Step folders and the client part of file names were decided 21 Oct 2026 and aren't
+built yet (#70; `filing_model.stage_folders`, `filing_model.file_name`).
+
 - **Outer = client.** Matches how firms and reviewers pull files.
-- **The event folder is named after the event, not one document.** It holds the fact find, SOA or ROA, ATP and PDS together, so it is never labelled "[SOA]". The record type goes in each document's filename, and the advice-process stage is shown on each document rather than as another folder layer (decided 9 Oct 2026, PR #58; `filing_model` in `knowledge_base.json`).
+- **The event folder is named after the event, not one document.** It holds the fact find, SOA or ROA, ATP and PDS together, so it is never labelled "[SOA]". The record type goes in each document's filename. Inside the event, documents sit in a folder for their practical planning step (decided 21 Oct 2026, replacing the 9 Oct label-only rule; `filing_model.stage_folders`).
 - **Inner = advice event.** Groups everything behind one advisory decision, using the document-to-document links. A client accumulates many events over years (super year 1, insurance year 2 …); each is its own folder.
 - **Why nesting is more accurate:** a document is placed by two axes that must agree (right client AND a coherent event). Disagreement = a flag a single axis would miss.
 - **Shared documents** (e.g. a PDS used in two events): file once, reference elsewhere. Configurable per firm.
+- **One click for the confident ones, never automatic.** A person sees the list and approves every unheld, unflagged document with one click. The line is the firm-safe 90%; a firm can raise it, not lower it. Testing may show 70%, with nothing written (`review_policy.one_click`, 21 Oct 2026). Every filing is logged with undo.
 - **Always a proposal a human confirms.** Event grouping depends on link accuracy — the fiddliest part — so mis-grouping is expected early and must surface, never auto-bundle.
 
 ## 6. AI summary (planned, later phase)

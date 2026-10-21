@@ -66,6 +66,13 @@ app runs, data it reads (`knowledge_base.json`), or sample input (`samples/`).
   from 2018, and attachment 3 ("Stockbroker"), which mentions neither s946AA nor "small
   investment". The sample set covers one situation three times, not three situations once.
   An earlier version of this file said att 2 was "not further advice"; that was wrong.
+- **Filing is client → advice event → planning step** (21 Oct 2026). Step folders follow
+  the six-step financial planning process, practical steps only: `1 Goals and situation`,
+  `2 Advice`, `3 Implementation`. File names start `Surname_First name_`. Rules in
+  `filing_model.stage_folders` and `filing_model.file_name`, not in Python (#70).
+- **90% is a floor for real filing.** One click files only what the tool didn't hold, and a
+  person makes the click. A firm can raise the line, never lower it. 70% exists for
+  prototype testing only, with nothing written (`review_policy.one_click`).
 
 ## What NOT to do
 - Do not build the AI summary feature until classification + event-grouping are reliable.

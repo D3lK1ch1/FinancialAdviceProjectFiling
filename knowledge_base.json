@@ -66,13 +66,14 @@
       "documents": []
     }
   ],
+  "advice_process_stages_note": "The six steps of the financial planning process as Bella studied it (21 Oct 2026, #70). Replaces engagement / discovery / construction / delivery / implementation / review: the fact find now sits in goals and situation, and the SOA in one step.",
   "advice_process_stages": [
-    {"stage": 1, "name": "Engagement & disclosure", "plain": "The relationship is established; the client is told who the provider is, what they offer, and how they're paid — before any service is provided.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg", "file_note"]},
-    {"stage": 2, "name": "Discovery / fact-find", "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile", "file_note"]},
-    {"stage": 3, "name": "Advice construction", "plain": "Recommendations are formed and the reasoning/basis for advice is documented.", "governing_provisions": ["s961B", "s961G (appropriate advice)"], "typical_docs": ["file_note", "soa", "pds"]},
-    {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa", "file_note"]},
-    {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "pds", "file_note"], "not_yet_document_types": ["product application forms — not yet a document type (see #23)"]},
-    {"stage": 6, "name": "Ongoing service & review", "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "file_note"]}
+    {"stage": 1, "name": "Define the relationship and scope", "plain": "Trust is established. The adviser explains the advice process and the fees, and agrees what services the client needs. The client is told who the provider is and how they are paid before any service.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg", "file_note"]},
+    {"stage": 2, "name": "Identify goals", "plain": "Short and long term goals are discussed, such as buying a home, funding education or retiring.", "governing_provisions": ["s961B (best interests)"], "typical_docs": ["fact_find", "file_note"]},
+    {"stage": 3, "name": "Assess the financial situation", "plain": "Income, expenses, assets, debts, super, insurance and risk tolerance are reviewed. This is the evidence for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile", "file_note"]},
+    {"stage": 4, "name": "Develop the strategic plan", "plain": "The recommendations are formed and documented in a Statement of Advice, or a Record of Advice where one is permitted, and given to the client with any PDS for a recommended product.", "governing_provisions": ["s961B", "s961G (appropriate advice)", "s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa", "pds", "file_note"]},
+    {"stage": 5, "name": "Implement the recommendations", "plain": "The plan is put into action: accounts opened, investments moved, insurance updated. The client authorises it first and product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "pds", "file_note"], "not_yet_document_types": ["product application forms — not yet a document type (see #23)"]},
+    {"stage": 6, "name": "Review and monitor", "plain": "Periodic check-ins adjust the plan for market, tax or life changes. Ongoing fee arrangements are disclosed and consented to. Smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "file_note"]}
   ],
   "version_status_values": {
     "current": "The live, in-force version of this document for this client (or this edition, for licensee/issuer-wide docs).",
@@ -621,10 +622,34 @@
       "rule": "Documents and folders are renamed. Every rename is tracked: the original name, the new name, who renamed it and when — and users can see who renamed it, so they know who to follow up with questions.",
       "decided": "Bella, 13 Oct 2026 (GH#61 Q8). The tracking needs the audit log (GH#7)."
     },
+    "file_name": {
+      "pattern": "<Surname>_<First name>_<YYYY-MM-DD> <abbrev>[ — <qualifier>].<ext>",
+      "examples": ["Nguyen_Lan_2024-03-14 SOA.pdf", "Nguyen_Lan_2024-02-20 Fact Find.pdf", "Nguyen_Lan_2025-06-02 ROA — further advice.pdf"],
+      "rule": "The file name starts with the client, surname then first name, joined by underscores. The date and type follow as before (decided on #10, 1 Oct 2026). The advice record type goes in the file name, never in a folder name.",
+      "couple": "A couple who share a surname: both first names, husband first, as for the folder. Black_Brad_Zara_2024-03-14 SOA.pdf",
+      "different_surnames": "Separate clients, each with their own folder and file names, unless the document explicitly says they are joint clients. A firm saying otherwise comes later (#71).",
+      "duplicate": "Same client, date and type: the second file gets a number. Nguyen_Lan_2024-03-02 Fact Find 2.pdf",
+      "no_client": "No client chosen means no client part: the name is not guessed, and the person chooses the client before filing.",
+      "decided": "Bella, 21 Oct 2026 (PR #69 comments).",
+      "open": "Couples who are not husband and wife: order not decided yet.",
+      "status": "Decided, not built: filing.proposed_filename still makes '2024-03-14 SOA.pdf'."
+    },
     "stage_label": {
-      "rule": "The advice process stage is shown on each document, read from advice_process_stages[].typical_docs. It is not a folder layer.",
-      "why": "An event usually holds one or two documents per stage, so stage folders would mostly hold a single file. Decided 9 Oct 2026.",
+      "rule": "The planning step is shown on each document, read from advice_process_stages[].typical_docs. Since 21 Oct 2026 the practical steps are also a folder layer inside the event: see stage_folders.",
+      "why": "9 Oct 2026: stage folders would mostly hold a single file, so label only. Replaced 21 Oct 2026 by stage_folders: filing by client and event alone is not enough value.",
       "every_stage_label": "Any stage"
+    },
+    "stage_folders": {
+      "rule": "Inside an advice event, each document sits in a folder for its practical planning step. Only steps whose documents belong to one piece of advice get a folder. Steps 1 and 6 are about the whole client relationship, so they have none.",
+      "decided": "Bella, 21 Oct 2026 (#70). Filing by client alone can be done by procedure; the value is placing each document with its advice and its step.",
+      "folders": [
+        {"name": "1 Goals and situation", "steps": [2, 3], "docs": ["fact_find", "risk_profile"]},
+        {"name": "2 Advice", "steps": [4], "docs": ["soa", "roa", "pds"]},
+        {"name": "3 Implementation", "steps": [5], "docs": ["authority_to_proceed"]}
+      ],
+      "pds_and_roa": "To confirm with Bella: a PDS files in 2 Advice because it is given with the advice that recommends the product (a copy in the client file is the proof, 29 Sep 2026). Every ROA files in 2 Advice, including one from a review.",
+      "no_folder": "A type in no folder (file note, FSG, FDS) files at the event level, or where special_folders puts it.",
+      "status": "Decided, not built: filing.py does not make step folders yet (#70)."
     },
     "advice_event": {
       "definition": "A single advisory decision and all documents that belong to it: the advice record (SOA or ROA), the inputs that fed it (fact find, risk profile), the implementation (authority to proceed), and supporting product disclosure (PDS) used for that decision.",
@@ -786,7 +811,12 @@
     "joint_client": {
       "rule": "A joint client is one client with one shared client folder, e.g. 'Black, Brad & Zara'. The names are kept together, never split into two folders or chosen between.",
       "decided": "Bella, 9 Oct 2026 (GH#61).",
-      "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026."
+      "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026.",
+      "file_name": "Both first names in the file name too: Black_Brad_Zara_2024-03-14 SOA.pdf (filing_model.file_name). Decided Bella, 21 Oct 2026."
+    },
+    "different_surnames": {
+      "rule": "Two people with different surnames are separate clients, each with their own folder, unless the document explicitly says they are joint clients.",
+      "decided": "Bella, 21 Oct 2026 (PR #69). A firm choosing otherwise comes later, through firm rules (#71)."
     },
     "name_format": {
       "rule": "Folder names use normal capitals whatever the document uses: 'JOHN SMITH' becomes 'Smith, John'. Titles are kept: 'Dr John Smith' becomes 'Smith, Dr John'.",
@@ -907,6 +937,20 @@
     "minimum_threshold": 0.90,
     "minimum_note": "The firm-safe level: 0.90, set once here at the domain level and applying to every firm and every document type (Bella, 1 Oct 2026). A firm cannot lower it — it is a safety control, not a convenience, and lowering a bar is how a busy queue gets emptied by letting documents through unchecked. A type may be held ABOVE it if its failure log ever argues for that; never below.",
     "default_note": "Applies to any document type without its own entry, so adding a type to `documents` needs no edit here (ground rule #1). Equal to the firm-safe level: a new type starts at it, never below.",
+    "one_click": {
+      "rule": "One click approves together every document the tool did not hold and that has nothing worth checking. A person sees the list and makes the click: nothing is filed automatically (13 Oct 2026). Held or flagged documents are decided one at a time.",
+      "line": "The firm-safe level (minimum_threshold, 0.90). A firm may raise it with a slider, never lower it.",
+      "aim": "90% or better, and higher is better.",
+      "prototype_testing": {
+        "lowest_line": 0.70,
+        "rule": "Only while the prototype is being tested, the slider may go down to 70% to show what would be filed. The screen says it is testing and nothing is written."
+      },
+      "decided": "Bella, 21 Oct 2026. Keeps the 1 Oct firm-safe level for real filing.",
+      "not_decided": [
+        "Lowering the line for one document type only when its failure log proves it is right at that level. Revisit when there are enough results.",
+        "A 'likely, please check' group for 70 to 89%."
+      ]
+    },
     "thresholds": {
       "soa": {
         "value": 0.90,
