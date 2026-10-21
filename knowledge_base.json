@@ -647,7 +647,7 @@
       "folders": [
         {"name": "1 Goals and situation", "steps": [2, 3], "docs": ["fact_find", "risk_profile"]},
         {"name": "2 Advice", "steps": [4], "docs": ["soa", "roa", "pds"]},
-        {"name": "3 Implementation", "steps": [5], "docs": ["authority_to_proceed"], "planned_docs": ["provider implementation forms: opening a super account, rolling over super, applying for a pension, opening an investment account"], "planned_note": "Not yet document types (#23). Bella is finding samples to test on (21 Oct 2026)."}
+        {"name": "3 Implementation", "steps": [5], "docs": ["authority_to_proceed"], "planned_docs": ["Account / product application", "Rollover / transfer in", "Rollover out / withdrawal / account closure", "Internal transfer / phase change", "Pension application (ABP / TTR)", "Pension maintenance / refresh", "Investment switch / rebalance", "Beneficiary nomination", "Contribution strategy forms", "Insurance inside super", "Adviser authority and fee consent", "Debt recycling / gearing implementation", "Share registry (direct equities)"], "planned_note": "Provider implementation forms. Not yet document types: each needs samples and testing first. Kinds, keywords, providers and sample links are in docs/reference/implementation_forms.json (Bella, 21 Oct 2026)."}
       ],
       "pds_and_roa": "Confirmed by Bella, 21 Oct 2026: the SOA, every ROA and the PDS file in 2 Advice. The PDS is given with the advice that recommends the product (a copy in the client file is the proof, 29 Sep 2026).",
       "no_folder": "A type in no folder (file note, FSG, FDS) files at the event level, or where special_folders puts it.",

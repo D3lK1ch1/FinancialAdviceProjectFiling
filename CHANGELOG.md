@@ -13,6 +13,17 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-21: Implementation forms taxonomy (reference)
+
+### Added
+- `docs/reference/implementation_forms.json` and its README: Bella's 13 kinds of
+  provider implementation form, with keywords, providers and sample links. For
+  testing and for adding these as document types later.
+- `filing_model.stage_folders`: `3 Implementation` lists the 13 kinds as planned.
+  None is a document type yet; each needs samples and testing first.
+
+---
+
 ## 2026-10-21: React page reads real PDFs through the backend (spike)
 
 ### Added
