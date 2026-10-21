@@ -7,6 +7,10 @@ import Filed from './Filed.jsx';
 import { Overview, Events, Review, Tree, Log, About } from './views.jsx';
 import { DATASETS, SETS, PROFILES, LOCAL, statusOf, initials, plural } from './model.js';
 
+// Sample sets can have different filing schemes (the public set has only the
+// backend's own), so fall back to a set's first scheme rather than crash.
+const schemeIn = (set, profile) => (DATASETS[set][profile] ? profile : Object.keys(DATASETS[set])[0]);
+
 const REPO = 'https://github.com/ahaythorpe/advice-document-classifier';
 const WHY_LOCAL = `${REPO}/blob/main/docs/DEPLOYMENT.md`;
 const VIEWS = { overview: 'Overview', events: 'Advice events', review: 'Needs review', tree: 'Folder tree', log: 'Filing log', about: 'About' };
@@ -54,7 +58,8 @@ export default function App() {
   const wide = useWide();
   const scrollRef = useRef(null);
 
-  const d = DATASETS[set][profile];   // changing the scheme changes the folders and nothing else
+  const scheme = schemeIn(set, profile);
+  const d = DATASETS[set][scheme];   // changing the scheme changes the folders and nothing else
   const doc = selected && d.documents.find((x) => x.doc_id === selected);
 
   useEffect(() => {
@@ -89,7 +94,7 @@ export default function App() {
     setTour(i);
     setSet(SETS[0]);                    // the tour is written about the demo folder
     go(s.view);
-    const pick = s.select && s.select(DATASETS[SETS[0]][profile]);
+    const pick = s.select && s.select(DATASETS[SETS[0]][schemeIn(SETS[0], profile)]);
     setSelected(pick ? pick.doc_id : null);
   };
   const endTour = () => { setTour(null); setSelected(null); };
@@ -168,7 +173,7 @@ export default function App() {
             {SETS.map((k) => (
               <button key={k} className="nav" aria-current={set === k ? 'true' : undefined}
                 onClick={() => { setSet(k); setSelected(null); }}>
-                <Icon id={k === 'public' ? 'file' : 'cabinet'} />{DATASETS[k][profile].dataset_label}
+                <Icon id={k === 'public' ? 'file' : 'cabinet'} />{DATASETS[k][schemeIn(k, profile)].dataset_label}
               </button>
             ))}
           </>}
@@ -207,8 +212,8 @@ export default function App() {
               <div className="scheme">
                 <label htmlFor="profile">Filing scheme</label>
                 <div className="select">
-                  <select id="profile" value={profile} onChange={(e) => setProfile(e.target.value)}>
-                    {PROFILES.map((p) => <option key={p} value={p}>{DATASETS[set][p].profile_name}</option>)}
+                  <select id="profile" value={scheme} onChange={(e) => setProfile(e.target.value)}>
+                    {Object.keys(DATASETS[set]).map((p) => <option key={p} value={p}>{DATASETS[set][p].profile_name}</option>)}
                   </select>
                   <Icon id="down" />
                 </div>

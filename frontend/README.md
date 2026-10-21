@@ -21,12 +21,22 @@ The page reads one object, `window.DATA`, put in at build time where
 `index.html` says `__DATA__`. `npm run dev` won't work until step 2 below
 replaces that with a fetch.
 
+## Demo and live mode
+
+The backend starts in **demo mode** unless `APP_MODE=live` is set. In demo mode
+`/app/` shows the full screens on sample sets only (the made-up folder, and public
+documents read by the real tool), and the backend refuses uploads. Live mode is for
+a firm's own installation: `/app/live.html` then takes PDFs.
+
+To refresh the public set: `python scripts/build_public_set.py <public samples folder>`,
+then `npm run build`.
+
 ## Run it with the Python backend (real PDFs)
 
     cd frontend && npm install && npm run build && cd ..
     python -m uvicorn app:app --port 8000
 
-Open http://localhost:8000/app/ and choose PDFs. Python reads them
+With `APP_MODE=live`, open http://localhost:8000/app/live.html and choose PDFs. Python reads them
 (`POST /api/batch`, the same steps as `/ingest`) and the page shows the results.
 Proposals only: nothing is moved, renamed or saved. Approve and Undo only change
 what's on screen.

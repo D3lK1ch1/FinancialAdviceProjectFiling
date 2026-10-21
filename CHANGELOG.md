@@ -29,6 +29,13 @@ overwrites a finished step (see Contributing in `README.md`).
   `manifest.py` reshapes the results. `/ingest`'s body is now `ingest_bytes()`, unchanged.
 - **One-click slider**: 90% floor for real filing (a firm can only raise it); down to 70%
   while testing, marked "Testing", nothing written (`review_policy.one_click`).
+- **Demo and live mode** (`config.APP_MODE`, default demo). Demo has no upload at all:
+  `/api/batch` answers 403 even when called directly, and `/app/` opens the full screens
+  on sample sets only. Live is set up on purpose on a firm's own computer; then
+  `/app/live.html` takes PDFs. 5 tests.
+- **Public documents set**: `scripts/build_public_set.py` reads the published samples
+  once with the real backend and saves the answers as a second sample set, so the demo
+  shows real results without waiting. Mock files are never included.
 - **Implementation forms taxonomy** from Bella: 13 kinds, 6 providers, sample links
   (`docs/reference/implementation_forms.json`, #74).
 - `docs/README.md` (which doc is for what), `docs/UI_INTEGRATION.md`,

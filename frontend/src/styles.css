@@ -324,7 +324,6 @@ h1{font-size:26px;line-height:1.2;letter-spacing:-.024em;margin:0 0 10px;font-we
 .pick{max-width:460px}
 .pick-btn{display:inline-flex;cursor:pointer}
 .pick-busy{font-size:13px;color:var(--mute)}
-.pick-alt{margin:16px 0 0;font-size:13px;color:var(--mute)}
 .pick-error{margin:12px 0 0;font-size:13px;color:var(--bad)}
 .batch.testing{background:var(--banner);border-bottom-color:var(--bannerline)}
 .test-tag{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:var(--warn);color:#fff;font-size:11px;font-weight:600;vertical-align:1px}

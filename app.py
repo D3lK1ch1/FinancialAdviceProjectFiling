@@ -13,6 +13,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import config
 from classifier import classify, engine_identity, engine_version
 from clients import choose_client, find_client_candidates
 from filing import proposed_filing
@@ -45,12 +46,21 @@ def root():
 app.mount("/app", StaticFiles(directory="frontend/dist/app", html=True, check_dir=False), name="app")
 
 
+@app.get("/api/mode")
+def mode():
+    """demo or live (config.APP_MODE). The page shows an upload control only when live."""
+    return {"mode": config.APP_MODE}
+
+
 @app.post("/api/batch")
 async def batch(files: list[UploadFile], display: str = DEFAULT_DISPLAY_MODE):
     """Several documents through /ingest's pipeline, as the manifest the React page reads.
 
-    Proposals only, like /ingest: nothing is written.
+    Proposals only, like /ingest: nothing is written. Refused in demo mode, so a
+    firm's documents can't be sent to a demo even by calling this directly.
     """
+    if config.APP_MODE != "live":
+        raise HTTPException(status_code=403, detail="Uploads are off in demo mode.")
     _check_display(display)
     return build_manifest([ingest_bytes(await f.read(), f.filename, display) for f in files])
 

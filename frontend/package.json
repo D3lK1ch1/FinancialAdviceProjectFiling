@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node -e \"const f=require('fs');const page=f.readFileSync('dist/index.html','utf8');f.mkdirSync('dist/app',{recursive:true});f.writeFileSync('dist/app/index.html',page.replace('__DATA__','null'));f.writeFileSync('dist/app/demo.html',page.replace('__DATA__',f.readFileSync('sample-data.json','utf8').replace(/<\\//g,'<\\\\/')))\"",
-    "preview:sample": "npm run build && node -e \"const f=require('fs');f.writeFileSync('dist/demo.html',f.readFileSync('dist/index.html','utf8').replace('__DATA__',f.readFileSync('sample-data.json','utf8')))\""
+    "build": "vite build && node build-pages.cjs",
+    "preview:sample": "npm run build"
   },
   "dependencies": {
     "react": "^18.3.1",

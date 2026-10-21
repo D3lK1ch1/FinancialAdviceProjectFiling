@@ -51,7 +51,8 @@ def _result(**filing) -> dict:
     }
 
 
-def test_batch_returns_one_manifest_with_every_document():
+def test_batch_returns_one_manifest_with_every_document(monkeypatch):
+    monkeypatch.setattr("config.APP_MODE", "live")
     files = [("files", ("one.pdf", _pdf(None), "application/pdf")),
              ("files", ("two.pdf", _pdf("Client name: George Baker"), "application/pdf"))]
     body = client.post("/api/batch", files=files).json()
