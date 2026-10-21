@@ -265,7 +265,7 @@ function Folder({ name, node, selected, onSelect, decisions }) {
   );
 }
 
-// Already in a stage folder ("4 Advice delivery"), so the label would only repeat it.
+// Already in a step folder ("2 Advice"), so the label would only repeat it.
 const inStageFolder = (x) => /^\d /.test(((x.destination || {}).folder || []).slice(-1)[0] || '');
 
 function Branch({ node, selected, onSelect, decisions }) {

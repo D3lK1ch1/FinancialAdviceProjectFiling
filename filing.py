@@ -205,11 +205,12 @@ def proposed_event_folder(
     return {"folder": folder, "subject": subject, "reason": subject["reason"]}
 
 
-# --- Advice process stage ------------------------------------------------------
+# --- Planning step label ----------------------------------------------------------
 #
-# Shown on each document, not a folder layer (filing_model.stage_label). Read
-# from advice_process_stages[].typical_docs, so a type can sit in more than
-# one stage — an SOA is both constructed and delivered.
+# Shown on each document (filing_model.stage_label). Read from
+# advice_process_stages[].typical_docs, so a type can sit in more than one
+# step: a fact find covers goals and the financial situation. Since 21 Oct the
+# practical steps are also folders: see step_folder() below.
 
 _STAGES = _KB["advice_process_stages"]
 _EVERY_STAGE = _KB["filing_model"]["stage_label"]["every_stage_label"]

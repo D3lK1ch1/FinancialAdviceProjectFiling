@@ -88,7 +88,9 @@ tools". Accept, then run the command again.
    ```
    python -m uvicorn app:app --port 8000
    ```
-3. Open **http://127.0.0.1:8000/** and drop a PDF on the page.
+3. Open **http://127.0.0.1:8000/** and drop a PDF on the page. Or open
+   **http://127.0.0.1:8000/app/** for the new screens. Build them once first
+   (`frontend/README.md`).
 4. Stop with `Ctrl+C` (also `Ctrl` on a Mac, not `Cmd`).
 
 **"Couldn't reach the classifier … connection refused"** (`WinError 10061` /

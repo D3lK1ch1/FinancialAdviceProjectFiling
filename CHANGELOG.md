@@ -25,6 +25,14 @@ overwrites a finished step (see Contributing in `README.md`).
   issue #61, rewritten as the one place for them.
 - `docs/reference/sample_coverage.md`: the sample coverage record from issue #35.
 
+### Fixed (stale text)
+- `app.py` no longer says "No classifier/filing/flagging yet".
+- `GROUND_TRUTH.md` folder-levels row, `filing.py` and a front-end comment use the
+  step folders. `advice_classification_reference.md` notes how its compliance stages map
+  to the six steps. `README.md` mentions `/app/`. `CLAUDE.md` points to `docs/README.md`.
+- Knowledge base version 0.4, so failure-log entries before and after today's rule
+  changes can be told apart.
+
 ### Changed (issues)
 - #61 rewritten: open questions on top, every decision below with its date.
 - #70 rewritten as the filing layout, with the rules from #26 and PR #28 folded in.

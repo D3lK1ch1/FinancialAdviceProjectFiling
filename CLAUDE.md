@@ -13,7 +13,9 @@ exist — **it never generates financial advice.**
 
 ## Read these first
 - `docs/SYSTEM.md` — the spec. Build from it. Source of truth for behaviour.
-- `knowledge_base.json` — the domain data the classifier reads (v0.3).
+- `docs/README.md` — which document is for what. Bella's decisions and open questions are
+  in GitHub issue #61.
+- `knowledge_base.json` — the domain data the classifier reads (v0.4).
 - `harness.py` — a working keyword-based prototype of the full pipeline. Reference, not final.
 - `docs/sample_documents.labelling.md` — hand-labelled expected results for the sample files in
   `samples/`. Note: `harness.py` currently tries to load `sample_documents.json`, which doesn't

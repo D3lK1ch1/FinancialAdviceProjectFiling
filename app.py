@@ -1,6 +1,8 @@
 """
-API layer — Phase 1: /ingest only. Nothing is persisted; each request parses
-and returns the result in-memory. No classifier/filing/flagging yet.
+API layer. /ingest reads one PDF and returns its type, verified confidence,
+flags, client, review decision and filing proposal. /api/batch does the same
+for several and returns the manifest the React page (/app/) reads. Proposals
+only: nothing is persisted or filed.
 """
 
 import hashlib

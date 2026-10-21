@@ -3,7 +3,7 @@
     "regime": "Australia",
     "framework": "Corporations Act 2001 (Cth), Chapter 7 (Pt 7.7 Financial Services Disclosure; Pt 7.9 Financial Product Disclosure), and Corporations Regulations 2001",
     "regulator": "ASIC",
-    "version": "0.3",
+    "version": "0.4",
     "legislative_currency_note": "Provisions verified against AustLII / ASIC sources as at 2026-08. The SOA regime (s946A) is current but has a proposed successor: under DBFO Tranche 2 the SOA is slated to be replaced by a Client Advice Record (CAR). Tranche 2 was not yet passed as at this build. See 'reform_watch'. Do not hardcode 'SOA' as the only advice-record type — classify by role in the advice process, carry the statutory label as an attribute.",
     "not_legal_advice": "This maps documents to provisions to drive classification. It is not legal advice and does not substitute for a financial-services lawyer's sign-off, especially on the AFSL boundary and on reform timing.",
     "consumers": "Each document entry feeds: (1) new-to-industry teaching layer, (2) classifier identification hints, (3) version-tracking logic. Single source of truth — do not fork copies into the UI or classifier."

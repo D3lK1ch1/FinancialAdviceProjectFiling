@@ -37,6 +37,12 @@ Two honest caveats to hold throughout:
 
 Six process stages, the safe harbour step each corresponds to, and the document produced.
 
+> **Note (21 Oct 2026):** this table is the compliance view. For filing, the tool uses
+> the six-step financial planning process (define the relationship, identify goals,
+> assess the situation, develop the plan, implement, review) in `advice_process_stages`,
+> with folders for the practical steps only (#70). Discovery here is steps 2 and 3
+> there; advice delivery is step 4; implementation is step 5.
+
 | Process stage | Safe harbour step (s961B(2)) | Document produced | Legal basis |
 |---|---|---|---|
 | Initial consultation | Pre-step — give FSG, agree scope | FSG (+ engagement letter) | s941A |

@@ -144,7 +144,7 @@ documents above (a file note, an ROA, a fee statement).
 | Topic | This file | Elsewhere | Status |
 |---|---|---|---|
 | Threshold | 90% for everything | `review_policy`: 0.90 for every type (#50) | **Resolved 2026-10-02.** Matches |
-| Folder levels | Client (`Surname, First name`) | #47 Client → Advice event; `settings.filing_mode` has `client_event` and `flat` (#51, flat not built yet) | **Resolved 9 Oct 2026.** Two layers: client folder, then an event folder named `YYYY-MM — <subject>`, never after one document such as "[SOA]". The stage is shown on each document, not as a folder (PR #58) |
+| Folder levels | Client (`Surname, First name`) | #47 Client → Advice event; `settings.filing_mode` has `client_event` and `flat` (#51, flat not built yet) | **Resolved 21 Oct 2026.** Three layers: client folder, an event folder named `YYYY-MM — <subject>` (never after one document such as "[SOA]"), then a folder per practical planning step. Replaces the 9 Oct two-layer answer (#70) |
 | Popup actions | Accept / Reject (+ correct or manual) | SYSTEM.md: Approve / Edit / Reject | Same idea. "Reject + correct" = Edit |
 | The "why" on a reject | Tell the model what it is and why | `review_policy.correction_reasons`: pick one of six codes, **no free text** (#43) | **Resolved by design.** A free-text box is where staff type a client's name, and the failure log is shared. The "speech bubble" is a pick-a-reason list |
 | Who can accept | "The user" | `approval_policy` (#54): only an adviser (own clients, for SOA/ROA/ATP/FDS) or compliance may approve; admin and paraplanner can edit, not approve | **Added 2026-10-02**, decided by Bella. The tool now has roles |
