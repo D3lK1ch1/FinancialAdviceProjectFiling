@@ -697,6 +697,14 @@ function render(data) {
               <ul class="flag-evidence">${candidates}</ul>`;
     },
 
+    ambiguous_client(flag) {
+      // Every client the document names, none chosen: the adviser decides (#6).
+      const names = (flag.names || []).map(n => `<li>${escapeHtml(n)}</li>`).join('');
+      return `<div class="flag-basis">The document names more than one client:</div>
+              <ul class="flag-evidence">${names}</ul>
+              <div class="flag-basis" style="margin-top:8px">Nothing has been chosen. The adviser picks one.</div>`;
+    },
+
     multi_doc_bundle(flag) {
       // The page ranges are the useful part: a reviewer checks the boundary,
       // not the adjective. Nothing is split — this is a proposal.

@@ -790,11 +790,18 @@
     },
     "name_format": {
       "rule": "Folder names use normal capitals whatever the document uses: 'JOHN SMITH' becomes 'Smith, John'. Titles are kept: 'Dr John Smith' becomes 'Smith, Dr John'.",
-      "decided": "Bella, 14 Oct 2026. Titles kept because clients, especially doctors, expect them."
+      "decided": "Bella, 14 Oct 2026. Titles kept because clients, especially doctors, expect them.",
+      "titles": ["Mr", "Mrs", "Ms", "Miss", "Mx", "Dr", "Prof", "Sir", "Dame", "Rev"],
+      "surname_particles": ["van", "von", "der", "den", "de", "del", "della", "da", "di", "du", "la", "le"],
+      "lists_source": "Proposed by Delia, 20 Oct 2026, not yet confirmed by Bella. Titles: common Australian forms of address. Particles: the lower-case words that belong to a surname ('Anna van der Berg' is 'van der Berg, Anna'), from the 14 Oct review. Add one when a real document needs it."
     },
     "entity_client": {
       "rule": "A trust, SMSF or company is the client in its own right. Its folder uses the entity's own name, and each entity has its own folder, separate from the people behind it.",
-      "decided": "Bella, 13 Oct 2026 (GH#61 Q2)."
+      "decided": "Bella, 13 Oct 2026 (GH#61 Q2).",
+      "markers": ["Pty", "Ltd", "Limited", "Trust", "Fund", "SMSF", "Superannuation", "Super", "Holdings"],
+      "trustee_markers": ["ATF", "ITF", "as trustee for"],
+      "trustee_rule": "'John Smith ATF Smith Family Trust' names the trustee and the trust. The client is the trust (several_names: if a trustee is named, file under the trust).",
+      "markers_source": "Proposed by Delia, 20 Oct 2026, not yet confirmed by Bella. Words that make a name an entity rather than a person. No real sample names an entity client yet."
     },
     "same_surname": {
       "rule": "Clients who share a surname are told apart by first name: 'Surname, First name'. In practice two clients share only the surname, not the full name.",
@@ -1055,6 +1062,7 @@
       "roa_basis_unconfirmed": "Asks which ROA situation applies; the approver answers it."
     },
     "not_yet_decided": [
+      "ambiguous_client",
       "roa_without_soa",
       "superseding_ambiguity",
       "advice_record_label_shift",
@@ -1093,6 +1101,7 @@
       {"id": "no_date", "evaluation": "stateless", "trigger": "No date extractable from a document type that requires one for sequencing", "why": "Version tracking and advice-timing checks impossible without a date.", "severity": "medium"},
       {"id": "low_confidence", "evaluation": "stateless", "trigger": "Classifier confidence below threshold", "why": "Ambiguous or poor-quality document; needs a human eye.", "severity": "medium"},
       {"id": "unknown_type", "evaluation": "stateless", "trigger": "The classifier returned no document type at all. Distinct from low_confidence, where it named a type below that type's threshold.", "why": "Possibly out-of-scope or a novel/edge document.", "severity": "low"},
+      {"id": "ambiguous_client", "evaluation": "stateless", "trigger": "The document labels more than one distinct client, or a name that can't be read safely alongside one that can. Includes a joint client named next to one of its members alone ('Brad and Zara Black' and 'Brad Black').", "why": "The client folder is the filing key. A document in the wrong client's folder is the worst failure this tool can make, and joint versus individual is a fact about the advice, not something to guess from names (GH#6).", "severity": "high", "asks": "Which client is this document for?", "never_choose": "The flag lists every name found and proposes none of them. The adviser chooses (client_model.several_names)."},
       {"id": "superseding_ambiguity", "evaluation": "stateful", "trigger": "Two candidate 'current' documents of the same type and scope for one client", "why": "Cannot determine which is in force.", "severity": "high"}
     ]
   }
