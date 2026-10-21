@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Icon, Dot, FileIcon, Confidence, StatusBadge, Type } from './atoms.jsx';
 import {
-  FILTERS, batchable, BATCH_LEVELS, groupByEvent, groupByStatus, folderTree, countFiles, statusOf, initials, plural, flagTitle, cls, pct,
+  FILTERS, batchable, oneClick, target, groupByEvent, groupByStatus, folderTree, countFiles, statusOf, initials, plural, flagTitle, cls, pct,
 } from './model.js';
 
 /* ---------------------------------------------------------------- Overview */
@@ -75,21 +75,30 @@ export const Decided = ({ k }) => (
 );
 
 function BatchBar({ d, decisions, onBatch }) {
-  const [level, setLevel] = useState(BATCH_LEVELS[0]);
-  const ready = d.documents.filter((x) => batchable(x) && x.confidence >= level && !decisions[x.doc_id]);
-  const oneByOne = d.documents.filter((x) => !batchable(x) && !decisions[x.doc_id]).length;
+  const rule = oneClick(d);
+  const [level, setLevel] = useState(rule.testing ? rule.lowest : rule.floor);
+  const testing = level < rule.floor;
+  const open = d.documents.filter((x) => !decisions[x.doc_id]);
+  const ready = open.filter((x) => batchable(x, level, rule.floor));
+  const oneByOne = open.length - ready.length;
   return (
-    <div className="batch">
+    <div className={`batch ${testing ? 'testing' : ''}`}>
       <div className="batch-tx">
-        <b>File the confident ones in one click</b>
-        <span>Everything with nothing to check at or above
-          <span className="select inline"><select aria-label="Confidence level" value={level} onChange={(e) => setLevel(+e.target.value)}>
-            {BATCH_LEVELS.map((l) => <option key={l} value={l}>{pct(l)}%</option>)}
-          </select><Icon id="down" /></span>.
+        <b>File the confident ones in one click{testing && <span className="test-tag">Testing</span>}</b>
+        <label className="slider">
+          <span>Line: <strong>{pct(level)}%</strong></span>
+          <input type="range" min={Math.round(rule.lowest * 100)} max={99} step={1} value={Math.round(level * 100)}
+            aria-label="Confidence line" onChange={(e) => setLevel(+e.target.value / 100)} />
+        </label>
+        <span>
+          {testing
+            ? <>Testing only: below {pct(rule.floor)}% nothing would be filed for real. </>
+            : <>Everything with nothing to check at or above the line. A firm can raise the line, never lower it below {pct(rule.floor)}%. </>}
+          The aim is {rule.aim}
           {oneByOne > 0 && <> {plural(oneByOne, 'other waits', 'others wait')} for a person.</>}</span>
       </div>
       <button className="btn primary" disabled={!ready.length} onClick={() => onBatch(ready.map((x) => x.doc_id), level)}>
-        <Icon id="check" />{ready.length ? `Approve and file ${ready.length}` : 'Nothing left to batch'}</button>
+        <Icon id="check" />{ready.length ? `${testing ? 'Try filing' : 'Approve and file'} ${ready.length}` : 'Nothing left to batch'}</button>
     </div>
   );
 }
@@ -229,7 +238,7 @@ export function Log({ d, log, selected, onSelect, onUndo }) {
                 <li key={id}>
                   <button className="log-doc" aria-selected={selected === id} data-doc={id} onClick={() => onSelect(id)}>
                     <span className="nm"><b>{x.source_name}</b><Type>{x.type_label}</Type><span className="pc">{pct(x.confidence)}%</span></span>
-                    <span className="to">{e.decision === 'approve' ? <>&rarr; {(x.destination || {}).path}</> : 'not filed'}</span>
+                    <span className="to">{e.decision === 'approve' ? <>&rarr; {target(x).path || 'not placed yet'}</> : 'not filed'}</span>
                     <span className="why">{(x.destination || {}).rationale || x.attachment_reason}</span>
                   </button>
                 </li>

@@ -84,3 +84,28 @@ def test_each_document_keeps_its_own_threshold():
     [doc] = build_manifest([_result()])["local"]["default"]["documents"]
 
     assert doc["threshold"] == 0.9
+
+
+def test_the_step_folder_goes_inside_the_event():
+    [doc] = build_manifest([_result(client_folder="Nguyen, Lan", event_folder="2024-03 — Retirement",
+                                    step_folder="2 Advice")])["local"]["default"]["documents"]
+
+    assert doc["destination"]["path"] == "Nguyen, Lan/2024-03 — Retirement/2 Advice/2024-03-14 SOA.pdf"
+
+
+def test_a_held_document_keeps_where_it_would_go():
+    """Testing mode shows it; it is still held (review_policy.one_click)."""
+    result = _result(client_folder="Nguyen, Lan", event_folder="2024-03 — Retirement", step_folder="2 Advice")
+    result["review"] = {"needs_review": True, "threshold": 0.9,
+                        "reasons": [{"code": "low_confidence", "why": "below the line"}]}
+    [doc] = build_manifest([result])["local"]["default"]["documents"]
+
+    assert doc["destination"]["folder"] == ["_Needs review"]
+    assert doc["would_file"]["path"].endswith("2 Advice/2024-03-14 SOA.pdf")
+    assert doc["review_codes"] == ["low_confidence"]
+
+
+def test_the_one_click_floor_comes_from_the_knowledge_base():
+    one_click = build_manifest([_result()])["local"]["default"]["one_click"]
+
+    assert (one_click["floor"], one_click["testing_lowest"]) == (0.9, 0.7)

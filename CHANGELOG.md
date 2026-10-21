@@ -22,7 +22,10 @@ overwrites a finished step (see Contributing in `README.md`).
 - `/app/`: the built React page, served by FastAPI. With no data in it, the page
   asks for PDFs and calls `/api/batch`. It uses each document type's own
   threshold from `review_policy` and hides the demo's tour and disclaimers.
-- 4 tests (`tests/test_manifest.py`).
+- The one-click slider (`review_policy.one_click`): 90% floor for real filing, a firm
+  can only raise it; down to 70% while testing, marked "Testing", with documents held
+  for low confidence alone. Paths include the step folder.
+- 7 tests (`tests/test_manifest.py`). 453 pass.
 
 ### Changed
 - `/ingest`'s body moved into `ingest_bytes()` so the batch can reuse it. Same

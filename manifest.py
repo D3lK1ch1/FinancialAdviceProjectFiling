@@ -40,6 +40,14 @@ def build_manifest(results: list[dict]) -> dict:
         "profile_description": "The filing this backend proposes today. Step folders (#70) are not built yet.",
         "knowledge_base_version": _KB["meta"].get("version"),
         "confidence_threshold": _POLICY["default_threshold"],
+        # review_policy.one_click: the slider's floor for real filing, and how
+        # low it may go while the prototype is tested (nothing is written).
+        "one_click": {
+            "floor": _POLICY["minimum_threshold"],
+            "testing": True,
+            "testing_lowest": _POLICY["one_click"]["prototype_testing"]["lowest_line"],
+            "aim": _POLICY["one_click"]["aim"],
+        },
         "batch": {"documents": len(documents), "needs_review": held, "auto_filed": len(documents) - held},
         "events": list(events.values()),
         "documents": documents,
@@ -71,10 +79,14 @@ def _document(result: dict) -> dict:
         "attachment_reason": filing.get("event_reason"),
         "needs_review": bool(review.get("needs_review")),
         "review_reasons": [r.get("why") for r in review.get("reasons") or [] if r.get("why")],
+        "review_codes": [r.get("code") for r in review.get("reasons") or []],
         "threshold": review.get("threshold"),
         "flags": [_flag(f) for f in result.get("flags") or []],
         "stages": filing.get("stages") or [],
         "destination": _destination(review, filing),
+        # Where it would go if a person filed it anyway: what testing mode shows
+        # for a document held only for low confidence.
+        "would_file": _destination({}, filing) if review.get("needs_review") else None,
     }
 
 
@@ -93,7 +105,9 @@ def _destination(review: dict, filing: dict) -> dict:
         folder = [review.get("destination") or _POLICY["destination"]]
         rationale = "held for a person"
     else:
-        folder = [p for p in (filing.get("client_folder"), filing.get("event_folder")) if p]
+        # The step folder is optional: a type with none files at the event level.
+        folder = [p for p in (filing.get("client_folder"), filing.get("event_folder"),
+                              filing.get("event_folder") and filing.get("step_folder")) if p]
         missing = [reason for part, reason in (
             (filing.get("client_folder"), filing.get("client_reason")),
             (filing.get("event_folder"), filing.get("event_reason")),

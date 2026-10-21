@@ -55,8 +55,30 @@ export function groupByStatus(d, keep) {
 
 // Only these can be approved together: placed, nothing held, nothing to check.
 // Anything flagged waits for a person one by one, however confident.
-export const batchable = (x) => !x.needs_review && !x.flags.length && !!(x.destination || {}).path;
-export const BATCH_LEVELS = [0.7, 0.8, 0.9];   // first is the default
+// review_policy.one_click: real filing never goes below the floor (90%); a firm
+// may only raise it. While the prototype is tested the slider may go down to
+// testing_lowest (70%), and nothing is written. Data without the setting (the
+// built-in demo) gets the same rule.
+export function oneClick(d) {
+  const c = d.one_click || {};
+  const floor = c.floor ?? 0.9;
+  const testing = c.testing ?? true;
+  return { floor, testing, lowest: testing ? (c.testing_lowest ?? 0.7) : floor, aim: c.aim || '90% or better, and higher is better.' };
+}
+
+// Where a document goes if approved: its destination, or for a document held
+// only because it is below the line, where it would go (testing mode only).
+export const target = (x) => (x.needs_review ? x.would_file : x.destination) || {};
+const onlyLowConfidence = (x) => (x.review_codes || []).length > 0 && x.review_codes.every((c) => c === 'low_confidence');
+
+// Can go in the one-click batch at this level: nothing worth checking, a full
+// path, and either not held, or (below the floor, testing only) held for low
+// confidence alone.
+export function batchable(x, level = 1, floor = 0.9) {
+  if (x.flags.length || x.confidence < level) return false;
+  if (!x.needs_review) return !!target(x).path;
+  return level < floor && onlyLowConfidence(x) && !!target(x).path;
+}
 
 export function groupByEvent(d, keep) {
   const byEvent = {};

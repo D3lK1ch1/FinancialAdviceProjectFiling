@@ -325,6 +325,11 @@ h1{font-size:26px;line-height:1.2;letter-spacing:-.024em;margin:0 0 10px;font-we
 .pick-btn{display:inline-flex;cursor:pointer}
 .pick-busy{font-size:13px;color:var(--mute)}
 .pick-error{margin:12px 0 0;font-size:13px;color:var(--bad)}
+.batch.testing{background:var(--banner);border-bottom-color:var(--bannerline)}
+.test-tag{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:var(--warn);color:#fff;font-size:11px;font-weight:600;vertical-align:1px}
+.slider{display:flex;align-items:center;gap:10px;margin:4px 0 2px;font-size:12.5px}
+.slider input{flex:1;max-width:260px;accent-color:var(--accent)}
+.batch.testing .slider input{accent-color:var(--warn)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .isec{padding:12px 0;border-bottom:1px solid var(--hair)}
 .isec:last-child{border-bottom:0}

@@ -29,7 +29,12 @@ replaces that with a fetch.
 Open http://localhost:8000/app/ and choose PDFs. Python reads them
 (`POST /api/batch`, the same steps as `/ingest`) and the page shows the results.
 Proposals only: nothing is moved, renamed or saved. Approve and Undo only change
-what's on screen. Each document takes a minute or more, because every one goes
+what's on screen.
+
+The one-click slider follows `review_policy.one_click`: 90% is the floor for real
+filing and a firm can only raise it. While testing, the slider goes down to 70%,
+the bar says "Testing" and the button says "Try filing". Below 90% it includes only
+documents the model held for low confidence alone, never flagged ones. Each document takes a minute or more, because every one goes
 through the model. The old page is still at http://localhost:8000/.
 
 ## What the page needs: the manifest
