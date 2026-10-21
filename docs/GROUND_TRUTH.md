@@ -32,7 +32,9 @@ file in
    failure.
 2. ~~**90% threshold covers both the type and the client.**~~ **Superseded 13 Oct 2026 (Q7):**
    a person confirms every document — type, client, stage and new name — whatever the
-   confidence. Nothing is ever filed automatically.
+   confidence. Nothing is ever filed automatically. **Changed 21 Oct 2026:** confident
+   documents (at or above the line, nothing to check) are filed automatically in a logged,
+   reversible batch; everything else still needs a person (`review_policy.one_click`).
 3. **The confidence has to be real.** An LLM that says "0.95" is only reporting its own
    opinion. The number has to be checked before the 90% rule means anything (PR #37).
 4. **Reject is never a dead end.** The user can correct it (type, client, reason), or they
@@ -122,9 +124,11 @@ documents above (a file note, an ROA, a fee statement).
   document explicitly says joint. Same client, date and type: the second gets ` 2`. The
   record type goes in the file name, never a folder name. `filing_model.file_name`,
   `client_model.different_surnames`. Open: couples who aren't husband and wife.
-- **One click and the confidence line.** One click approves every document the tool
-  didn't hold and that has nothing worth checking. A person sees the list and clicks:
-  still nothing filed automatically (13 Oct). The line for real filing stays at the
+- **Automatic batch filing and the confidence line.** Every document the tool didn't hold
+  and that has nothing worth checking is filed automatically in one batch as it is read.
+  Every filing is logged and can be undone; an undone document isn't refiled. Everything
+  else is flagged for a person. Replaces the 13 Oct "nothing filed automatically" for
+  confident documents only. The line for real filing stays at the
   firm-safe 90%; a firm's slider can only raise it. While testing the prototype the slider
   may go down to 70%, marked as testing, with nothing written. The aim is 90% or better.
   `review_policy.one_click`. Not decided: lowering the line for one type when its failure
@@ -179,6 +183,8 @@ She has **no access to real client documents**, and they would be highly confide
    being wrong can mean compliance fines and regulator problems
    (`review_policy.certainty_decision`). So a person confirms every document; **nothing is
    filed automatically**, even at 90%+. This replaces the auto-file step in the pipeline above.
+   **Changed 21 Oct 2026:** confident documents file automatically again, in a logged batch
+   that can be undone (see "Decided 21 Oct 2026").
 8. ~~**Renaming**~~: **answered 13 Oct 2026**. Yes, documents *and folders* are renamed.
    Every rename records the old name, new name, who and when, and users can see who renamed
    it so they can follow up with questions (`filing_model.renaming`; needs the audit log, #7).

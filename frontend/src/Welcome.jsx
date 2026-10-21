@@ -7,7 +7,7 @@ const HOW = [
   ['Identify', 'works out the type, client and advice event'],
   ['Check', 'raises compliance flags'],
   ['Propose', 'suggests a folder: the client then the advice event'],
-  ['File', 'the confident ones together in one batch: 70% sure or more in this demo, 90% or more in real use'],
+  ['File', 'the confident ones automatically in one batch: 70% sure or more in this demo, 90% or more in real use'],
   ['Flag', 'the ones it is unsure of go to a person, who decides'],
   ['Log', 'every filing is recorded and can be undone'],
 ];

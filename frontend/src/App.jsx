@@ -3,9 +3,8 @@ import { Icon } from './atoms.jsx';
 import Inspector from './Inspector.jsx';
 import Tour, { STEPS as TOUR } from './Tour.jsx';
 import Welcome from './Welcome.jsx';
-import Filed from './Filed.jsx';
 import { Overview, Events, Review, Tree, Log, About } from './views.jsx';
-import { DATASETS, SETS, PROFILES, LOCAL, statusOf, initials, plural } from './model.js';
+import { DATASETS, SETS, PROFILES, LOCAL, statusOf, initials, plural, batchable, oneClick, startLine } from './model.js';
 
 // Sample sets can have different filing schemes (the public set has only the
 // backend's own), so fall back to a set's first scheme rather than crash.
@@ -54,7 +53,6 @@ export default function App() {
   const [tour, setTour] = useState(null);           // step index while the tour is open
   const [welcome, setWelcome] = useState(() => !LOCAL && !welcomed());   // the demo's popup, not for real files
   const [log, setLog] = useState([]);               // the filing log: in memory only, like decisions
-  const [filed, setFiled] = useState(null);         // doc ids of the last batch, while its popup is open
   const wide = useWide();
   const scrollRef = useRef(null);
 
@@ -76,7 +74,7 @@ export default function App() {
   useEffect(() => {
     const on = (e) => {
       if (e.target.closest && e.target.closest('select')) return;
-      if (e.key === 'Escape') { setSelected(null); setTour(null); setFiled(null); if (welcome) closeWelcome(); }
+      if (e.key === 'Escape') { setSelected(null); setTour(null); if (welcome) closeWelcome(); }
       if (selected && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); step(e.key === 'ArrowDown' ? 1 : -1); }
     };
     document.addEventListener('keydown', on);
@@ -101,19 +99,31 @@ export default function App() {
   const closeWelcome = () => { markWelcomed(); setWelcome(false); };
   const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const record = (e) => setLog((l) => [...l, { id: l.length + 1, at: now(), ...e }]);
-  const approveBatch = (ids, level) => {
+  // Automatic batch filing (review_policy.one_click, decided 21 Oct): every
+  // document at or above the line with nothing to check is filed as soon as it
+  // is read, and logged. Anything else is flagged for a person. A document a
+  // person has undone is never filed again by the batch.
+  const [line, setLine] = useState(() => startLine(d));
+  const decided = useRef({});
+  const undone = useRef(new Set());
+  decided.current = decisions;
+  useEffect(() => {
+    const floor = oneClick(d).floor;
+    const ids = d.documents
+      .filter((x) => !decided.current[x.doc_id] && !undone.current.has(x.doc_id) && batchable(x, line, floor))
+      .map((x) => x.doc_id);
+    if (!ids.length) return;
     setDecisions((m) => ({ ...m, ...Object.fromEntries(ids.map((id) => [id, 'approve'])) }));
-    record({ kind: 'batch', level, ids, decision: 'approve' });
-    setFiled(ids);
-  };
+    record({ kind: 'auto', level: line, ids, decision: 'approve' });
+  }, [set, scheme, line]);
   // Undo clears the decisions that entry made and marks it undone; the log keeps it.
   const undoEntry = (id) => {
     const e = log.find((x) => x.id === id);
     if (!e) return;
     setDecisions((m) => { const n = { ...m }; e.ids.forEach((d0) => { if (n[d0] === e.decision) delete n[d0]; }); return n; });
+    e.ids.forEach((d0) => undone.current.add(d0));
     setLog((l) => l.map((x) => (x.id === id ? { ...x, undone: true } : x)));
   };
-  const undoBatch = () => { const last = log[log.length - 1]; if (last) undoEntry(last.id); setFiled(null); };
   const decide = (k) => {
     const same = decisions[selected] === k;
     setDecisions((m) => ({ ...m, [selected]: same ? undefined : k }));
@@ -127,7 +137,7 @@ export default function App() {
   const ok = d.documents.filter((x) => statusOf(x) === 'ok').length;
   const warn = d.documents.filter((x) => statusOf(x) === 'warn').length;
   const sub = { log: plural(log.filter((e) => !e.undone).length, 'entry', 'entries'), events: `${d.events.length} events · ${n} documents`, review: `${d.batch.needs_review} held`, tree: 'Proposed filing' }[view] || '';
-  const viewProps = { d, selected, onSelect: setSelected, decisions, onBatch: approveBatch };
+  const viewProps = { d, selected, onSelect: setSelected, decisions, line, onLine: setLine, log };
 
   return (
     <div className="window" role="application" aria-label={LOCAL ? 'Advice Document Filing' : 'Advice Document Filing (demo only)'}>
@@ -248,12 +258,10 @@ export default function App() {
       {tour !== null && <Tour d={d} step={tour} onStep={tourTo} onClose={endTour}
         onBackToStart={() => { endTour(); setWelcome(true); }} />}
       {/* Hidden while a narrow screen's document panel is open: it would sit on Reject. */}
-      {!LOCAL && tour === null && !welcome && !filed && !(showInspector && !wide) && (
+      {!LOCAL && tour === null && !welcome && !(showInspector && !wide) && (
         <button className="fab" title="How it works and the tour" aria-label="How it works and the tour"
           onClick={() => setWelcome(true)}><span aria-hidden="true">👋</span></button>
       )}
-      {filed && <Filed docs={d.documents.filter((x) => filed.includes(x.doc_id))}
-        onUndo={undoBatch} onClose={() => setFiled(null)} onLog={() => { setFiled(null); go('log'); }} />}
       {welcome && <Welcome onClose={closeWelcome} onTour={() => { closeWelcome(); tourTo(0); }} />}
     </div>
   );

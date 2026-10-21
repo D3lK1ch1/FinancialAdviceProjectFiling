@@ -11,7 +11,7 @@ export function Overview({ d, go, startTour }) {
   const check = count('bad');
   const clients = new Set(d.events.map((e) => e.client)).size;
   const stats = [
-    { n: d.batch.documents, l: 'Documents', s: `${count('ok')} ready to batch file`, to: 'events', dot: 'ok' },
+    { n: d.batch.documents, l: 'Documents', s: `${count('ok')} filed automatically`, to: 'events', dot: 'ok' },
     { n: d.events.length, l: 'Advice events', s: `for ${plural(clients, 'client', 'clients')}`, to: 'tree' },
     { n: held, l: 'Needs review', s: 'held by the tool, with a reason', to: 'review', c: held ? 'warn' : '', dot: 'warn' },
     { n: check, l: 'Worth checking', s: 'a person looks before filing', to: 'events', c: check ? 'bad' : '', dot: 'bad' },
@@ -21,7 +21,7 @@ export function Overview({ d, go, startTour }) {
       <p className="eyebrow">{d.dataset_label} · {d.batch.documents} files</p>
       <h1>{{ public: 'Real published PDFs and a tool that won’t guess', local: 'Your documents, read and proposed for filing' }[d.dataset] || 'A messy client folder in, a proposed filing out'}</h1>
       <p className="lede">The tool reads each document and works out what it is, which client it is for and which{' '}
-        <em>advice event</em> it belongs to: one piece of advice and every document behind it. The confident ones are filed together in one batch: 70% sure or more in this demo, 90% or more in
+        <em>advice event</em> it belongs to: one piece of advice and every document behind it. The confident ones are filed automatically in one batch: 70% sure or more in this demo, 90% or more in
         real use. The ones it is unsure of are flagged and a person decides. Every filing is logged and can be undone.</p>
       {d.dataset_note && <div className="box sub set-note"><Icon id="info" /><span>{d.dataset_note}</span></div>}
       {startTour && <button className="btn primary tour-cta" onClick={startTour}><Icon id="play" />Take the 1-minute tour</button>}
@@ -74,31 +74,32 @@ export const Decided = ({ k }) => (
     {k === 'approve' ? 'Filed (demo)' : 'Rejected'}</span>
 );
 
-function BatchBar({ d, decisions, onBatch }) {
+// The automatic batch: shows what was filed at the line and lets the line move.
+// Filing itself happens in App as documents are read; this only reports it.
+function BatchBar({ d, decisions, line, onLine, log }) {
   const rule = oneClick(d);
-  const [level, setLevel] = useState(rule.testing ? rule.lowest : rule.floor);
-  const testing = level < rule.floor;
-  const open = d.documents.filter((x) => !decisions[x.doc_id]);
-  const ready = open.filter((x) => batchable(x, level, rule.floor));
-  const oneByOne = open.length - ready.length;
+  const testing = line < rule.floor;
+  const ids = new Set(d.documents.map((x) => x.doc_id));
+  const auto = log.filter((e) => e.kind === 'auto' && !e.undone).flatMap((e) => e.ids).filter((id) => ids.has(id) && decisions[id] === 'approve').length;
+  const flagged = d.documents.filter((x) => !decisions[x.doc_id]).length;
   return (
     <div className={`batch ${testing ? 'testing' : ''}`}>
       <div className="batch-tx">
-        <b>Batch file the confident ones{testing && <span className="test-tag">Testing</span>}</b>
+        <b>Filed automatically: {plural(auto, 'document', 'documents')}{testing && <span className="test-tag">Demo line</span>}</b>
         <label className="slider">
-          <span>Line: <strong>{pct(level)}%</strong></span>
-          <input type="range" min={Math.round(rule.lowest * 100)} max={99} step={1} value={Math.round(level * 100)}
-            aria-label="Confidence line" onChange={(e) => setLevel(+e.target.value / 100)} />
+          <span>Line: <strong>{pct(line)}%</strong></span>
+          <input type="range" min={Math.round(rule.lowest * 100)} max={99} step={1} value={Math.round(line * 100)}
+            aria-label="Confidence line" onChange={(e) => onLine(+e.target.value / 100)} />
         </label>
         <span>
+          Everything at or above the line with nothing to check is filed in one batch as it is read.{' '}
           {testing
-            ? <>Testing only: below {pct(rule.floor)}% nothing would be filed for real. </>
-            : <>Everything with nothing to check at or above the line. A firm can raise the line, never lower it below {pct(rule.floor)}%. </>}
-          The aim is {rule.aim}
-          {oneByOne > 0 && <> {plural(oneByOne, 'other waits', 'others wait')} for a person.</>}</span>
+            ? <>This demo uses {pct(line)}%; real use never goes below {pct(rule.floor)}%. </>
+            : <>A firm can raise the line, never lower it below {pct(rule.floor)}%. </>}
+          {flagged > 0 && <>{plural(flagged, 'other is', 'others are')} flagged for a person. </>}
+          Nothing is written in this demo.</span>
       </div>
-      <button className="btn primary" disabled={!ready.length} onClick={() => onBatch(ready.map((x) => x.doc_id), level)}>
-        <Icon id="check" />{ready.length ? `${testing ? 'Try filing' : 'Approve and file'} ${ready.length}` : 'Nothing left to batch'}</button>
+      <a className="btn" href="#log"><Icon id="check" />Check or undo in the Filing log</a>
     </div>
   );
 }
@@ -118,7 +119,7 @@ const STATUS_META = {
   Confident: 'nothing to check',
 };
 
-export function Events({ d, selected, onSelect, decisions, onBatch }) {
+export function Events({ d, selected, onSelect, decisions, line, onLine, log }) {
   const [filter, setFilter] = useState('all');
   const [by, setBy] = useState('event');
   const keep = FILTERS.find((f) => f.key === filter).test;
@@ -129,7 +130,7 @@ export function Events({ d, selected, onSelect, decisions, onBatch }) {
   const row = (x) => <DocRow key={x.doc_id} x={x} selected={selected} onSelect={onSelect} threshold={t} decision={decisions[x.doc_id]} />;
   return (
     <>
-      <BatchBar d={d} decisions={decisions} onBatch={onBatch} />
+      <BatchBar d={d} decisions={decisions} line={line} onLine={onLine} log={log} />
       <div className="tabs" role="tablist">
         {FILTERS.map((f) => (
           <button key={f.key} className="tab" role="tab" aria-selected={filter === f.key} onClick={() => setFilter(f.key)}>
@@ -226,7 +227,7 @@ export function Log({ d, log, selected, onSelect, onUndo }) {
       {log.slice().reverse().map((e) => (
         <div key={e.id} className={`box log-entry ${e.undone ? 'undone' : ''}`}>
           <div className="log-head">
-            <b>{e.kind === 'batch' ? `Batch: ${plural(e.ids.length, 'document', 'documents')} at or above ${pct(e.level)}%` : `${e.decision === 'approve' ? 'Approved' : 'Rejected'} one by one`}</b>
+            <b>{e.kind === 'auto' ? `Filed automatically: ${plural(e.ids.length, 'document', 'documents')} at or above ${pct(e.level)}%` : `${e.decision === 'approve' ? 'Approved' : 'Rejected'} one by one`}</b>
             <span className="m">{e.at}{e.undone ? ' · undone' : ''}</span>
             <span className="grow" />
             {!e.undone && <button className="link-btn" onClick={() => onUndo(e.id)}>Undo</button>}
@@ -308,7 +309,7 @@ const STEPS = [
   ['Identify', 'Each document is typed (SOA, ROA, FSG, Fact Find, Risk Profile…), dated and matched to a client and advice event.'],
   ['Check', 'Rules from the knowledge base look for gaps and mismatches a person should check, such as a risk profile that does not match the SOA.'],
   ['Propose', 'A folder is proposed: the client, then the advice event. If the tool is unsure it holds the document and says why.'],
-  ['File', 'The confident ones are filed together in one batch: 70% or more in this demo, 90% or more in real use. The ones it is unsure of are flagged and a person decides. Every filing is logged and can be undone.'],
+  ['File', 'The confident ones are filed automatically in one batch: 70% or more in this demo, 90% or more in real use. The ones it is unsure of are flagged and a person decides. Every filing is logged and can be undone.'],
 ];
 
 export function About({ whyLocal }) {

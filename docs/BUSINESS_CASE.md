@@ -14,7 +14,7 @@
   (`1 Goals and situation`, `2 Advice`, `3 Implementation`), named
   `Surname_First name_YYYY-MM-DD Type.pdf`.
 - Holds anything it isn't at least 90% sure of, or that has a compliance point, for a
-  person, with the reason. The confident ones are approved together in one click.
+  person, with the reason. The confident ones are filed automatically in one batch.
 - Every filing is logged and can be undone (on screen today; real file moves are next).
 
 **What it doesn't do yet:** move real files, group every document with its advice, or
@@ -87,11 +87,11 @@ Sole practitioners and micro-practices (~6,000 firms) — most squeezed on cost,
 
 ## 8. Go-to-market (staged)
 
-- **Stage 1 (0–6mo):** the wedge — ingest existing pile, auto-identify type, apply convention, route to client → advice event → planning step, one-click approval of the confident ones, review queue for the rest, log with undo. Overlay via file tree/API. Australian data handling.
+- **Stage 1 (0–6mo):** the wedge — ingest existing pile, auto-identify type, apply convention, route to client → advice event → planning step, automatic batch filing of the confident ones, review queue for the rest, log with undo. Overlay via file tree/API. Australian data handling.
 - **Stage 2 (6–12mo):** compliance-grade record management — version tracking, **missing-record detection** (flag clients with no current FSG/fact find/FDS), CAR-ready record-keeping. Sell the DBFO migration: bulk re-classify back-catalogues.
 
 ## 9. What would make advisers switch (win conditions)
-1. No manual filing for routine documents: one click approves the confident ones, and a person only handles what the tool holds (a person always approves; nothing files automatically).
+1. No manual filing for routine documents: the confident ones file themselves in a logged batch anyone can undo, and a person only handles what the tool flags.
 2. Sub-second, content-based search by **type** and **subject** — directly targets Xplan's admitted subject-search failure.
 3. No core-system rip-and-replace.
 4. Transparent, low, no-lock-in pricing.

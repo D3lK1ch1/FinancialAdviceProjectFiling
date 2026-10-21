@@ -1,7 +1,7 @@
 # Front end (React)
 
 The screens from the demo (`ahaythorpe/advice-document-classifier`, 21 Oct 2026):
-overview, advice events, document panel, one-click filing, filing log with undo,
+overview, advice events, document panel, automatic batch filing, filing log with undo,
 folder tree, guided tour. Not yet connected to this repo's Python backend. This
 file is the plan for connecting it. `docs/UI_INTEGRATION.md` (PR #72) has the
 screenshots and the reasoning.
@@ -41,11 +41,12 @@ With `APP_MODE=live`, open http://localhost:8000/app/live.html and choose PDFs. 
 Proposals only: nothing is moved, renamed or saved. Approve and Undo only change
 what's on screen.
 
-The one-click slider follows `review_policy.one_click`: 90% is the floor for real
-filing and a firm can only raise it. While testing, the slider goes down to 70%,
-the bar says "Testing" and the button says "Try filing". Below 90% it includes only
-documents the model held for low confidence alone, never flagged ones. Each document takes a minute or more, because every one goes
-through the model. The old page is still at http://localhost:8000/.
+Automatic batch filing follows `review_policy.one_click`: as documents are read,
+everything at or above the line with nothing to check is filed in one batch, logged
+in the Filing log, and can be undone (an undone document isn't refiled). 90% is the
+floor for real use and a firm can only raise it; the demo uses 70%, marked "Demo line".
+Below 90% the batch also takes documents held for low confidence alone, never flagged
+ones. Nothing is written to disk yet.
 
 ## What the page needs: the manifest
 

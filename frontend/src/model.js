@@ -66,6 +66,9 @@ export function oneClick(d) {
   return { floor, testing, lowest: testing ? (c.testing_lowest ?? 0.7) : floor, aim: c.aim || '90% or better, and higher is better.' };
 }
 
+// The line a set starts on: 70% while testing (the demo), 90% in real use.
+export const startLine = (d) => { const r = oneClick(d); return r.testing ? r.lowest : r.floor; };
+
 // Where a document goes if approved: its destination, or for a document held
 // only because it is below the line, where it would go (testing mode only).
 export const target = (x) => (x.needs_review ? x.would_file : x.destination) || {};

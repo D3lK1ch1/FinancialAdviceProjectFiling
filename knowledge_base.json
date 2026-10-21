@@ -940,14 +940,14 @@
     "minimum_note": "The firm-safe level: 0.90, set once here at the domain level and applying to every firm and every document type (Bella, 1 Oct 2026). A firm cannot lower it — it is a safety control, not a convenience, and lowering a bar is how a busy queue gets emptied by letting documents through unchecked. A type may be held ABOVE it if its failure log ever argues for that; never below.",
     "default_note": "Applies to any document type without its own entry, so adding a type to `documents` needs no edit here (ground rule #1). Equal to the firm-safe level: a new type starts at it, never below.",
     "one_click": {
-      "rule": "One click approves together every document the tool did not hold and that has nothing worth checking. A person sees the list and makes the click: nothing is filed automatically (13 Oct 2026). Held or flagged documents are decided one at a time.",
+      "rule": "Automatic batch filing. Every document at or above the line, not held and with nothing worth checking, is filed in one batch as it is read, with no click. Every filing is logged and any of it can be undone; an undone document is not refiled by the batch. Everything else is flagged for a person to decide.",
       "line": "The firm-safe level (minimum_threshold, 0.90). A firm may raise it with a slider, never lower it.",
       "aim": "90% or better, and higher is better.",
       "prototype_testing": {
         "lowest_line": 0.70,
         "rule": "Only while the prototype is being tested, the slider may go down to 70% to show what would be filed. The screen says it is testing and nothing is written."
       },
-      "decided": "Bella, 21 Oct 2026. Keeps the 1 Oct firm-safe level for real filing.",
+      "decided": "Bella, 21 Oct 2026: the confident batch files by itself, with the log to inspect and reverse. Replaces the 13 Oct certainty_decision for confident documents. Keeps the 1 Oct firm-safe level (90%) for real filing.",
       "not_decided": [
         "Lowering the line for one document type only when its failure log proves it is right at that level. Revisit when there are enough results.",
         "A 'likely, please check' group for 70 to 89%."
@@ -1017,6 +1017,7 @@
       "rule": "Everything the tool proposes needs 100% certainty: document type, client name, the advice stage, and the new document name. In practice a person confirms every one before anything is filed. Nothing is filed automatically, at any confidence.",
       "why": "Any of these being wrong can lead to heavy compliance fines and problems with regulators.",
       "decided": "Bella, 13 Oct 2026 (GH#61 Q7). Matches CLAUDE.md ground rule 2: everything is a proposal a human approves.",
+      "superseded": "Bella, 21 Oct 2026, for confident documents only: see one_click. Documents at or above the line with nothing worth checking are filed automatically, logged and reversible. Everything else still needs a person. The reasoning above (a wrong type, client, step or name risks fines) is why the line is 90% for real filing and why anything flagged never files itself.",
       "consequence": "The 0.90 thresholds no longer decide whether to file; every document is confirmed. They can still decide how a proposal is shown (e.g. 'likely' vs 'needs a closer look'). How that works on screen is for Delia and Bella to agree; thresholds are unchanged until then."
     }
   },

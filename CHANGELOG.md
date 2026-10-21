@@ -27,8 +27,12 @@ overwrites a finished step (see Contributing in `README.md`).
 - **React screens on the Python backend.** `frontend/` holds the demo's screens. FastAPI
   serves them at `/app/`; `POST /api/batch` runs several PDFs through `/ingest`'s steps and
   `manifest.py` reshapes the results. `/ingest`'s body is now `ingest_bytes()`, unchanged.
-- **One-click slider**: 90% floor for real filing (a firm can only raise it); down to 70%
+- **The line slider**: 90% floor for real filing (a firm can only raise it); down to 70%
   while testing, marked "Testing", nothing written (`review_policy.one_click`).
+- **Automatic batch filing** (Bella, 21 Oct): confident documents (at or above the line,
+  nothing to check) file themselves in one batch as they're read, logged, with Undo; an
+  undone document isn't refiled. Replaces the 13 Oct "nothing filed automatically" for
+  confident documents and CLAUDE.md ground rule 2's wording. Everything else is flagged.
 - **Demo and live mode** (`config.APP_MODE`, default demo). Demo has no upload at all:
   `/api/batch` answers 403 even when called directly, and `/app/` opens the full screens
   on sample sets only. Live is set up on purpose on a firm's own computer; then

@@ -61,7 +61,7 @@ document; placing a document under its event still needs grouping (#8).
 - **Inner = advice event.** Groups everything behind one advisory decision, using the document-to-document links. A client accumulates many events over years (super year 1, insurance year 2 …); each is its own folder.
 - **Why nesting is more accurate:** a document is placed by two axes that must agree (right client AND a coherent event). Disagreement = a flag a single axis would miss.
 - **Shared documents** (e.g. a PDS used in two events): file once, reference elsewhere. Configurable per firm.
-- **One click for the confident ones, never automatic.** A person sees the list and approves every unheld, unflagged document with one click. The line is the firm-safe 90%; a firm can raise it, not lower it. Testing may show 70%, with nothing written (`review_policy.one_click`, 21 Oct 2026). Every filing is logged with undo.
+- **Confident documents file themselves; the rest are a person's call.** Every document at or above the line with nothing worth checking is filed automatically in one batch, logged, and reversible. The line is the firm-safe 90%; a firm can raise it, not lower it. The demo uses 70%, with nothing written (`review_policy.one_click`, 21 Oct 2026). Anything held or flagged goes to a person.
 - **Always a proposal a human confirms.** Event grouping depends on link accuracy — the fiddliest part — so mis-grouping is expected early and must surface, never auto-bundle.
 
 ## 6. AI summary (planned, later phase)
