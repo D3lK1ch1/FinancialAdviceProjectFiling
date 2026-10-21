@@ -13,6 +13,30 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-21: React page reads real PDFs through the backend (spike)
+
+### Added
+- `POST /api/batch`: several PDFs through `/ingest`'s steps, returned as the
+  manifest the React page reads. `manifest.py` reshapes and decides nothing. A
+  path is only joined when every part is known.
+- `/app/`: the built React page, served by FastAPI. With no data in it, the page
+  asks for PDFs and calls `/api/batch`. It uses each document type's own
+  threshold from `review_policy` and hides the demo's tour and disclaimers.
+- 4 tests (`tests/test_manifest.py`).
+
+### Changed
+- `/ingest`'s body moved into `ingest_bytes()` so the batch can reuse it. Same
+  behaviour.
+
+### Known gaps
+- Proposals only. Approve and Undo don't write files yet (needs `storage.py`
+  wired up, and a filing log).
+- No Edit, failure-log verdicts or display mode on the React page yet.
+- Slow: 4 public PDFs took 7 minutes on Bella's laptop (qwen3:8b). The page
+  shows no progress per document.
+
+---
+
 ## 2026-10-21: Every decision from 21 Oct recorded in the knowledge base and docs
 
 ### Changed

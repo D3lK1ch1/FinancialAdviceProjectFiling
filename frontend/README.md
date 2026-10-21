@@ -21,6 +21,17 @@ The page reads one object, `window.DATA`, put in at build time where
 `index.html` says `__DATA__`. `npm run dev` won't work until step 2 below
 replaces that with a fetch.
 
+## Run it with the Python backend (real PDFs)
+
+    cd frontend && npm install && npm run build && cd ..
+    python -m uvicorn app:app --port 8000
+
+Open http://localhost:8000/app/ and choose PDFs. Python reads them
+(`POST /api/batch`, the same steps as `/ingest`) and the page shows the results.
+Proposals only: nothing is moved, renamed or saved. Approve and Undo only change
+what's on screen. Each document takes a minute or more, because every one goes
+through the model. The old page is still at http://localhost:8000/.
+
 ## What the page needs: the manifest
 
 Everything on screen comes from one object per filing scheme:

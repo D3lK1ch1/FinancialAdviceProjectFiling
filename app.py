@@ -18,6 +18,7 @@ from display import DEFAULT_DISPLAY_MODE, DISPLAY_MODES, teaching_for
 from confidence import verify
 from flags import evaluate_flags
 from kb import KB as _KB
+from manifest import build_manifest
 from parser import parse_pdf
 from review import CorrectionRejected, assess, record_correction
 from scope_gate import check_scope
@@ -33,12 +34,39 @@ def root():
     return FileResponse("static/index.html")
 
 
+# The React page (frontend/). `npm run build` writes frontend/dist/app/index.html
+# with no data in it, so the page asks for files and calls /api/batch.
+# check_dir=False: the app still starts when the front end isn't built; /app/
+# is then a 404 (frontend/README.md says how to build it). static/index.html
+# stays at / until the React page has Edit, failure-log verdicts and display
+# mode.
+app.mount("/app", StaticFiles(directory="frontend/dist/app", html=True, check_dir=False), name="app")
+
+
+@app.post("/api/batch")
+async def batch(files: list[UploadFile], display: str = DEFAULT_DISPLAY_MODE):
+    """Several documents through /ingest's pipeline, as the manifest the React page reads.
+
+    Proposals only, like /ingest: nothing is written.
+    """
+    _check_display(display)
+    return build_manifest([ingest_bytes(await f.read(), f.filename, display) for f in files])
+
+
 @app.post("/ingest")
 async def ingest(file: UploadFile, display: str = DEFAULT_DISPLAY_MODE):
+    _check_display(display)
+    return ingest_bytes(await file.read(), file.filename, display)
+
+
+def _check_display(display: str) -> None:
     if display not in DISPLAY_MODES:
         raise HTTPException(status_code=422, detail=f"display must be one of {sorted(DISPLAY_MODES)}")
-    contents = await file.read()
-    result = parse_pdf(BytesIO(contents), file.filename)
+
+
+def ingest_bytes(contents: bytes, filename: str, display: str = DEFAULT_DISPLAY_MODE) -> dict:
+    """One document through the whole pipeline. /ingest and /api/batch both use it."""
+    result = parse_pdf(BytesIO(contents), filename)
     # The identity a reviewer's correction is recorded against. A hash of the
     # bytes rather than the filename, which is routinely the client's name —
     # see the de-identification rule in failure_log.py.
@@ -108,7 +136,7 @@ async def ingest(file: UploadFile, display: str = DEFAULT_DISPLAY_MODE):
     # Where it would be filed (#10). A proposal only: nothing is written, and
     # the client folder stays empty until a client is chosen (GH#6).
     result["filing"] = proposed_filing(
-        doc_type, result["extracted_text"], pages, result["flags"], file.filename, client=result["client"]
+        doc_type, result["extracted_text"], pages, result["flags"], filename, client=result["client"]
     )
     # Display mode (#11). Added last and from the classified type only, so it
     # cannot reach back into anything above — the settings independence rule.

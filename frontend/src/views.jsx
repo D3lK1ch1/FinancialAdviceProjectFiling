@@ -19,12 +19,12 @@ export function Overview({ d, go, startTour }) {
   return (
     <div className="pad">
       <p className="eyebrow">{d.dataset_label} · {d.batch.documents} files</p>
-      <h1>{d.dataset === 'public' ? 'Real published PDFs and a tool that won’t guess' : 'A messy client folder in, a proposed filing out'}</h1>
+      <h1>{{ public: 'Real published PDFs and a tool that won’t guess', local: 'Your documents, read and proposed for filing' }[d.dataset] || 'A messy client folder in, a proposed filing out'}</h1>
       <p className="lede">The tool reads each document and works out what it is, which client it is for and which{' '}
         <em>advice event</em> it belongs to: one piece of advice and every document behind it. The confident ones are filed in one click. The rest wait for a
         person. Every filing is logged and can be undone.</p>
       {d.dataset_note && <div className="box sub set-note"><Icon id="info" /><span>{d.dataset_note}</span></div>}
-      <button className="btn primary tour-cta" onClick={startTour}><Icon id="play" />Take the 1-minute tour</button>
+      {startTour && <button className="btn primary tour-cta" onClick={startTour}><Icon id="play" />Take the 1-minute tour</button>}
       <div className="stats">
         {stats.map((t) => (
           <button key={t.l} className={`stat ${t.c || ''}`} onClick={() => go(t.to)}>
@@ -58,7 +58,7 @@ function DocRow({ x, selected, onSelect, threshold, decision }) {
       </td>
       <td className="col-type"><Type>{x.type_label}</Type></td>
       <td className="col-client">{x.client || 'none'}</td>
-      <td className="col-conf"><Confidence doc={x} threshold={threshold} /></td>
+      <td className="col-conf"><Confidence doc={x} threshold={x.threshold ?? threshold} /></td>
       <td className="col-status">{decision ? <Decided k={decision} /> : <StatusBadge doc={x} />}</td>
       <td className="col-why">
         <button className="why-btn" title="Why it was filed here, and how sure the tool is"

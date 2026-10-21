@@ -1,9 +1,16 @@
 // Pure helpers over the pipeline payload. No UI here.
 
-// { dataset: { profile: manifest } }. The demo set is always present and first.
-export const DATASETS = window.DATA;
-export const SETS = Object.keys(DATASETS);
-export const PROFILES = Object.keys(DATASETS[SETS[0]]);
+// { dataset: { profile: manifest } }: the demo's data built into the page, or
+// real documents from the Python backend (/api/batch). Set once by main.jsx
+// before App renders; the build loads every module up front, so these can't
+// be read from window.DATA on import.
+export let DATASETS, SETS, PROFILES, LOCAL;
+export function setData(data) {
+  DATASETS = data;
+  SETS = Object.keys(data);
+  PROFILES = Object.keys(data[SETS[0]]);
+  LOCAL = SETS[0] === 'local';
+}
 
 // Every document is in exactly one group, so the counts agree on every screen.
 // Held by the tool (amber), not held but something to check (red), or confident (green).

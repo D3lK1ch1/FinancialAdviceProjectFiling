@@ -3,7 +3,7 @@ import { pct, plural } from './model.js';
 
 // Plain-words answer to the two questions a person has first: why here, and how sure.
 function Summary({ d, doc, ev }) {
-  const t = d.confidence_threshold;
+  const t = doc.threshold ?? d.confidence_threshold;   // the backend sets a line per document type
   const dst = doc.destination || {};
   const above = doc.confidence >= t;
   const blocking = doc.flags.find((f) => f.blocks_filing);
@@ -14,9 +14,9 @@ function Summary({ d, doc, ev }) {
       <p><b>How sure:</b> read as {doc.type_label}, {pct(doc.confidence)}% sure. That is {above ? 'above' : 'below'} the{' '}
         {pct(t)}% line{above ? '.' : ', so the tool will not file it.'}</p>
       {doc.needs_review
-        ? <p><b>Why held:</b> {blocking ? blocking.message : !above ? 'confidence is below the line.' : 'the tool could not place it with certainty.'}</p>
+        ? <p><b>Why held:</b> {blocking ? blocking.message : (doc.review_reasons || [])[0] || (!above ? 'confidence is below the line.' : 'the tool could not place it with certainty.')}</p>
         : <p><b>Why here:</b> {ev ? <>part of {doc.client}’s {ev.subject} advice ({ev.record_label}, {ev.date || 'undated'}). </> : <>{doc.client ? `${doc.client}’s file, ` : ''}not tied to one piece of advice. </>}
-          {dst.folder && <>Proposed folder: {dst.folder.join(' / ')}.</>}</p>}
+          {dst.path ? <>Proposed folder: {dst.folder.join(' / ')}.</> : <>Not placed yet: {dst.rationale}.</>}</p>}
       {others > 0 && <p><b>Also:</b> {plural(others, 'point', 'points')} worth checking below.</p>}
     </div>
   );
@@ -58,8 +58,8 @@ export default function Inspector({ d, doc, decision, onDecide, onStep, onClose 
           <dl className="kv">
             <dt>Type</dt><dd>{doc.type_label}{doc.category && <small>{doc.category}</small>}</dd>
             {doc.stages && doc.stages.length > 0 && <><dt>Step</dt><dd>{doc.stages.join(' · ')}</dd></>}
-            <dt>Confidence</dt><dd><Confidence doc={doc} threshold={d.confidence_threshold} /></dd>
-            <dt>Extraction</dt><dd>{pct(doc.extraction_quality)}% quality · {plural(doc.pages, 'page', 'pages')}</dd>
+            <dt>Confidence</dt><dd><Confidence doc={doc} threshold={doc.threshold ?? d.confidence_threshold} /></dd>
+            <dt>Extraction</dt><dd>{doc.extraction_quality != null && <>{pct(doc.extraction_quality)}% quality · </>}{plural(doc.pages, 'page', 'pages')}</dd>
           </dl>
           {doc.classification_evidence && <div className="evidence" style={{ marginTop: 8 }}>{doc.classification_evidence}</div>}
         </div>

@@ -5,7 +5,7 @@ import Tour, { STEPS as TOUR } from './Tour.jsx';
 import Welcome from './Welcome.jsx';
 import Filed from './Filed.jsx';
 import { Overview, Events, Review, Tree, Log, About } from './views.jsx';
-import { DATASETS, SETS, PROFILES, statusOf, initials, plural } from './model.js';
+import { DATASETS, SETS, PROFILES, LOCAL, statusOf, initials, plural } from './model.js';
 
 const REPO = 'https://github.com/ahaythorpe/advice-document-classifier';
 const WHY_LOCAL = `${REPO}/blob/main/docs/DEPLOYMENT.md`;
@@ -48,7 +48,7 @@ export default function App() {
   const [decisions, setDecisions] = useState({});      // in memory only: the demo stores nothing
   const [theme, setTheme] = useTheme();
   const [tour, setTour] = useState(null);           // step index while the tour is open
-  const [welcome, setWelcome] = useState(() => !welcomed());
+  const [welcome, setWelcome] = useState(() => !LOCAL && !welcomed());   // the demo's popup, not for real files
   const [log, setLog] = useState([]);               // the filing log: in memory only, like decisions
   const [filed, setFiled] = useState(null);         // doc ids of the last batch, while its popup is open
   const wide = useWide();
@@ -125,8 +125,8 @@ export default function App() {
   const viewProps = { d, selected, onSelect: setSelected, decisions, onBatch: approveBatch };
 
   return (
-    <div className="window" role="application" aria-label="Advice Document Filing (demo only)">
-      <div className="ribbon" aria-hidden="true">Demo</div>
+    <div className="window" role="application" aria-label={LOCAL ? 'Advice Document Filing' : 'Advice Document Filing (demo only)'}>
+      {!LOCAL && <div className="ribbon" aria-hidden="true">Demo</div>}
 
       <div className="titlebar">
         <div className="lights" aria-hidden="true"><i /><i /><i /></div>
@@ -142,14 +142,24 @@ export default function App() {
         </div>
       </div>
 
-      <div className="banner" role="note">
-        <span className="demo-tag">Demo only</span>
-        <div className="msg">
-          <b>Prototype demo, shared to show how the idea works.</b>
-          <span>Demo and publicly published documents only. Names and details are made up to protect privacy. There is no upload control, so no real client file can be added.</span>
+      {LOCAL ? (
+        <div className="banner" role="note">
+          <span className="demo-tag">Proposals only</span>
+          <div className="msg">
+            <b>Read on this computer.</b>
+            <span>Nothing is moved, renamed or saved yet. Approving here only shows what would happen.</span>
+          </div>
         </div>
-        <a href={WHY_LOCAL}>Read more&nbsp;&rarr;</a>
-      </div>
+      ) : (
+        <div className="banner" role="note">
+          <span className="demo-tag">Demo only</span>
+          <div className="msg">
+            <b>Prototype demo, shared to show how the idea works.</b>
+            <span>Demo and publicly published documents only. Names and details are made up to protect privacy. There is no upload control, so no real client file can be added.</span>
+          </div>
+          <a href={WHY_LOCAL}>Read more&nbsp;&rarr;</a>
+        </div>
+      )}
 
       <div className="body">
         <nav className="side" aria-label="Sections">
@@ -174,7 +184,7 @@ export default function App() {
             <div key={c} className="client"><span className="av">{initials(c)}</span>{c}<span className="count">{perClient[c]}</span></div>
           ))}
           <h6>Help</h6>
-          <button className="nav" onClick={() => tourTo(0)}><Icon id="play" />Take the tour</button>
+          {!LOCAL && <button className="nav" onClick={() => tourTo(0)}><Icon id="play" />Take the tour</button>}
           <button className="nav" onClick={() => setWelcome(true)}><Icon id="shield" />Disclaimers</button>
           <a className="nav" href="#about" aria-current={view === 'about' ? 'page' : undefined}><Icon id="info" />About</a>
           <div className="foot">
@@ -206,7 +216,7 @@ export default function App() {
             </div>
 
             <div className="scroll" ref={scrollRef}>
-              <section className="view" hidden={view !== 'overview'}><Overview d={d} go={go} startTour={() => tourTo(0)} /></section>
+              <section className="view" hidden={view !== 'overview'}><Overview d={d} go={go} startTour={LOCAL ? null : () => tourTo(0)} /></section>
               <section className="view" hidden={view !== 'events'}><Events {...viewProps} /></section>
               <section className="view" hidden={view !== 'review'}><Review {...viewProps} /></section>
               <section className="view" hidden={view !== 'tree'}><Tree {...viewProps} /></section>
@@ -233,7 +243,7 @@ export default function App() {
       {tour !== null && <Tour d={d} step={tour} onStep={tourTo} onClose={endTour}
         onBackToStart={() => { endTour(); setWelcome(true); }} />}
       {/* Hidden while a narrow screen's document panel is open: it would sit on Reject. */}
-      {tour === null && !welcome && !filed && !(showInspector && !wide) && (
+      {!LOCAL && tour === null && !welcome && !filed && !(showInspector && !wide) && (
         <button className="fab" title="How it works and the tour" aria-label="How it works and the tour"
           onClick={() => setWelcome(true)}><span aria-hidden="true">👋</span></button>
       )}
