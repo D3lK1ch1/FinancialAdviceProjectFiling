@@ -33,6 +33,9 @@ overwrites a finished step (see Contributing in `README.md`).
   nothing to check) file themselves in one batch as they're read, logged, with Undo; an
   undone document isn't refiled. Replaces the 13 Oct "nothing filed automatically" for
   confident documents and CLAUDE.md ground rule 2's wording. Everything else is flagged.
+- **Verdicts reach the failure log from the React screens** (live mode only). Approve on a
+  held document records "confirmed"; Reject asks what it is and why (fixed reason codes)
+  and records the correction. The made-up demo and demo-mode clicks are never recorded.
 - **Demo and live mode** (`config.APP_MODE`, default demo). Demo has no upload at all:
   `/api/batch` answers 403 even when called directly, and `/app/` opens the full screens
   on sample sets only. Live is set up on purpose on a firm's own computer; then
@@ -89,8 +92,9 @@ overwrites a finished step (see Contributing in `README.md`).
   `/api/batch` into the screens (7 minutes on Bella's laptop with qwen3:8b).
 
 ### Known gaps
-- Approve and Undo don't move real files yet. No Edit, failure-log verdicts or display
-  mode on the React page, so `static/index.html` stays. No progress shown while reading.
+- Approve and Undo don't move real files yet, and an Undo isn't sent to the failure log.
+  No display mode on the React page yet, so `static/index.html` stays.
+- `failure_log.jsonl` isn't git-ignored: Delia to decide whether it is committed. No progress shown while reading.
 - Placing the step folder under its event needs grouping (#8). Provider forms aren't
   document types yet (#74). Firm rules by chat box later (#71).
 - Open questions for Bella are in #61.
