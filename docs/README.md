@@ -14,8 +14,8 @@ repeating them. GitHub issues are for work to do; questions go in #61.
 | `reference/` | Research data: implementation forms taxonomy, sample coverage | Bella |
 | `sample_documents.labelling.md` | The expected answer for each sample file, to grade the tool against | Bella |
 | `EXPERIMENT_LOG.md` | Classifier changes measured on the samples, with the numbers | Delia |
-| `1_PRD.md`, `2_ARCHITECTURE.md`, `3_BUSINESS_CASE.md` | The original product, architecture and business case drafts (Aug 2026). Background, partly out of date | Bella |
-| `HANDOVER.md` | The first handover from Bella to Delia (20 Aug 2026). History | n/a |
+| `BUSINESS_CASE.md` | Why this is worth building: the gap, customers, pricing, what evidence is still needed | Bella |
+| `archive/` | The August drafts: product, architecture, first handover. History, partly out of date | n/a |
 
 Outside `docs/`: `CLAUDE.md` (standing rules for Claude), `CHANGELOG.md` (what changed,
 newest first), `README.md` (how to run it), `frontend/README.md` (the React screens).

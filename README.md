@@ -46,7 +46,7 @@ properly documented.
 and cost-squeezed, and the planned move from SOAs to Client Advice Records will
 make every firm rework its record-keeping. An advice-specific filing assistant
 that sits on top of existing systems, rather than replacing them, fills a gap
-nobody currently covers. The full case is in `docs/3_BUSINESS_CASE.md`.
+nobody currently covers. The full case is in `docs/BUSINESS_CASE.md`.
 
 ---
 
@@ -199,7 +199,7 @@ Use `python -m pytest`, not bare `pytest`. On Windows the bare command depends o
 exactly five fields. `document_id` is the SHA-256 of the file, never a filename
 or path. `note` is a reason code, never free text, so no names, account numbers
 or figures. Its field names match the planned `failure_log` SQLite table in
-`docs/2_ARCHITECTURE.md`. The full rule is in `failure_log.py`'s docstring, and
+`docs/archive/2_ARCHITECTURE.md`. The full rule is in `failure_log.py`'s docstring, and
 `tests/test_failure_log.py` fails if a field is added. The file won't exist
 until the first verdict is recorded.
 
@@ -232,9 +232,9 @@ later behind the same knowledge-base hints.
 |---|---|
 | `docs/SYSTEM.md` | the spec: build from this |
 | `docs/GROUND_TRUTH.md` | the anchor decisions, including the review-level rule |
-| `docs/1_PRD.md`, `docs/2_ARCHITECTURE.md`, `docs/3_BUSINESS_CASE.md` | product, architecture and business case |
+| `docs/BUSINESS_CASE.md` | business case |
+| `docs/archive/` | the August drafts: product, architecture, handover (history) |
 | `docs/advice_classification_reference.md` | the legal basis for each document type and ROA situation |
-| `docs/HANDOVER.md` | sample sourcing decisions, judgment calls, source URLs |
 | `docs/sample_documents.labelling.md` | hand-labelled expected results for `samples/` |
 | `docs/EXPERIMENT_LOG.md` | classifier experiments: runs, scores, findings |
 | `CHANGELOG.md` | what's done, decided and still open, newest first |

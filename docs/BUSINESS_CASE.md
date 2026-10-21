@@ -1,9 +1,37 @@
 # Business Case — AI Document Classification & Filing for Australian Advice Firms
 
-**Status:** Working draft (v0.1) · Owner: domain collaborator · Audience: internal working doc
+**Status:** Working draft (v0.2, refreshed 21 Oct 2026) · Owner: Bella · Audience: internal working doc
 **Note on data:** Market figures below are from the research scan; several (esp. Xplan pricing) are **not publicly verifiable** — treat as indicative and validate before any external use. See Caveats.
 
 ---
+
+## Where it stands (21 Oct 2026)
+
+**What the prototype does today**
+- Reads a client's PDFs on the firm's own computer and works out each one's type, client
+  and advice event. A local model is used, so no client file leaves the computer.
+- Proposes where to file: client, then advice event, then planning step
+  (`1 Goals and situation`, `2 Advice`, `3 Implementation`), named
+  `Surname_First name_YYYY-MM-DD Type.pdf`.
+- Holds anything it isn't at least 90% sure of, or that has a compliance point, for a
+  person, with the reason. The confident ones are approved together in one click.
+- Every filing is logged and can be undone (on screen today; real file moves are next).
+
+**What it doesn't do yet:** move real files, group every document with its advice, or
+read the provider forms that implement advice. Accuracy on real documents isn't proven.
+It isn't ready to show outside the team.
+
+**Evidence still needed before this case can be relied on**
+1. **The problem, from practices.** Interview 5 to 10 small practices: hours spent
+   filing each week, what goes wrong, what a misfiled record costs at a review.
+2. **Accuracy.** An agreed target (for example, 95% filed correctly on a real
+   practice's files, nothing wrong filed without a flag), measured on enough documents.
+3. **A pilot practice** willing to test it on its own computer.
+4. **Privacy and legal advice** on a tool reading client files, even locally, and on the
+   AFSL boundary (section 11).
+5. **Pricing reality.** What target firms pay now for Xplan, AdviserLogic, Practifi or
+   Virtual Cabinet (the figures below are partly unverified).
+6. **An agreement between Bella and Delia** on ownership and decisions.
 
 ## 1. The opportunity in one line
 
@@ -59,11 +87,11 @@ Sole practitioners and micro-practices (~6,000 firms) — most squeezed on cost,
 
 ## 8. Go-to-market (staged)
 
-- **Stage 1 (0–6mo):** the wedge — ingest existing pile, auto-identify type, apply convention, route to client→event, review queue. Overlay via file tree/API. Australian data handling.
+- **Stage 1 (0–6mo):** the wedge — ingest existing pile, auto-identify type, apply convention, route to client → advice event → planning step, one-click approval of the confident ones, review queue for the rest, log with undo. Overlay via file tree/API. Australian data handling.
 - **Stage 2 (6–12mo):** compliance-grade record management — version tracking, **missing-record detection** (flag clients with no current FSG/fact find/FDS), CAR-ready record-keeping. Sell the DBFO migration: bulk re-classify back-catalogues.
 
 ## 9. What would make advisers switch (win conditions)
-1. Zero manual filing for routine documents.
+1. No manual filing for routine documents: one click approves the confident ones, and a person only handles what the tool holds (a person always approves; nothing files automatically).
 2. Sub-second, content-based search by **type** and **subject** — directly targets Xplan's admitted subject-search failure.
 3. No core-system rip-and-replace.
 4. Transparent, low, no-lock-in pricing.
