@@ -13,7 +13,7 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
-## 2026-10-21 — The client folder is proposed (#6)
+## 2026-10-21 — The client folder is proposed (#6); UI integration plan; filing by planning step decided (#70, #71)
 
 ### Added
 - **Client folder on the card.** The "Would be filed as" section now fills the
@@ -29,6 +29,9 @@ overwrites a finished step (see Contributing in `README.md`).
 - **Entity clients:** `ABC Pty Ltd`, `Smith Family Trust` and SMSFs are filed
   under their own name. `John Smith ATF Smith Family Trust` → `Smith Family Trust`.
 - 57 tests. 471 pass.
+- `docs/UI_INTEGRATION.md` and `docs/ui/`: the demo's screens, what each needs
+  from this backend, and the gaps. Also how the two could join and how a
+  non-technical person would run it. For planning, nothing decided yet.
 
 ### Fixed
 (The 14 Oct review's client-name misses.)
@@ -41,6 +44,12 @@ overwrites a finished step (see Contributing in `README.md`).
   only (`Smith`), or a joint client with two different surnames.
 - The client is still not passed to the review decision. A person confirms
   the client on every document, so a proposed client mustn't make a document look safer.
+- (Bella) Files go client → advice event → planning step, using the six-step
+  financial planning process. Only the practical steps get folders. Replaces the
+  9 Oct "stage is a label only" decision. Work tracked in #70.
+- (Bella) File names start `Surname_First name_`, and couples get both first
+  names. Recorded on PR #69.
+- (Bella) The public demo link is switched off until the real tool is ready.
 
 ### Checked
 - All 10 samples, live: `Rossi, Nick`, `Baker, George`, `Zhang, Wendy`,
@@ -63,6 +72,8 @@ overwrites a finished step (see Contributing in `README.md`).
 - No real sample names a trust or company client, so entity handling is tested
   on made-up names only.
 - `MCDONALD` becomes `Mcdonald`. Names the document writes in mixed case are kept as written.
+- Letting a firm set its own naming and filing rules through a chat box: ideas
+  in #71, after the filing basics.
 
 ---
 
