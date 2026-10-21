@@ -72,7 +72,7 @@
     {"stage": 2, "name": "Identify goals", "plain": "Short and long term goals are discussed, such as buying a home, funding education or retiring.", "governing_provisions": ["s961B (best interests)"], "typical_docs": ["fact_find", "file_note"]},
     {"stage": 3, "name": "Assess the financial situation", "plain": "Income, expenses, assets, debts, super, insurance and risk tolerance are reviewed. This is the evidence for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile", "file_note"]},
     {"stage": 4, "name": "Develop the strategic plan", "plain": "The recommendations are formed and documented in a Statement of Advice, or a Record of Advice where one is permitted, and given to the client with any PDS for a recommended product.", "governing_provisions": ["s961B", "s961G (appropriate advice)", "s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa", "pds", "file_note"]},
-    {"stage": 5, "name": "Implement the recommendations", "plain": "The plan is put into action: accounts opened, investments moved, insurance updated. The client authorises it first and product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "pds", "file_note"], "not_yet_document_types": ["product application forms — not yet a document type (see #23)"]},
+    {"stage": 5, "name": "Implement the recommendations", "plain": "The plan is put into action: accounts opened, investments moved, insurance updated. The client authorises it first and product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "pds", "file_note"], "not_yet_document_types": ["provider implementation forms (opening a super account, rolling over super, applying for a pension, opening an investment account) — not yet document types (see #23). They file in 3 Implementation."]},
     {"stage": 6, "name": "Review and monitor", "plain": "Periodic check-ins adjust the plan for market, tax or life changes. Ongoing fee arrangements are disclosed and consented to. Smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "file_note"]}
   ],
   "version_status_values": {
@@ -647,9 +647,9 @@
       "folders": [
         {"name": "1 Goals and situation", "steps": [2, 3], "docs": ["fact_find", "risk_profile"]},
         {"name": "2 Advice", "steps": [4], "docs": ["soa", "roa", "pds"]},
-        {"name": "3 Implementation", "steps": [5], "docs": ["authority_to_proceed"]}
+        {"name": "3 Implementation", "steps": [5], "docs": ["authority_to_proceed"], "planned_docs": ["provider implementation forms: opening a super account, rolling over super, applying for a pension, opening an investment account"], "planned_note": "Not yet document types (#23). Bella is finding samples to test on (21 Oct 2026)."}
       ],
-      "pds_and_roa": "To confirm with Bella: a PDS files in 2 Advice because it is given with the advice that recommends the product (a copy in the client file is the proof, 29 Sep 2026). Every ROA files in 2 Advice, including one from a review.",
+      "pds_and_roa": "Confirmed by Bella, 21 Oct 2026: the SOA, every ROA and the PDS file in 2 Advice. The PDS is given with the advice that recommends the product (a copy in the client file is the proof, 29 Sep 2026).",
       "no_folder": "A type in no folder (file note, FSG, FDS) files at the event level, or where special_folders puts it.",
       "status": "Built in filing.step_folder (21 Oct 2026). The step folder is proposed per document; joining it under the event folder needs grouping (#8)."
     },

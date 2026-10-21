@@ -44,7 +44,7 @@ Every document maps to a step of the six-step financial planning process (define
    [YYYY-MM — subject]                   <- one advice event
         1 Goals and situation/            <- fact find, risk profile      (steps 2, 3)
         2 Advice/                         <- SOA, ROA, PDS                (step 4)
-        3 Implementation/                 <- authority to proceed         (step 5)
+        3 Implementation/                 <- authority to proceed, provider forms (step 5)
    _Client-level documents                <- FSG, general correspondence
    _Needs review                          <- anything not confidently placed
 

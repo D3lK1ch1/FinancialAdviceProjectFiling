@@ -67,8 +67,10 @@ overwrites a finished step (see Contributing in `README.md`).
 ### Known gaps
 - Placing the step folder under its event needs grouping (#8). Numbering duplicates
   (` 2`) needs the other files on hand, so it belongs to filing, not the proposal.
-- To confirm with Bella: PDS and every ROA in `2 Advice`. Couples who aren't husband
-  and wife: order not decided.
+- Confirmed: SOA, every ROA and PDS in `2 Advice`. Provider implementation forms
+  (super, rollover, pension, investment account) belong in `3 Implementation` but
+  aren't document types yet (#23); Bella is finding samples. Couples who aren't
+  husband and wife: order not decided.
 
 ---
 

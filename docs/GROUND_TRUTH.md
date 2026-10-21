@@ -112,7 +112,10 @@ documents above (a file note, an ROA, a fee statement).
   done by procedure; the value is each document placed with its advice and step.
   `advice_process_stages`, `filing_model.stage_folders`, `filing.step_folder()`. Placing the
   step folder under its event needs grouping (#8).
-  - **To confirm:** PDS and every ROA (including a review ROA) in `2 Advice`.
+  - **Confirmed:** the SOA, every ROA and the PDS go in `2 Advice`. `3 Implementation` holds
+    the ATP and, once they are document types (#23), provider forms: opening a super
+    account, rolling over super, applying for a pension, opening an investment account.
+    Bella is finding samples.
 - **File names:** `Surname_First name_YYYY-MM-DD Type[ — qualifier].pdf`, e.g.
   `Nguyen_Lan_2024-03-14 SOA.pdf`. A couple who share a surname: both first names,
   husband first (`Black_Brad_Zara_...`). Different surnames: separate clients unless the
