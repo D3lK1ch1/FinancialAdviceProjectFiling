@@ -32,6 +32,8 @@ export default function Pick({ onData }) {
           : <label className="btn primary pick-btn">Choose PDFs
               <input type="file" accept="application/pdf,.pdf" multiple hidden onChange={(e) => send(e.target.files)} /></label>}
         {error && <p className="pick-error" role="alert">{error}</p>}
+        {!busy && <p className="pick-alt">The full screens appear once the PDFs are read, about a minute each.{' '}
+          <a href="demo.html">See them now with sample documents</a>.</p>}
       </div>
     </div>
   );
