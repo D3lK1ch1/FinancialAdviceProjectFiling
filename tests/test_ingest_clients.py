@@ -51,8 +51,26 @@ def test_client_candidates_is_present_and_empty_when_no_name_is_labelled():
 
 
 def test_a_found_name_does_not_change_the_review_decision():
-    """Nothing selects a client yet, so a name must not make a document look safer to file."""
+    """A person confirms the client on every document (review_policy.certainty_decision),
+    so a proposed client must not make a document look safer to file."""
     with_name = _ingest(_pdf("Client name: George Baker"))["review"]
     without = _ingest(_pdf("Something else entirely"))["review"]
 
     assert with_name == without
+
+
+def test_ingest_proposes_the_one_client_named_as_the_client_folder():
+    result = _ingest(_pdf("Client name: George Baker"))
+
+    assert result["client"]["folder"] == "Baker, George"
+    assert result["filing"]["client_folder"] == "Baker, George"
+    assert not [f for f in result["flags"] if f["id"] == "ambiguous_client"]
+
+
+def test_ingest_flags_a_document_naming_two_clients_and_chooses_neither():
+    result = _ingest(_pdf("Client name: George Baker   Account name: Wendy Zhang"))
+
+    assert result["filing"]["client_folder"] is None
+    [flag] = [f for f in result["flags"] if f["id"] == "ambiguous_client"]
+    assert flag["severity"] == "high"
+    assert sorted(flag["names"]) == ["Baker, George", "Zhang, Wendy"]

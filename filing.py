@@ -206,6 +206,7 @@ def proposed_filing(
     pages: list[str],
     flags: list[dict] | None = None,
     original_filename: str = "",
+    client: dict | None = None,
 ) -> dict:
     """Where one document would be filed, part by part, as /ingest reports it.
 
@@ -213,16 +214,17 @@ def proposed_filing(
     proposal: nothing here writes, and the parts are not joined into a path,
     because a path with a hole in it reads as a real destination.
 
-    The client folder is always None until a client is chosen from the
-    candidates (GH#6). A found name is not a chosen one.
+    The client folder is the one clients.choose_client() proposed, or None
+    with its reason: no client named, a name that can't be read safely, or
+    more than one client (GH#6). Still a proposal a person confirms.
     """
     date_result = extract_dates({"pages": pages})
     chosen = date_result.get("chosen")
     name = proposed_filename(doc_type, date_result, flags, original_filename)
     event = proposed_event_folder(doc_type, text, date_result)
     return {
-        "client_folder": None,
-        "client_reason": "no client chosen yet (GH#6)",
+        "client_folder": client["folder"] if client else None,
+        "client_reason": client["reason"] if client else "no client was looked for",
         "event_folder": event["folder"],
         "event_reason": event["reason"],
         "stages": advice_stages(doc_type),

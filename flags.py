@@ -18,6 +18,7 @@ having checked something it had no evidence for.
 
 import re
 
+from clients import choose_client, find_client_candidates
 from kb import KB as _KB
 
 _RULES = {rule["id"]: rule for rule in _KB["edge_case_flags"]["rules"]}
@@ -266,13 +267,29 @@ def _proposed_split(pages: list[str], candidates: list[dict]) -> list[dict]:
 # A rule is evaluated only if it appears here. Everything else in
 # edge_case_flags is recorded and not yet checked, which is the honest state
 # and is visible rather than implied.
+def _ambiguous_client(doc_type: str, text: str, pages: list[str] | None) -> dict | None:
+    """The document names more than one client (#6).
+
+    Lists every name found and proposes none: choosing between clients is the
+    adviser's call, never the tool's. A document naming no client is not
+    ambiguous, just unassigned, and the filing proposal says so.
+    """
+    if not pages:
+        return None
+    client = choose_client(find_client_candidates(pages))
+    if not client["ambiguous"]:
+        return None
+    return {"names": client["names"]}
+
+
 EVALUATORS = {
     "roa_basis_unconfirmed": _roa_basis_unconfirmed,
     "multi_doc_bundle": _multi_doc_bundle,
+    "ambiguous_client": _ambiguous_client,
 }
 
 
-_NEEDS_PAGES = {"multi_doc_bundle"}
+_NEEDS_PAGES = {"multi_doc_bundle", "ambiguous_client"}
 
 
 def evaluate_flags(doc_type: str | None, text: str, pages: list[str] | None = None) -> list[dict]:
