@@ -32,8 +32,15 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ### Added
 - **14 new local samples** (gitignored, sources in `samples/public/SOURCES.md`): 5 adviser
-  FSGs, 4 fact finds and 5 made-up Harbour Wealth documents (2 SOAs, 2 ROAs, 1 ATP).
-  The title check reads 15 of the 16 right; the TJS fact find's title is too low on page 1.
+  FSGs, 4 fact finds and 11 made-up documents from three made-up practices, messy on
+  purpose (cover letters, bundles, look-alikes, typos).
+
+### Known gaps
+- **Made-up set: title check right on 7 of 11, client found on 3.** A cover letter or
+  letter-style SOA has no title near the top; an ATP titled "Client Authority and
+  Acknowledgement" reads as an SOA; an SOA that recommends a binding death benefit
+  nomination reads as a provider form; "Clients", "Client" and "Dear …" aren't client labels.
+  Two non-bundles get a bundle flag. The model was not run on these.
 
 ### Checked
 - **Body text alone misleads.** "Product Disclosure Statement" appears in 9 of 20 provider
