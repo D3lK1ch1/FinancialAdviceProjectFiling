@@ -896,8 +896,8 @@
   },
   "client_model": {
     "status": "Started (GH#6). Finds the names a document gives for its client; does not yet choose one.",
-    "name_labels": ["client name", "account name", "soa for"],
-    "name_labels_source": "Only labels seen in the real samples: 'Client name:' in INFO 266 att 1 and att 2 and the INFO 267 SOA; 'Account name:' in the INFO 266 att 3 stockbroker ROA; 'SOA for' in the running header of the example SOA inside RG 90 ('SOA for Brad and Zara Black', every page from p31). Add a label when a real document uses one, not before.",
+    "name_labels": ["client name", "account name", "soa for", "prepared for"],
+    "name_labels_source": "Only labels seen in the real samples: 'Client name:' in INFO 266 att 1 and att 2 and the INFO 267 SOA; 'Account name:' in the INFO 266 att 3 stockbroker ROA; 'SOA for' in the running header of the example SOA inside RG 90 ('SOA for Brad and Zara Black', every page from p31). 'Prepared for' on the cover table of the RG 90 2013 example SOA and Bella's made-up SOAs (Bella, 23 Oct 2026); bare 'Client' was tested and left out, because it reads 'Client Fact Find' and similar headings as names. Add a label when a real document uses one, not before.",
     "joint_client": {
       "rule": "A joint client is one client with one shared client folder, e.g. 'Black, Brad & Zara'. The names are kept together, never split into two folders or chosen between.",
       "decided": "Bella, 9 Oct 2026 (GH#61).",

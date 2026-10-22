@@ -153,6 +153,9 @@ documents above (a file note, an ROA, a fee statement).
   "Product Disclosure Statement" appears in 9 of the 20 provider forms, which is why
   forms get read as a PDS. ASIC's "Example Statement of Advice" wording was left out
   because a firm's own SOA won't contain it.
+- **"Prepared for" labels the client** (`client_model.name_labels`). It found the right
+  client on the RG 90 2013 SOA and both of Bella's made-up SOAs, and no wrong name on any
+  sample. Bare "Client" was left out: it reads headings such as "Client Fact Find" as names.
 - **A title alone can mislead, so some phrases rule a type out.** On page 1,
   "Product Disclosure Statement" is printed on 4 provider forms and only 2 PDSs, and
   "Statement of Advice" is on page 1 of all 3 ROAs. `exact_phrases.rules_out`: form
