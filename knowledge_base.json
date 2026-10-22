@@ -73,7 +73,7 @@
     {"stage": 3, "name": "Assess the financial situation", "plain": "Income, expenses, assets, debts, super, insurance and risk tolerance are reviewed. This is the evidence for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile", "file_note"]},
     {"stage": 4, "name": "Develop the strategic plan", "plain": "The recommendations are formed and documented in a Statement of Advice, or a Record of Advice where one is permitted, and given to the client with any PDS for a recommended product.", "governing_provisions": ["s961B", "s961G (appropriate advice)", "s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa", "pds", "file_note"]},
     {"stage": 5, "name": "Implement the recommendations", "plain": "The plan is put into action: accounts opened, investments moved, insurance updated. The client authorises it first and product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "provider_form", "pds", "file_note"], "not_yet_document_types": ["provider implementation forms (opening a super account, rolling over super, applying for a pension, opening an investment account) — not yet document types (see #23). They file in 3 Implementation."]},
-    {"stage": 6, "name": "Review and monitor", "plain": "Periodic check-ins adjust the plan for market, tax or life changes. Ongoing fee arrangements are disclosed and consented to. Smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "file_note"]}
+    {"stage": 6, "name": "Review and monitor", "plain": "Periodic check-ins adjust the plan for market, tax or life changes. Ongoing fee arrangements are disclosed and consented to. Smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "fee_consent", "file_note"]}
   ],
   "version_status_values": {
     "current": "The live, in-force version of this document for this client (or this edition, for licensee/issuer-wide docs).",
@@ -652,7 +652,7 @@
     },
     {
       "id": "fee_disclosure_statement",
-      "name": "Fee Disclosure Statement / Ongoing Fee Consent",
+      "name": "Fee Disclosure Statement",
       "abbrev": "FDS",
       "category": "ongoing_service",
       "advice_record_role": false,
@@ -661,41 +661,85 @@
         "note": "DBFO Tranche 1 changed the ongoing-fee/consent mechanics; confirm the current consolidated form on enactment dates."
       },
       "teaching": {
-        "what_it_is": "Documents disclosing ongoing advice fees and obtaining the client's consent to continue charging them.",
-        "why_it_exists": "Protects clients in ongoing fee arrangements by requiring periodic disclosure and renewed consent.",
+        "what_it_is": "A statement of the ongoing advice fees a client paid over a period and the services they were entitled to and received.",
+        "why_it_exists": "Lets a client in an ongoing fee arrangement see what they paid and what they got for it.",
         "where_it_sits": "Ongoing service & review (stage 6).",
         "two_weeks_in_note": "This is the area DBFO Tranche 1 already reshaped, so older files and newer files may look different. Flag rather than guess when the format doesn't match the expected era."
       },
       "classifier_hints": {
         "title_patterns": [
           "Fee Disclosure Statement",
-          "FDS",
-          "Ongoing Fee Consent",
-          "Consent to Deduct Advice Fees"
+          "FDS"
         ],
         "key_fields": [
           "client name",
           "fees charged in the period",
           "services the client was entitled to / received",
-          "consent signature",
           "period covered",
           "date"
         ],
         "distinguishing_signals": [
           "fee tables by period",
-          "consent/authorisation to continue or deduct fees",
-          "references an ongoing fee arrangement"
+          "looks back over a past period"
         ],
         "confusable_with": [
-          "authority_to_proceed — ATP authorises implementation of advice; this authorises ongoing FEES",
+          "fee_consent — a consent asks the client to agree to fees going forward; an FDS reports fees already charged. A different document, filed separately (Bella, 23 Oct 2026).",
           "soa — this is fee administration, not advice"
         ]
       },
       "links_to": [],
-      "version_notes": "Per client, periodic (usually annual). Each period's statement is discrete; a corrected re-issue for the same period supersedes.",
+      "version_notes": "Per client, periodic (usually annual). Each period's statement is discrete; a corrected re-issue for the same period supersedes."
+    },
+    {
+      "id": "fee_consent",
+      "name": "Ongoing Fee Consent",
+      "abbrev": "Fee Consent",
+      "category": "ongoing_service",
+      "advice_record_role": false,
+      "legislation": {
+        "primary": "Ongoing fee arrangement provisions, Div 3 of Pt 7.7A, as amended by DBFO Tranche 1 (single consent regime commenced under DBFO)",
+        "note": "DBFO Tranche 1 changed the ongoing-fee/consent mechanics; confirm the current consolidated form on enactment dates."
+      },
+      "teaching": {
+        "what_it_is": "The client's signed consent to an ongoing fee arrangement, or to advice fees being deducted from their account, for a stated period.",
+        "why_it_exists": "An ongoing fee can't be charged, or deducted from a client's super or pension, without the client's written consent.",
+        "where_it_sits": "Ongoing service & review (stage 6); a first consent often follows the SOA that recommends the ongoing service.",
+        "two_weeks_in_note": "This is the area DBFO Tranche 1 already reshaped, so older files and newer files may look different. Flag rather than guess when the format doesn't match the expected era."
+      },
+      "classifier_hints": {
+        "title_patterns": [
+          "Ongoing Fee Consent",
+          "Consent to Deduct Advice Fees"
+        ],
+        "key_fields": [
+          "client name",
+          "the fee and how often it is charged",
+          "the account it is deducted from",
+          "period of the arrangement",
+          "consent signature",
+          "date"
+        ],
+        "distinguishing_signals": [
+          "asks the client to agree, going forward",
+          "a signature block for consent",
+          "often a renewal letter"
+        ],
+        "confusable_with": [
+          "fee_disclosure_statement — an FDS reports fees already charged; a consent agrees to fees going forward. A different document, filed separately (Bella, 23 Oct 2026).",
+          "authority_to_proceed — an ATP authorises implementing advice; this authorises FEES",
+          "soa — this is fee administration, not advice"
+        ]
+      },
+      "links_to": [],
+      "version_notes": "Per client, per arrangement period. A renewal consent starts a new period; it does not replace the earlier one.",
       "exact_phrases": {
         "note": "Wording from Bella's made-up fee consents (23 Oct 2026); no public sample yet. Read on page 1 by scope_gate.py.",
-        "phrases": ["Ongoing fee arrangement", "Consent to deduct advice fees", "Renewal of your ongoing fee", "Renewing your ongoing advice"]
+        "phrases": [
+          "Ongoing fee arrangement",
+          "Consent to deduct advice fees",
+          "Renewal of your ongoing fee",
+          "Renewing your ongoing advice"
+        ]
       }
     }
   ],
@@ -743,7 +787,7 @@
         {"name": "3 Implementation", "steps": [5], "docs": ["authority_to_proceed", "provider_form"], "planned_docs": ["Account / product application", "Rollover / transfer in", "Rollover out / withdrawal / account closure", "Internal transfer / phase change", "Pension application (ABP / TTR)", "Pension maintenance / refresh", "Investment switch / rebalance", "Beneficiary nomination", "Contribution strategy forms", "Insurance inside super", "Adviser authority and fee consent", "Debt recycling / gearing implementation", "Share registry (direct equities)"], "planned_note": "Provider implementation forms. Not yet document types: each needs samples and testing first. Kinds, keywords, providers and sample links are in docs/reference/implementation_forms.json (Bella, 21 Oct 2026)."}
       ],
       "pds_and_roa": "Confirmed by Bella, 21 Oct 2026: the SOA, every ROA and the PDS file in 2 Advice. The PDS is given with the advice that recommends the product (a copy in the client file is the proof, 29 Sep 2026).",
-      "no_folder": "A type in no folder (file note, FSG, FDS) files at the event level, or where special_folders puts it.",
+      "no_folder": "A type in no folder (file note, FSG, FDS, fee consent) files at the event level, or where special_folders puts it.",
       "status": "Built in filing.step_folder (21 Oct 2026). The step folder is proposed per document; joining it under the event folder needs grouping (#8)."
     },
     "advice_event": {
@@ -1067,6 +1111,10 @@
         "value": 0.90,
         "why": "Fee disclosure and ongoing-fee consent carry their own compliance exposure, and fds_era_mismatch depends on this type being identified correctly before the pre/post-DBFO check can run at all."
       },
+      "fee_consent": {
+        "value": 0.90,
+        "why": "Same exposure as the FDS: no ongoing fee may be charged or deducted without a valid consent, and fds_era_mismatch reads consent documents too."
+      },
       "fact_find": {
         "value": 0.90,
         "why": "Evidence of safe harbour steps 1-2 — what the adviser knew about the client when advising. A supporting document, but the advice is only as sound as the record of the client it rests on, and fact_find_after_soa sequencing depends on it."
@@ -1161,7 +1209,8 @@
       "soa",
       "roa",
       "authority_to_proceed",
-      "fee_disclosure_statement"
+      "fee_disclosure_statement",
+      "fee_consent"
     ],
     "own_clients_only_note": "An adviser approves these only for their own clients: one adviser must not sign off another's advice record. Compliance may approve any.",
     "edit_may_change": [
@@ -1182,7 +1231,8 @@
       "roa": "As SOA, plus which of the three ROA situations applies.",
       "authority_to_proceed": "Signed; links to the SOA or ROA it authorises.",
       "provider_form": "Instructs the product issuer, not the adviser; it is the receiving fund's form for a rollover; signed and dated.",
-      "fee_disclosure_statement": "Right client; the period; consent signed."
+      "fee_disclosure_statement": "Right client; the period; fees and services listed.",
+      "fee_consent": "Right client; the period; consent signed."
     },
     "flag_effects": {
       "hard_stop": "Approve is unavailable until the problem is fixed. Only compliance may clear it.",

@@ -67,7 +67,8 @@ each label. They live in `knowledge_base.json`, never in Python.
 | `fact_find` | Client information form | "Fact Find", "Client Data Form" |
 | `risk_profile` | Risk questionnaire | "Risk Profile", "Risk Tolerance Questionnaire" |
 | `file_note` | Adviser's meeting notes | "File Note", "Meeting Note" |
-| `fee_disclosure_statement` | Yearly fee statement | "Fee Disclosure Statement", "FDS", "Ongoing Fee Consent" |
+| `fee_disclosure_statement` | Yearly fee statement: fees already charged | "Fee Disclosure Statement", "FDS" |
+| `fee_consent` | The client agrees to ongoing fees going forward | "Ongoing Fee Consent", "Consent to Deduct Advice Fees" |
 
 A **client review** is a meeting, not a document type. It usually produces some of the
 documents above (a file note, an ROA, a fee statement).
@@ -170,6 +171,9 @@ documents above (a file note, an ROA, a fee statement).
   lists past ROAs among the services. These come from made-up documents only; check them
   against a real fee consent when one is available, and an ROA that recommends a fee
   arrangement may now be read as a fee consent.
+- **Fee consent and fee disclosure statement are two types** (`fee_consent`,
+  `fee_disclosure_statement`). An FDS reports fees already charged; a consent agrees to fees
+  going forward. Different documents, filed separately.
 - **Answer sheet checked** (Bella). A bank's change-of-address form and a "nominate broker or
   adviser" form are provider forms: implementation documents, filed in `3 Implementation`.
   An SOA with an ATP stuck to it is split, and each is filed on its own (SOA in `2 Advice`,

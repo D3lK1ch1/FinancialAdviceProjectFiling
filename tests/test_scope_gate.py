@@ -395,4 +395,4 @@ def test_fee_consent_letter_is_found_by_its_wording():
     """A renewal letter lists past ROAs among the services; the fee wording decides it."""
     head = "Harbour Wealth Pty Ltd\nLevel 4, 100 Example Street\n" + "x " * 250
     page = head + "\nRenewal of your ongoing fee arrangement\nRecord of Advice: pension, 2 July 2026"
-    assert check_scope(head + page, page)["likely_type"] == "fee_disclosure_statement"
+    assert check_scope(head + page, page)["likely_type"] == "fee_consent"
