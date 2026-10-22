@@ -19,6 +19,8 @@ overwrites a finished step (see Contributing in `README.md`).
 - **Exact phrases per document type** (Bella). Wording copied from the public samples,
   each found only in its own type across all 36: `exact_phrases` in `knowledge_base.json`.
   Not read by the code yet; a page-1 check that uses them is next (Delia).
+- **Phrases that rule a type out** (Bella). Form wording on page 1 means not a PDS;
+  "Record of Advice" means not an SOA. `exact_phrases.rules_out`.
 
 ### Checked
 - **Body text alone misleads.** "Product Disclosure Statement" appears in 9 of 20 provider

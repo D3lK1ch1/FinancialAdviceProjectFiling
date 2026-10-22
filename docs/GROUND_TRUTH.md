@@ -153,6 +153,12 @@ documents above (a file note, an ROA, a fee statement).
   "Product Disclosure Statement" appears in 9 of the 20 provider forms, which is why
   forms get read as a PDS. ASIC's "Example Statement of Advice" wording was left out
   because a firm's own SOA won't contain it.
+- **A title alone can mislead, so some phrases rule a type out.** On page 1,
+  "Product Disclosure Statement" is printed on 4 provider forms and only 2 PDSs, and
+  "Statement of Advice" is on page 1 of all 3 ROAs. `exact_phrases.rules_out`: form
+  wording on page 1 ("Use this form to", "Date of birth", "Declaration"…) means it is not a
+  PDS, even when the PDS title is there; "Record of Advice" means it is not an SOA. None of
+  the rules-out phrases is on page 1 of a sample of the type it rules out.
 
 ## Known differences from existing docs (resolve, don't ignore)
 | Topic | This file | Elsewhere | Status |

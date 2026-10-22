@@ -134,7 +134,8 @@
       "version_notes": "Client-specific and dated. A new SOA for the same client and scope supersedes the prior one; rarely a true duplicate.",
       "exact_phrases": {
         "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Match on page 1. Not yet read by the code.",
-        "phrases": ["Consequences of replacing"]
+        "phrases": ["Consequences of replacing"],
+        "rules_out": ["Record of Advice"]
       }
     },
     {
@@ -477,7 +478,8 @@
       "version_notes": "Editioned by issuer and effective date, not per client. A newer PDS edition supersedes the prior edition for that product.",
       "exact_phrases": {
         "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Match on page 1. Not yet read by the code.",
-        "phrases": ["Fees and costs summary", "Consumer advisory warning", "How super works"]
+        "phrases": ["Fees and costs summary", "Consumer advisory warning", "How super works"],
+        "rules_out": ["Use this form to", "Complete this form", "Office use only", "Date of birth", "Tax file number", "Declaration", "Personal details"]
       }
     },
     {
