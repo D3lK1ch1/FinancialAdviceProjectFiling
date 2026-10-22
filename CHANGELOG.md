@@ -22,6 +22,9 @@ overwrites a finished step (see Contributing in `README.md`).
 - **Phrases that rule a type out** (Bella). Form wording on page 1 means not a PDS;
   "Record of Advice" means not an SOA. `exact_phrases.rules_out`.
 - **"Prepared for" labels the client** (Bella). Bare "Client" was tested and left out.
+- **Fee consent phrases** ("Ongoing fee arrangement" and three more), and "Ongoing fee
+  arrangement" rules out an ROA. From made-up documents only. Title check on all 63
+  labelled samples: 57 right, 6 blank, none wrong.
 - **Name lists confirmed** (Bella): titles, surname particles, and trust and company words.
 - **Only a husband and wife share a folder** (Bella). De facto partners and relatives who
   share a surname get their own folders.
@@ -39,8 +42,8 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ### Added
 - **14 new local samples** (gitignored, sources in `samples/public/SOURCES.md`): 5 adviser
-  FSGs, 4 fact finds and 11 made-up documents from three made-up practices, messy on
-  purpose (cover letters, bundles, look-alikes, typos).
+  FSGs, 4 fact finds and 18 made-up documents from three made-up practices, messy on
+  purpose (cover letters, bundles, look-alikes, typos, fee consents, file notes, an FSG).
 
 ### Known gaps
 - **Made-up set: title check right on 7 of 11, client found on 3.** A cover letter or

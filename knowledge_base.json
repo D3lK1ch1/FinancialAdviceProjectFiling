@@ -268,7 +268,8 @@
       "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the three situations — it changes both content expectations and whether a prior SOA is required.",
       "exact_phrases": {
         "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Read on page 1 by scope_gate.py.",
-        "phrases": ["Record of Advice", "Previous advice"]
+        "phrases": ["Record of Advice", "Previous advice"],
+        "rules_out": ["Ongoing fee arrangement"]
       }
     },
     {
@@ -691,7 +692,11 @@
         ]
       },
       "links_to": [],
-      "version_notes": "Per client, periodic (usually annual). Each period's statement is discrete; a corrected re-issue for the same period supersedes."
+      "version_notes": "Per client, periodic (usually annual). Each period's statement is discrete; a corrected re-issue for the same period supersedes.",
+      "exact_phrases": {
+        "note": "Wording from Bella's made-up fee consents (23 Oct 2026); no public sample yet. Read on page 1 by scope_gate.py.",
+        "phrases": ["Ongoing fee arrangement", "Consent to deduct advice fees", "Renewal of your ongoing fee", "Renewing your ongoing advice"]
+      }
     }
   ],
   "filing_model": {

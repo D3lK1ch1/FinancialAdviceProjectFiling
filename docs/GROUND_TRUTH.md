@@ -163,6 +163,13 @@ documents above (a file note, an ROA, a fee statement).
 - **Name lists confirmed:** the titles kept in folder names (Mr, Mrs, Ms, Miss, Mx, Dr,
   Prof, Sir, Dame, Rev), surname particles (van, von, de, di…) and the words that mark a
   trust or company (Pty, Ltd, Trust, SMSF…, and ATF/ITF for trustees). `client_model`.
+- **Fee consents are found by their wording.** They are letters, so the letterhead and
+  address push the title out of the title window. Phrases on page 1: "Ongoing fee
+  arrangement", "Consent to deduct advice fees", "Renewal of your ongoing fee", "Renewing
+  your ongoing advice". "Ongoing fee arrangement" also rules out an ROA: a renewal letter
+  lists past ROAs among the services. These come from made-up documents only; check them
+  against a real fee consent when one is available, and an ROA that recommends a fee
+  arrangement may now be read as a fee consent.
 - **Tested on the made-up set** (11 messy documents, 23 Oct). "Client Authority" is an ATP
   title. "Binding death benefit nomination" was dropped as a provider form phrase: an SOA
   that recommends one read as a form. "Dear" was tested as a client label and left out: it
