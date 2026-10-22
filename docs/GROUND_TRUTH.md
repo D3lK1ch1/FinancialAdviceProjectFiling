@@ -144,6 +144,16 @@ documents above (a file note, an ROA, a fee statement).
   page; Node is only for building it. Plan in `docs/UI_INTEGRATION.md` and
   `frontend/README.md`. The public demo link is off until the real tool is ready.
 
+### Decided 23 Oct 2026 (Bella)
+- **Exact phrases per document type.** Wording copied from the public samples, which
+  the tool should treat as strong evidence when it appears on page 1. Each one was
+  checked against all 36 samples and appears only in its own type:
+  `knowledge_base.json` `exact_phrases`. Not read by the code yet; the page-1 check
+  that uses them is engineering work. A phrase found only in the body is weak:
+  "Product Disclosure Statement" appears in 9 of the 20 provider forms, which is why
+  forms get read as a PDS. ASIC's "Example Statement of Advice" wording was left out
+  because a firm's own SOA won't contain it.
+
 ## Known differences from existing docs (resolve, don't ignore)
 | Topic | This file | Elsewhere | Status |
 |---|---|---|---|

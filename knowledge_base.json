@@ -131,7 +131,11 @@
           "note": "The SOA's recommendations must trace back to the fact find and risk profile."
         }
       ],
-      "version_notes": "Client-specific and dated. A new SOA for the same client and scope supersedes the prior one; rarely a true duplicate."
+      "version_notes": "Client-specific and dated. A new SOA for the same client and scope supersedes the prior one; rarely a true duplicate.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Match on page 1. Not yet read by the code.",
+        "phrases": ["Consequences of replacing"]
+      }
     },
     {
       "id": "roa",
@@ -260,7 +264,11 @@
           "note": "Where the ROA advises an action the client then authorises."
         }
       ],
-      "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the three situations — it changes both content expectations and whether a prior SOA is required."
+      "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the three situations — it changes both content expectations and whether a prior SOA is required.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Match on page 1. Not yet read by the code.",
+        "phrases": ["Record of Advice", "Previous advice"]
+      }
     },
     {
       "id": "authority_to_proceed",
@@ -366,7 +374,11 @@
           "note": "Match by client, date and the products recommended."
         }
       ],
-      "version_notes": "Per client, per instruction, dated. Providers change form versions often (the version code is usually in the footer, e.g. BTF32020). A resubmitted form for the same instruction replaces the earlier one."
+      "version_notes": "Per client, per instruction, dated. Providers change form versions often (the version code is usually in the footer, e.g. BTF32020). A resubmitted form for the same instruction replaces the earlier one.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Match on page 1. Not yet read by the code.",
+        "phrases": ["Use this form to", "Complete this form to", "When to use this form", "Office use only", "Dealer group name", "Adviser full name", "Request to transfer", "Partial transfer within", "Binding death benefit nomination", "Application form"]
+      }
     },
     {
       "id": "fsg",
@@ -462,7 +474,11 @@
         ]
       },
       "links_to": [],
-      "version_notes": "Editioned by issuer and effective date, not per client. A newer PDS edition supersedes the prior edition for that product."
+      "version_notes": "Editioned by issuer and effective date, not per client. A newer PDS edition supersedes the prior edition for that product.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Match on page 1. Not yet read by the code.",
+        "phrases": ["Fees and costs summary", "Consumer advisory warning", "How super works"]
+      }
     },
     {
       "id": "fact_find",
@@ -563,7 +579,11 @@
           "note": "Risk category should be consistent with SOA recommendations; inconsistency is a flag."
         }
       ],
-      "version_notes": "Per client, dated. A re-assessment supersedes the prior profile."
+      "version_notes": "Per client, dated. A re-assessment supersedes the prior profile.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Match on page 1. Not yet read by the code.",
+        "phrases": ["Risk profile questionnaire", "Risk Tolerance Questionnaire", "Total score", "Your investor profile"]
+      }
     },
     {
       "id": "file_note",

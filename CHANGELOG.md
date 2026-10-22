@@ -13,6 +13,20 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-23 — Exact phrases per document type
+
+### Decided
+- **Exact phrases per document type** (Bella). Wording copied from the public samples,
+  each found only in its own type across all 36: `exact_phrases` in `knowledge_base.json`.
+  Not read by the code yet; a page-1 check that uses them is next (Delia).
+
+### Checked
+- **Body text alone misleads.** "Product Disclosure Statement" appears in 9 of 20 provider
+  forms, and 6 of the 12 misses have the right title on page 1. Details in
+  `docs/GROUND_TRUTH.md`, 23 Oct.
+
+---
+
 ## 2026-10-21 — Filing layout and names decided and built; React screens read real PDFs; docs condensed
 
 ### Added
