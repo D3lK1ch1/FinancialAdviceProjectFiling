@@ -363,3 +363,29 @@ def test_a_title_broken_across_lines_still_matches():
     result = check_scope("REGULATORY GUIDE 90\nExample Statement of\nAdvice: Scaled advice for a new client")
 
     assert result["in_scope"] and result["likely_type"] == "soa"
+
+
+def test_form_wording_rules_out_a_pds_title():
+    """Page 1 of 4 public provider forms carries the PDS title (Bella, 23 Oct
+    2026). Form wording on the page rules the PDS out."""
+    page = "Product Disclosure Statement\nUse this form to roll over your super.\nDate of birth"
+    assert check_scope(page, page)["likely_type"] != "pds"
+
+
+def test_record_of_advice_rules_out_an_soa_title():
+    """Every ASIC example ROA says "Statement of Advice" on page 1."""
+    page = "Statement of Advice\nExample Record of Advice (ROA): Stockbroker"
+    assert check_scope(page, page)["likely_type"] == "roa"
+
+
+def test_phrases_on_page_one_place_a_document_with_no_title():
+    """A form that opens on the fund's letterhead has no title in the window,
+    but its own wording further down page 1 still places it."""
+    head = "Hostplus Pty Limited ABN 79 008 634 704\n" + "x " * 300
+    page = head + "\nComplete this form to make an investment switch.\nOffice use only"
+    assert check_scope(head + page, page) == {"in_scope": True, "likely_type": "provider_form"}
+
+
+def test_without_page_one_the_title_window_is_used():
+    assert check_scope("Use this form to transfer your balance") == {
+        "in_scope": True, "likely_type": "provider_form"}

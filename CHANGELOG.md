@@ -18,9 +18,16 @@ overwrites a finished step (see Contributing in `README.md`).
 ### Decided
 - **Exact phrases per document type** (Bella). Wording copied from the public samples,
   each found only in its own type across all 36: `exact_phrases` in `knowledge_base.json`.
-  Not read by the code yet; a page-1 check that uses them is next (Delia).
+  `scope_gate.py` reads them on page 1 when no title is at the top.
 - **Phrases that rule a type out** (Bella). Form wording on page 1 means not a PDS;
   "Record of Advice" means not an SOA. `exact_phrases.rules_out`.
+
+### Changed
+- **The title check reads page 1** (`scope_gate.check_scope(text, first_page)`). Rules-out
+  phrases drop a type even when its title is there; with no title at the top, the type with
+  the most of its own phrases on page 1 wins. On the 36 public samples the title check is
+  now right on 34, up from 29. Still missed: a UniSuper PDS and a Westpac change of address,
+  which have neither a title nor a listed phrase on page 1. The model was not rerun.
 
 ### Checked
 - **Body text alone misleads.** "Product Disclosure Statement" appears in 9 of 20 provider

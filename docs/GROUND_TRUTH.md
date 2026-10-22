@@ -148,8 +148,8 @@ documents above (a file note, an ROA, a fee statement).
 - **Exact phrases per document type.** Wording copied from the public samples, which
   the tool should treat as strong evidence when it appears on page 1. Each one was
   checked against all 36 samples and appears only in its own type:
-  `knowledge_base.json` `exact_phrases`. Not read by the code yet; the page-1 check
-  that uses them is engineering work. A phrase found only in the body is weak:
+  `knowledge_base.json` `exact_phrases`, read on page 1 by `scope_gate.py` when no
+  title is at the top. A phrase found only in the body is weak:
   "Product Disclosure Statement" appears in 9 of the 20 provider forms, which is why
   forms get read as a PDS. ASIC's "Example Statement of Advice" wording was left out
   because a firm's own SOA won't contain it.

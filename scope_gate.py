@@ -62,13 +62,39 @@ _MATCHERS = {
 }
 
 
+# Wording printed on the page that settles the type, and wording that rules a
+# type out even when its title is there (Bella, 23 Oct 2026). Both live on each
+# document type in the knowledge base, under `exact_phrases`.
+_PHRASES = {
+    doc["id"]: [_matcher(p) for p in doc.get("exact_phrases", {}).get("phrases", [])]
+    for doc in _KB["documents"]
+}
+_RULES_OUT = {
+    doc["id"]: [_matcher(p) for p in doc.get("exact_phrases", {}).get("rules_out", [])]
+    for doc in _KB["documents"]
+}
+
+
 # How much of the top of the document counts as its title region. The value
 # and the reason for it live in knowledge_base.json's `scope_gate` (#7).
 TITLE_WINDOW = _KB["scope_gate"]["title_window_chars"]
 
 
-def check_scope(text: str) -> dict:
+def check_scope(text: str, first_page: str | None = None) -> dict:
     head = text[:TITLE_WINDOW]
+    # Phrases are read across the whole first page, not only the title
+    # window: "Use this form to" or "Fees and costs summary" sit below the
+    # title. Without the page, fall back to the title window.
+    page = head if first_page is None else first_page
+
+    # A title is not enough on its own. Page 1 of 4 provider forms in the
+    # public samples carries "Product Disclosure Statement", and page 1 of
+    # every ASIC example ROA says "Statement of Advice". Form wording on the
+    # page rules out a PDS; "Record of Advice" rules out an SOA.
+    ruled_out = {
+        doc_id for doc_id, matchers in _RULES_OUT.items()
+        if any(m.search(page) for m in matchers)
+    }
 
     # Rank on WHERE the earliest match falls, not on how long the matching
     # pattern string is. Length was a proxy for confidence and a poor one: it
@@ -86,10 +112,27 @@ def check_scope(text: str) -> dict:
     # position.
     ranking = {}
     for doc_id, matchers in _MATCHERS.items():
+        if doc_id in ruled_out:
+            continue
         positions = [found.start() for _p, pattern in matchers if (found := pattern.search(head))]
         if positions:
             ranking[doc_id] = (min(positions), -len(positions))
 
-    if not ranking:
+    if ranking:
+        return {"in_scope": True, "likely_type": min(ranking, key=ranking.get)}
+
+    # No title at the top. Many provider forms and questionnaires open on a
+    # fund's letterhead or a step heading, so their title is below the window
+    # or missing. The type with the most of its own phrases on page 1 wins;
+    # ties go to the one found first.
+    by_phrase = {}
+    for doc_id, matchers in _PHRASES.items():
+        if doc_id in ruled_out:
+            continue
+        positions = [found.start() for m in matchers if (found := m.search(page))]
+        if positions:
+            by_phrase[doc_id] = (-len(positions), min(positions))
+
+    if not by_phrase:
         return {"in_scope": False, "likely_type": None}
-    return {"in_scope": True, "likely_type": min(ranking, key=ranking.get)}
+    return {"in_scope": True, "likely_type": min(by_phrase, key=by_phrase.get)}
