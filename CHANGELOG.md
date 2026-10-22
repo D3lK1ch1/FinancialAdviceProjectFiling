@@ -25,6 +25,8 @@ overwrites a finished step (see Contributing in `README.md`).
 - **Fee consent phrases** ("Ongoing fee arrangement" and three more), and "Ongoing fee
   arrangement" rules out an ROA. From made-up documents only. Title check on all 63
   labelled samples: 57 right, 6 blank, none wrong.
+- **Answer sheet checked** (Bella): change-of-address and nominate-adviser forms are provider
+  forms; an SOA with an ATP attached is split and each filed on its own.
 - **Name lists confirmed** (Bella): titles, surname particles, and trust and company words.
 - **Only a husband and wife share a folder** (Bella). De facto partners and relatives who
   share a surname get their own folders.

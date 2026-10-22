@@ -170,6 +170,10 @@ documents above (a file note, an ROA, a fee statement).
   lists past ROAs among the services. These come from made-up documents only; check them
   against a real fee consent when one is available, and an ROA that recommends a fee
   arrangement may now be read as a fee consent.
+- **Answer sheet checked** (Bella). A bank's change-of-address form and a "nominate broker or
+  adviser" form are provider forms: implementation documents, filed in `3 Implementation`.
+  An SOA with an ATP stuck to it is split, and each is filed on its own (SOA in `2 Advice`,
+  ATP in `3 Implementation`). The tool already holds every bundle for a person to split.
 - **Tested on the made-up set** (11 messy documents, 23 Oct). "Client Authority" is an ATP
   title. "Binding death benefit nomination" was dropped as a provider form phrase: an SOA
   that recommends one read as a form. "Dear" was tested as a client label and left out: it
