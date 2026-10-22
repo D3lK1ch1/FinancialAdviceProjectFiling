@@ -721,7 +721,7 @@
       "duplicate": "Same client, date and type: the second file gets a number. Nguyen_Lan_2024-03-02 Fact Find 2.pdf",
       "no_client": "No client chosen means no client part: the name is not guessed, and the person chooses the client before filing.",
       "decided": "Bella, 21 Oct 2026 (PR #69 comments).",
-      "open": "Couples who are not husband and wife: order not decided yet.",
+      "not_married": "Only a husband and wife share a folder. Others who share a surname (de facto partners, cousins, siblings) are separate clients with their own folders; the shared surname keeps them next to each other alphabetically. Decided Bella, 23 Oct 2026.",
       "status": "Built in filing.proposed_filename (21 Oct 2026). Numbering duplicates needs the other files on hand, so it happens when filing, not here."
     },
     "stage_label": {

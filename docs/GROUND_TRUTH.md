@@ -156,6 +156,10 @@ documents above (a file note, an ROA, a fee statement).
 - **"Prepared for" labels the client** (`client_model.name_labels`). It found the right
   client on the RG 90 2013 SOA and both of Bella's made-up SOAs, and no wrong name on any
   sample. Bare "Client" was left out: it reads headings such as "Client Fact Find" as names.
+- **Only a husband and wife share a folder.** De facto partners, cousins and siblings who
+  share a surname get their own folders, and sit next to each other alphabetically.
+  Answers the open "couples who aren't husband and wife" question.
+  `filing_model.file_name.not_married`.
 - **Tested on the made-up set** (11 messy documents, 23 Oct). "Client Authority" is an ATP
   title. "Binding death benefit nomination" was dropped as a provider form phrase: an SOA
   that recommends one read as a form. "Dear" was tested as a client label and left out: it
