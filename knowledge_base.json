@@ -292,7 +292,7 @@
         "two_weeks_in_note": "Very often appended to the back of the SOA it implements. When splitting a scanned bundle, the ATP is the classic 'document 2' hiding at the end of an SOA PDF. Always link it to the advice record it authorises — an ATP with no matching SOA/ROA is an exception worth flagging."
       },
       "classifier_hints": {
-        "title_patterns": ["Authority to Proceed", "Authority to Implement", "Client Authorisation", "Authority to Act"],
+        "title_patterns": ["Authority to Proceed", "Authority to Implement", "Client Authorisation", "Authority to Act", "Client Authority"],
         "key_fields": ["client name", "client signature", "the party being authorised — adviser name, authorised-representative number, licensee", "reference to the SOA/ROA being authorised", "products/actions authorised", "date signed"],
         "distinguishing_signals": ["a first-person grant of authority — 'I/We authorise ...' — not a description of advice", "names the party receiving the authority, and enumerates the specific actions it covers", "prominent signature block binding the client to that grant", "short and instructional, not explanatory", "references the advice record it implements", "may share a document with the SOA"],
         "confusable_with": ["soa — the ATP authorises; the SOA advises", "provider_form — both carry a signature and a list of actions, but the authority runs to different parties: an ATP authorises the ADVISER to act, a provider form instructs the PRODUCT ISSUER. Read who is being empowered, not what is being signed.", "fee_disclosure_statement — also a signed authorisation, but of ongoing FEES rather than of implementing advice"]
@@ -378,7 +378,7 @@
       "version_notes": "Per client, per instruction, dated. Providers change form versions often (the version code is usually in the footer, e.g. BTF32020). A resubmitted form for the same instruction replaces the earlier one.",
       "exact_phrases": {
         "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Read on page 1 by scope_gate.py.",
-        "phrases": ["Use this form to", "Complete this form to", "When to use this form", "Office use only", "Dealer group name", "Adviser full name", "Request to transfer", "Partial transfer within", "Binding death benefit nomination", "Application form"]
+        "phrases": ["Use this form to", "Complete this form to", "When to use this form", "Office use only", "Dealer group name", "Adviser full name", "Request to transfer", "Partial transfer within", "Application form"]
       }
     },
     {

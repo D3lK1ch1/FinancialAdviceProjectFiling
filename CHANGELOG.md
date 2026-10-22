@@ -22,6 +22,10 @@ overwrites a finished step (see Contributing in `README.md`).
 - **Phrases that rule a type out** (Bella). Form wording on page 1 means not a PDS;
   "Record of Advice" means not an SOA. `exact_phrases.rules_out`.
 - **"Prepared for" labels the client** (Bella). Bare "Client" was tested and left out.
+- **"Client Authority" is an ATP title; "Binding death benefit nomination" is no longer a
+  provider form phrase** (an SOA recommending one read as a form). "Dear" tested as a client
+  label and left out. Title check on all 56 labelled samples: 49 right, 7 left blank for a
+  person, none named as the wrong type.
 
 ### Changed
 - **The title check reads page 1** (`scope_gate.check_scope(text, first_page)`). Rules-out
