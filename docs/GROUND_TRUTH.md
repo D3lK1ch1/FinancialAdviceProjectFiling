@@ -160,6 +160,9 @@ documents above (a file note, an ROA, a fee statement).
   share a surname get their own folders, and sit next to each other alphabetically.
   Answers the open "couples who aren't husband and wife" question.
   `filing_model.file_name.not_married`.
+- **Name lists confirmed:** the titles kept in folder names (Mr, Mrs, Ms, Miss, Mx, Dr,
+  Prof, Sir, Dame, Rev), surname particles (van, von, de, di…) and the words that mark a
+  trust or company (Pty, Ltd, Trust, SMSF…, and ATF/ITF for trustees). `client_model`.
 - **Tested on the made-up set** (11 messy documents, 23 Oct). "Client Authority" is an ATP
   title. "Binding death benefit nomination" was dropped as a provider form phrase: an SOA
   that recommends one read as a form. "Dear" was tested as a client label and left out: it

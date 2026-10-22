@@ -22,6 +22,7 @@ overwrites a finished step (see Contributing in `README.md`).
 - **Phrases that rule a type out** (Bella). Form wording on page 1 means not a PDS;
   "Record of Advice" means not an SOA. `exact_phrases.rules_out`.
 - **"Prepared for" labels the client** (Bella). Bare "Client" was tested and left out.
+- **Name lists confirmed** (Bella): titles, surname particles, and trust and company words.
 - **Only a husband and wife share a folder** (Bella). De facto partners and relatives who
   share a surname get their own folders.
 - **"Client Authority" is an ATP title; "Binding death benefit nomination" is no longer a
