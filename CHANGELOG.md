@@ -21,6 +21,7 @@ overwrites a finished step (see Contributing in `README.md`).
   `scope_gate.py` reads them on page 1 when no title is at the top.
 - **Phrases that rule a type out** (Bella). Form wording on page 1 means not a PDS;
   "Record of Advice" means not an SOA. `exact_phrases.rules_out`.
+- **"Prepared for" labels the client** (Bella). Bare "Client" was tested and left out.
 
 ### Changed
 - **The title check reads page 1** (`scope_gate.check_scope(text, first_page)`). Rules-out
@@ -28,6 +29,11 @@ overwrites a finished step (see Contributing in `README.md`).
   the most of its own phrases on page 1 wins. On the 36 public samples the title check is
   now right on 34, up from 29. Still missed: a UniSuper PDS and a Westpac change of address,
   which have neither a title nor a listed phrase on page 1. The model was not rerun.
+
+### Added
+- **14 new local samples** (gitignored, sources in `samples/public/SOURCES.md`): 5 adviser
+  FSGs, 4 fact finds and 5 made-up Harbour Wealth documents (2 SOAs, 2 ROAs, 1 ATP).
+  The title check reads 15 of the 16 right; the TJS fact find's title is too low on page 1.
 
 ### Checked
 - **Body text alone misleads.** "Product Disclosure Statement" appears in 9 of 20 provider
