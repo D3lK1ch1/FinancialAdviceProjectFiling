@@ -545,11 +545,11 @@
     {
      "doc_id": "5dac825634a9e2cc",
      "source_name": "asic-cp284-example-soa-attachment.pdf",
-     "type": null,
-     "type_label": "UNKNOWN",
-     "category": null,
-     "confidence": 0.0,
-     "classification_evidence": null,
+     "type": "soa",
+     "type_label": "SOA",
+     "category": "advice_record",
+     "confidence": 0.95,
+     "classification_evidence": "Example Statement of Advice: Scaled advice for a new customer; About this guide; This guide is for Australian financial services (AFS) licensees; It explains how and why we have developed an example Statement of Advice (SOA); The example SOA was developed in consultation with stakeholders",
      "extraction_quality": null,
      "pages": 56,
      "client": null,
@@ -557,15 +557,15 @@
      "date": null,
      "date_provenance": "ambiguous",
      "event_id": null,
-     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "attachment_reason": "no usable date (ambiguous)",
      "needs_review": true,
      "review_reasons": [
-      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+      "A flag fired that blocks on its own. Usually high severity, but a rule may override its severity’s default — multi_doc_bundle is medium and blocks, because filing a two-document bundle as one document destroys a record rather than mislabelling one. Named for what it does rather than for its severity, because those came apart the moment overrides existed."
      ],
      "review_codes": [
-      "out_of_scope"
+      "flagged_blocking"
      ],
-     "threshold": null,
+     "threshold": 0.9,
      "flags": [
       {
        "id": "multi_doc_bundle",
@@ -574,7 +574,9 @@
        "blocks_filing": true
       }
      ],
-     "stages": [],
+     "stages": [
+      "4 Develop the strategic plan"
+     ],
      "destination": {
       "folder": [
        "_Needs review"
@@ -587,17 +589,17 @@
       "folder": [],
       "filename": null,
       "path": null,
-      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+      "rationale": "the document labels no client; a person chooses one; no usable date (ambiguous)"
      }
     },
     {
      "doc_id": "d9faf48641aa3cc9",
      "source_name": "asic-rg90-example-soa-2013.pdf",
-     "type": null,
-     "type_label": "UNKNOWN",
-     "category": null,
-     "confidence": 0.0,
-     "classification_evidence": null,
+     "type": "soa",
+     "type_label": "SOA",
+     "category": "advice_record",
+     "confidence": 0.95,
+     "classification_evidence": "Example Statement of Advice: Scaled advice for a new client; About this guide; This guide is for Australian financial services (AFS) licensees; It explains how and why we have developed an example Statement of Advice (SOA)",
      "extraction_quality": null,
      "pages": 40,
      "client": null,
@@ -605,15 +607,15 @@
      "date": null,
      "date_provenance": "ambiguous",
      "event_id": null,
-     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "attachment_reason": "no usable date (ambiguous)",
      "needs_review": true,
      "review_reasons": [
-      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+      "A flag fired that blocks on its own. Usually high severity, but a rule may override its severity’s default — multi_doc_bundle is medium and blocks, because filing a two-document bundle as one document destroys a record rather than mislabelling one. Named for what it does rather than for its severity, because those came apart the moment overrides existed."
      ],
      "review_codes": [
-      "out_of_scope"
+      "flagged_blocking"
      ],
-     "threshold": null,
+     "threshold": 0.9,
      "flags": [
       {
        "id": "multi_doc_bundle",
@@ -622,7 +624,9 @@
        "blocks_filing": true
       }
      ],
-     "stages": [],
+     "stages": [
+      "4 Develop the strategic plan"
+     ],
      "destination": {
       "folder": [
        "_Needs review"
@@ -635,7 +639,7 @@
       "folder": [],
       "filename": null,
       "path": null,
-      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+      "rationale": "the document labels no client; a person chooses one; no usable date (ambiguous)"
      }
     },
     {
