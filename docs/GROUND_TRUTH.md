@@ -171,6 +171,12 @@ documents above (a file note, an ROA, a fee statement).
   lists past ROAs among the services. These come from made-up documents only; check them
   against a real fee consent when one is available, and an ROA that recommends a fee
   arrangement may now be read as a fee consent.
+- **Joint folder order:** the tool can't tell the husband from a name, so it keeps the
+  order the document uses; nobody needs to confirm it. `client_model.joint_client`.
+- **Two possible clients blocks Approve.** `ambiguous_client` is a hard stop: nothing files
+  until a person picks the client. `review_policy.flag_effect_by_rule`.
+- **Same full name, different clients: told apart by date of birth.** Not built yet (#6);
+  until then both go to a person. `client_model.same_surname.same_full_name`.
 - **Fee consent and fee disclosure statement are two types** (`fee_consent`,
   `fee_disclosure_statement`). An FDS reports fees already charged; a consent agrees to fees
   going forward. Different documents, filed separately.

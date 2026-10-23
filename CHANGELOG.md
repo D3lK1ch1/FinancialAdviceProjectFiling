@@ -25,6 +25,8 @@ overwrites a finished step (see Contributing in `README.md`).
 - **Fee consent phrases** ("Ongoing fee arrangement" and three more), and "Ongoing fee
   arrangement" rules out an ROA. From made-up documents only. Title check on all 63
   labelled samples: 57 right, 6 blank, none wrong.
+- **Client decisions** (Bella): a joint folder keeps the document's name order;
+  `ambiguous_client` blocks Approve; same full name is told apart by date of birth (not built, #6).
 - **Fee consent is its own type** (`fee_consent`), separate from the fee disclosure
   statement (Bella). The four made-up fee consents are relabelled; score unchanged at 57 of 63.
 - **Answer sheet checked** (Bella): change-of-address and nominate-adviser forms are provider

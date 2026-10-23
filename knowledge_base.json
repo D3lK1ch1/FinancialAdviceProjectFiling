@@ -951,6 +951,7 @@
       "rule": "A joint client is one client with one shared client folder, e.g. 'Black, Brad & Zara'. The names are kept together, never split into two folders or chosen between.",
       "decided": "Bella, 9 Oct 2026 (GH#61).",
       "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026.",
+      "order_when_unknown": "A name doesn't say who the husband is, so the tool keeps the order the document uses ('Brad and Zara Black' becomes 'Black, Brad & Zara'). No person needs to confirm it. Bella, 23 Oct 2026.",
       "file_name": "Both first names in the file name too: Black_Brad_Zara_2024-03-14 SOA.pdf (filing_model.file_name). Decided Bella, 21 Oct 2026."
     },
     "different_surnames": {
@@ -975,7 +976,7 @@
     "same_surname": {
       "rule": "Clients who share a surname are told apart by first name: 'Surname, First name'. In practice two clients share only the surname, not the full name.",
       "decided": "Bella, 13 Oct 2026 (GH#61 Q3).",
-      "open": "Two different clients with the same full name is not covered by this rule; under the several_names fallback it goes to the adviser."
+      "same_full_name": "Two different clients with exactly the same full name are told apart by date of birth. Bella, 23 Oct 2026. Not built yet: matching on date of birth is #6. Until then both go to a person."
     },
     "several_names": {
       "rule": "Several names on one document usually share a surname with different first names: file under the surname. If a trustee is named, file under the trust. If neither works, flag it and ask the adviser. Never guess.",
@@ -1243,6 +1244,7 @@
       "risk_mismatch": "hard_stop",
       "fact_find_after_soa": "hard_stop",
       "multi_doc_bundle": "hard_stop",
+      "ambiguous_client": "hard_stop",
       "no_date": "warning",
       "fds_era_mismatch": "warning",
       "roa_basis_unconfirmed": "warning"
@@ -1252,12 +1254,12 @@
       "risk_mismatch": "Goes straight to whether the advice is appropriate.",
       "fact_find_after_soa": "Suggests the advice was written before the client was understood.",
       "multi_doc_bundle": "Filing a bundle as one document loses a record; stop until split.",
+      "ambiguous_client": "A document in the wrong client's folder is a compliance risk; nothing files until a person picks the client. Bella, 23 Oct 2026.",
       "no_date": "The approver can read the date and enter it.",
       "fds_era_mismatch": "Often only an old template, but worth a look.",
       "roa_basis_unconfirmed": "Asks which ROA situation applies; the approver answers it."
     },
     "not_yet_decided": [
-      "ambiguous_client",
       "roa_without_soa",
       "superseding_ambiguity",
       "advice_record_label_shift",
