@@ -32,7 +32,7 @@ properly documented.
 | Step | What happens |
 |---|---|
 | 1. Read | Takes a PDF and pulls out its text. |
-| 2. Identify | Decides which of 9 document types it is (SOA, ROA, FSG, PDS, Authority to Proceed, Fact Find, Risk Profile, File Note, Fee Disclosure Statement) and quotes the exact words that gave it away. |
+| 2. Identify | Decides which of 11 document types it is (SOA, ROA, FSG, PDS, Authority to Proceed, provider form, Fact Find, Risk Profile, File Note, Fee Disclosure Statement, Ongoing Fee Consent) and quotes the exact words that gave it away. |
 | 3. Check | Raises compliance flags. For example, an ROA is only allowed in three specific situations, so the tool asks someone to confirm which one applies. |
 | 4. Propose | Suggests a folder (client → advice event) and a standard file name. |
 | 5. Ask a person | Shows how confident it is. A staff member approves or rejects. Anything uncertain goes to a "Needs review" pile with the reason. |

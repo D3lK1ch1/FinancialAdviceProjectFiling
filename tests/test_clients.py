@@ -256,3 +256,12 @@ def test_real_samples_propose_their_client_folder(file, folder):
 
     assert client["folder"] == folder
     assert client["ambiguous"] is False
+
+
+def test_prepared_for_labels_the_client():
+    """The cover table of an SOA often reads 'Prepared for <names>' (Bella, 23 Oct 2026)."""
+    page = "Statement of Advice\n Prepared for                    Brad Black and Zara Black\n Prepared by    Daniel Archer"
+    candidates = find_client_candidates([page])
+
+    assert [c["label"] for c in candidates] == ["prepared for"]
+    assert choose_client(candidates)["folder"] == "Black, Brad & Zara"
