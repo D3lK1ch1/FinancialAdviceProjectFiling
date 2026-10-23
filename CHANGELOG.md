@@ -50,11 +50,10 @@ overwrites a finished step (see Contributing in `README.md`).
   purpose (cover letters, bundles, look-alikes, typos, fee consents, file notes, an FSG).
 
 ### Known gaps
-- **Made-up set: title check right on 7 of 11, client found on 3.** A cover letter or
-  letter-style SOA has no title near the top; an ATP titled "Client Authority and
-  Acknowledgement" reads as an SOA; an SOA that recommends a binding death benefit
-  nomination reads as a provider form; "Clients", "Client" and "Dear …" aren't client labels.
-  Two non-bundles get a bundle flag. The model was not run on these.
+- **Title check: 6 of 63 left blank.** Two letter-style SOAs (a cover letter first, or
+  titled "Our advice to you") and four public forms and guides with no title near the top.
+  The client is found on few made-up documents: "Clients", "Client" and "Dear …" aren't
+  client labels. Two non-bundles get a bundle flag. The model was not run on any of these.
 
 ### Checked
 - **Body text alone misleads.** "Product Disclosure Statement" appears in 9 of 20 provider
