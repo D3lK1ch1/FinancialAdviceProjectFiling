@@ -13,7 +13,9 @@ exist — **it never generates financial advice.**
 
 ## Read these first
 - `docs/SYSTEM.md` — the spec. Build from it. Source of truth for behaviour.
-- `knowledge_base.json` — the domain data the classifier reads (v0.3).
+- `docs/README.md` — which document is for what. Bella's decisions and open questions are
+  in GitHub issue #61.
+- `knowledge_base.json` — the domain data the classifier reads (v0.4).
 - `harness.py` — a working keyword-based prototype of the full pipeline. Reference, not final.
 - `docs/sample_documents.labelling.md` — hand-labelled expected results for the sample files in
   `samples/`. Note: `harness.py` currently tries to load `sample_documents.json`, which doesn't
@@ -28,8 +30,12 @@ app runs, data it reads (`knowledge_base.json`), or sample input (`samples/`).
 1. **The knowledge base is the source of truth for document rules.** Read document types,
    classifier hints, stages, and flags from `knowledge_base.json`. Never hardcode document
    rules in Python — if a rule is missing, add it to the knowledge base, not the code.
-2. **Everything is a proposal a human approves.** Never file silently. On low confidence,
-   route to `_Needs review` with a reason. Confidence must be visible.
+2. **Only confident documents file themselves; everything else is a human's call.** A
+   document at or above the line (90% in real use) with nothing worth checking is filed
+   automatically in a batch. Never silently: every filing is logged and can be undone.
+   Anything held, flagged or below the line goes to `_Needs review` with a reason for a
+   person. Confidence must be visible. (Changed by Bella 21 Oct 2026; was "everything is a
+   proposal a human approves".)
 3. **Keep the storage layer abstracted.** Filing must swap from local folder to cloud bucket
    later without touching the classifier. No storage details baked into classification logic.
 4. **Keep the three settings independent:** display mode (teach/don't), filing mode
@@ -66,6 +72,13 @@ app runs, data it reads (`knowledge_base.json`), or sample input (`samples/`).
   from 2018, and attachment 3 ("Stockbroker"), which mentions neither s946AA nor "small
   investment". The sample set covers one situation three times, not three situations once.
   An earlier version of this file said att 2 was "not further advice"; that was wrong.
+- **Filing is client → advice event → planning step** (21 Oct 2026). Step folders follow
+  the six-step financial planning process, practical steps only: `1 Goals and situation`,
+  `2 Advice`, `3 Implementation`. File names start `Surname_First name_`. Rules in
+  `filing_model.stage_folders` and `filing_model.file_name`, not in Python (#70).
+- **90% is a floor for real filing.** The automatic batch files only what the tool didn't
+  hold or flag. A firm can raise the line, never lower it. 70% exists for
+  prototype testing only, with nothing written (`review_policy.one_click`).
 
 ## What NOT to do
 - Do not build the AI summary feature until classification + event-grouping are reliable.

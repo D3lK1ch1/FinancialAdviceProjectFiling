@@ -32,7 +32,9 @@ file in
    failure.
 2. ~~**90% threshold covers both the type and the client.**~~ **Superseded 13 Oct 2026 (Q7):**
    a person confirms every document — type, client, stage and new name — whatever the
-   confidence. Nothing is ever filed automatically.
+   confidence. Nothing is ever filed automatically. **Changed 21 Oct 2026:** confident
+   documents (at or above the line, nothing to check) are filed automatically in a logged,
+   reversible batch; everything else still needs a person (`review_policy.one_click`).
 3. **The confidence has to be real.** An LLM that says "0.95" is only reporting its own
    opinion. The number has to be checked before the 90% rule means anything (PR #37).
 4. **Reject is never a dead end.** The user can correct it (type, client, reason), or they
@@ -102,11 +104,51 @@ documents above (a file note, an ROA, a fee statement).
   - Engineering consequence: an FSG/PDS has no client name inside it, so the client has to
     come from **outside the document** (see engineer question below).
 
+### Decided 21 Oct 2026 (Bella)
+- **Filing layers: client → advice event → planning step.** Steps follow the six-step
+  financial planning process (define the relationship, identify goals, assess the
+  situation, develop the plan, implement, review). Only the practical steps get folders
+  inside an event: `1 Goals and situation` (fact find, risk profile), `2 Advice` (SOA,
+  ROA, PDS), `3 Implementation` (ATP). Steps 1 and 6 are relationship-level, so no folder.
+  Replaces the 9 Oct "stage is a label only" answer. Why: filing by client alone can be
+  done by procedure; the value is each document placed with its advice and step.
+  `advice_process_stages`, `filing_model.stage_folders`, `filing.step_folder()`. Placing the
+  step folder under its event needs grouping (#8).
+  - **Confirmed:** the SOA, every ROA and the PDS go in `2 Advice`. `3 Implementation` holds
+    the ATP and, once they are document types (#23), provider forms: opening a super
+    account, rolling over super, applying for a pension, opening an investment account.
+    Bella is finding samples.
+- **File names:** `Surname_First name_YYYY-MM-DD Type[ — qualifier].pdf`, e.g.
+  `Nguyen_Lan_2024-03-14 SOA.pdf`. A couple who share a surname: both first names,
+  husband first (`Black_Brad_Zara_...`). Different surnames: separate clients unless the
+  document explicitly says joint. Same client, date and type: the second gets ` 2`. The
+  record type goes in the file name, never a folder name. `filing_model.file_name`,
+  `client_model.different_surnames`. Open: couples who aren't husband and wife.
+- **Automatic batch filing and the confidence line.** Every document the tool didn't hold
+  and that has nothing worth checking is filed automatically in one batch as it is read.
+  Every filing is logged and can be undone; an undone document isn't refiled. Everything
+  else is flagged for a person. Replaces the 13 Oct "nothing filed automatically" for
+  confident documents only. The line for real filing stays at the
+  firm-safe 90%; a firm's slider can only raise it. While testing the prototype the slider
+  may go down to 70%, marked as testing, with nothing written. The aim is 90% or better.
+  `review_policy.one_click`. Not decided: lowering the line for one type when its failure
+  log proves it, and a "likely, please check" group for 70–89%.
+- **Every filing is logged with undo.** Undone entries stay in the log, marked undone.
+- **Status groups on screen:** each document is in exactly one: Needs review (held),
+  Worth checking (not held, has a flag), Confident.
+- **INFO 267 dropped as a question.** When the scope sentence and the model disagree on what
+  the advice is about, flag it for a person.
+- **Firm rules by chat box** (e.g. "file couples under the husband only"): ideas in #71,
+  after the filing basics.
+- **Front end:** React for the screens, Python purely the backend. FastAPI serves the built
+  page; Node is only for building it. Plan in `docs/UI_INTEGRATION.md` and
+  `frontend/README.md`. The public demo link is off until the real tool is ready.
+
 ## Known differences from existing docs (resolve, don't ignore)
 | Topic | This file | Elsewhere | Status |
 |---|---|---|---|
 | Threshold | 90% for everything | `review_policy`: 0.90 for every type (#50) | **Resolved 2026-10-02.** Matches |
-| Folder levels | Client (`Surname, First name`) | #47 Client → Advice event; `settings.filing_mode` has `client_event` and `flat` (#51, flat not built yet) | **Resolved 9 Oct 2026.** Two layers: client folder, then an event folder named `YYYY-MM — <subject>`, never after one document such as "[SOA]". The stage is shown on each document, not as a folder (PR #58) |
+| Folder levels | Client (`Surname, First name`) | #47 Client → Advice event; `settings.filing_mode` has `client_event` and `flat` (#51, flat not built yet) | **Resolved 21 Oct 2026.** Three layers: client folder, an event folder named `YYYY-MM — <subject>` (never after one document such as "[SOA]"), then a folder per practical planning step. Replaces the 9 Oct two-layer answer (#70) |
 | Popup actions | Accept / Reject (+ correct or manual) | SYSTEM.md: Approve / Edit / Reject | Same idea. "Reject + correct" = Edit |
 | The "why" on a reject | Tell the model what it is and why | `review_policy.correction_reasons`: pick one of six codes, **no free text** (#43) | **Resolved by design.** A free-text box is where staff type a client's name, and the failure log is shared. The "speech bubble" is a pick-a-reason list |
 | Who can accept | "The user" | `approval_policy` (#54): only an adviser (own clients, for SOA/ROA/ATP/FDS) or compliance may approve; admin and paraplanner can edit, not approve | **Added 2026-10-02**, decided by Bella. The tool now has roles |
@@ -141,6 +183,8 @@ She has **no access to real client documents**, and they would be highly confide
    being wrong can mean compliance fines and regulator problems
    (`review_policy.certainty_decision`). So a person confirms every document; **nothing is
    filed automatically**, even at 90%+. This replaces the auto-file step in the pipeline above.
+   **Changed 21 Oct 2026:** confident documents file automatically again, in a logged batch
+   that can be undone (see "Decided 21 Oct 2026").
 8. ~~**Renaming**~~: **answered 13 Oct 2026**. Yes, documents *and folders* are renamed.
    Every rename records the old name, new name, who and when, and users can see who renamed
    it so they can follow up with questions (`filing_model.renaming`; needs the audit log, #7).

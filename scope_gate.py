@@ -46,9 +46,14 @@ _TITLE_PATTERNS = {
 # acronym in a title is capitalised; the word in a sentence is not. Keying on
 # `p.isupper()` uses the knowledge base's own formatting to tell them apart,
 # so it stays a data decision rather than a list of exceptions in Python.
+# Any run of whitespace between a title's words counts as one space. PDF
+# extraction often breaks a title across lines: ASIC's own RG 90 example SOA
+# reads "Statement of\nAdvice", so an exact single-space match left both ASIC
+# SOAs out of scope and the model never saw them.
 def _matcher(pattern: str) -> re.Pattern:
     flags = 0 if pattern.isupper() else re.IGNORECASE
-    return re.compile(rf"\b{re.escape(pattern)}\b", flags)
+    words = r"\s+".join(re.escape(w) for w in pattern.split())
+    return re.compile(rf"\b{words}\b", flags)
 
 
 _MATCHERS = {

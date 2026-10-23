@@ -1,5 +1,5 @@
 """
-Classifier — Phase 1, per SYSTEM.md/2_ARCHITECTURE.md §5: LLM returns strict
+Classifier — Phase 1, per SYSTEM.md/archive/2_ARCHITECTURE.md §5: LLM returns strict
 JSON {doc_type, confidence, matched_signals}, grounded by knowledge_base.json
 classifier_hints (not guessed). Runs only on text scope_gate.py already
 passed — this is the probabilistic step layered on top of that deterministic

@@ -3,7 +3,7 @@
     "regime": "Australia",
     "framework": "Corporations Act 2001 (Cth), Chapter 7 (Pt 7.7 Financial Services Disclosure; Pt 7.9 Financial Product Disclosure), and Corporations Regulations 2001",
     "regulator": "ASIC",
-    "version": "0.3",
+    "version": "0.4",
     "legislative_currency_note": "Provisions verified against AustLII / ASIC sources as at 2026-08. The SOA regime (s946A) is current but has a proposed successor: under DBFO Tranche 2 the SOA is slated to be replaced by a Client Advice Record (CAR). Tranche 2 was not yet passed as at this build. See 'reform_watch'. Do not hardcode 'SOA' as the only advice-record type — classify by role in the advice process, carry the statutory label as an attribute.",
     "not_legal_advice": "This maps documents to provisions to drive classification. It is not legal advice and does not substitute for a financial-services lawyer's sign-off, especially on the AFSL boundary and on reform timing.",
     "consumers": "Each document entry feeds: (1) new-to-industry teaching layer, (2) classifier identification hints, (3) version-tracking logic. Single source of truth — do not fork copies into the UI or classifier."
@@ -66,13 +66,14 @@
       "documents": []
     }
   ],
+  "advice_process_stages_note": "The six steps of the financial planning process as Bella studied it (21 Oct 2026, #70). Replaces engagement / discovery / construction / delivery / implementation / review: the fact find now sits in goals and situation, and the SOA in one step.",
   "advice_process_stages": [
-    {"stage": 1, "name": "Engagement & disclosure", "plain": "The relationship is established; the client is told who the provider is, what they offer, and how they're paid — before any service is provided.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg", "file_note"]},
-    {"stage": 2, "name": "Discovery / fact-find", "plain": "The provider gathers the client's goals, financial situation, and risk tolerance — the evidentiary basis for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile", "file_note"]},
-    {"stage": 3, "name": "Advice construction", "plain": "Recommendations are formed and the reasoning/basis for advice is documented.", "governing_provisions": ["s961B", "s961G (appropriate advice)"], "typical_docs": ["file_note", "soa", "pds"]},
-    {"stage": 4, "name": "Advice delivery", "plain": "The advice record is given to the client, at or as soon as practicable after the advice.", "governing_provisions": ["s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa", "file_note"]},
-    {"stage": 5, "name": "Implementation / execution", "plain": "The client authorises action and the recommendations are executed; product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "pds", "file_note"], "not_yet_document_types": ["product application forms — not yet a document type (see #23)"]},
-    {"stage": 6, "name": "Ongoing service & review", "plain": "Periodic review; ongoing fee arrangements are disclosed and consented to; smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "file_note"]}
+    {"stage": 1, "name": "Define the relationship and scope", "plain": "Trust is established. The adviser explains the advice process and the fees, and agrees what services the client needs. The client is told who the provider is and how they are paid before any service.", "governing_provisions": ["s941A", "s941B", "s941D"], "typical_docs": ["fsg", "file_note"]},
+    {"stage": 2, "name": "Identify goals", "plain": "Short and long term goals are discussed, such as buying a home, funding education or retiring.", "governing_provisions": ["s961B (best interests)"], "typical_docs": ["fact_find", "file_note"]},
+    {"stage": 3, "name": "Assess the financial situation", "plain": "Income, expenses, assets, debts, super, insurance and risk tolerance are reviewed. This is the evidence for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile", "file_note"]},
+    {"stage": 4, "name": "Develop the strategic plan", "plain": "The recommendations are formed and documented in a Statement of Advice, or a Record of Advice where one is permitted, and given to the client with any PDS for a recommended product.", "governing_provisions": ["s961B", "s961G (appropriate advice)", "s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa", "pds", "file_note"]},
+    {"stage": 5, "name": "Implement the recommendations", "plain": "The plan is put into action: accounts opened, investments moved, insurance updated. The client authorises it first and product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "provider_form", "pds", "file_note"], "not_yet_document_types": ["provider implementation forms (opening a super account, rolling over super, applying for a pension, opening an investment account) — not yet document types (see #23). They file in 3 Implementation."]},
+    {"stage": 6, "name": "Review and monitor", "plain": "Periodic check-ins adjust the plan for market, tax or life changes. Ongoing fee arrangements are disclosed and consented to. Smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "file_note"]}
   ],
   "version_status_values": {
     "current": "The live, in-force version of this document for this client (or this edition, for licensee/issuer-wide docs).",
@@ -285,7 +286,7 @@
         "title_patterns": ["Authority to Proceed", "Authority to Implement", "Client Authorisation", "Authority to Act"],
         "key_fields": ["client name", "client signature", "the party being authorised — adviser name, authorised-representative number, licensee", "reference to the SOA/ROA being authorised", "products/actions authorised", "date signed"],
         "distinguishing_signals": ["a first-person grant of authority — 'I/We authorise ...' — not a description of advice", "names the party receiving the authority, and enumerates the specific actions it covers", "prominent signature block binding the client to that grant", "short and instructional, not explanatory", "references the advice record it implements", "may share a document with the SOA"],
-        "confusable_with": ["soa — the ATP authorises; the SOA advises", "application_forms — both carry a signature and a list of actions, but the authority runs to different parties: an ATP authorises the ADVISER to act, application forms instruct the PRODUCT ISSUER. Read who is being empowered, not what is being signed.", "fee_disclosure_statement — also a signed authorisation, but of ongoing FEES rather than of implementing advice"]
+        "confusable_with": ["soa — the ATP authorises; the SOA advises", "provider_form — both carry a signature and a list of actions, but the authority runs to different parties: an ATP authorises the ADVISER to act, a provider form instructs the PRODUCT ISSUER. Read who is being empowered, not what is being signed.", "fee_disclosure_statement — also a signed authorisation, but of ongoing FEES rather than of implementing advice"]
       },
       "links_to": [
         {
@@ -300,6 +301,72 @@
         }
       ],
       "version_notes": "Per client, per advice event, dated. Not usually superseded — each authorisation is a discrete event. A re-signed ATP for the same advice replaces the earlier one. Firms name this document inconsistently (see title_patterns), so title alone is weak evidence. The substance is constant: can this named party act on the client's behalf, for these specific actions, and did the client grant that authority. Classify on that."
+    },
+    {
+      "id": "provider_form",
+      "name": "Provider implementation form",
+      "abbrev": "Form",
+      "category": "implementation",
+      "advice_record_role": false,
+      "legislation": {
+        "primary": "No single section. A provider's own form, under its product terms and, for super, the SIS Act (rollovers, pensions, nominations). The ATO approves some, such as the rollover form NAT 75359.",
+        "related": [
+          "Superannuation Industry (Supervision) Act 1993",
+          "Product application terms"
+        ],
+        "note": "Classify on what the form does (instruct the product issuer), not on the products or documents it mentions."
+      },
+      "teaching": {
+        "what_it_is": "A product provider's form that puts advice into action: opening an account, rolling super over, starting a pension, nominating beneficiaries or an adviser, and similar.",
+        "why_it_exists": "The provider needs the client's own signed instruction before it acts. It is the evidence the recommendation was carried out.",
+        "where_it_sits": "Implementation (step 5), after the advice and the authority to proceed.",
+        "two_weeks_in_note": "Forms constantly mention the PDS ('read the PDS before you sign'). That mention doesn't make the form a PDS. A rollover form names the fund being left as well as the one receiving the money: file it under the receiving fund."
+      },
+      "classifier_hints": {
+        "title_patterns": [
+          "Application form",
+          "Request for rollover",
+          "Request to transfer",
+          "Transfer form",
+          "Transfer within",
+          "Nominate Broker",
+          "Nominate Financial Adviser",
+          "Use this form to"
+        ],
+        "key_fields": [
+          "the provider and product (USI, ABN, AFSL)",
+          "member or account number",
+          "client name, date of birth, address, TFN",
+          "the instruction: open, transfer, roll over, start a pension, nominate",
+          "client signature and date"
+        ],
+        "distinguishing_signals": [
+          "addressed to the product issuer or trustee, which is the party instructed to act",
+          "boxes and sections to fill in ('complete this form', 'mark [x]', 'BLOCK LETTERS')",
+          "a declaration and signature by the member or investor",
+          "refers the reader to the PDS rather than being the PDS",
+          "short, numbered sections; no product features, fees tables or risks explained at length"
+        ],
+        "confusable_with": [
+          "pds — a form tells the client to read the PDS and is often bound into or sent with it, but a PDS explains the product; a form instructs the issuer. A title near the top saying 'Application form' or 'Request …' decides it.",
+          "authority_to_proceed — both are signed instructions, but an ATP authorises the ADVISER; a provider form instructs the PRODUCT ISSUER. Read who is empowered.",
+          "fact_find — both collect client details, but a fact find feeds advice and goes to the adviser; a provider form goes to the provider to act."
+        ],
+        "kinds": "13 kinds in docs/reference/implementation_forms.json (account opening, rollover in, pension application, beneficiary nomination and others). Not yet a separate field; the kind may become a file-name qualifier later (#74)."
+      },
+      "links_to": [
+        {
+          "doc": "authority_to_proceed",
+          "relationship": "follows",
+          "note": "The ATP authorises the adviser; the provider forms carry out the same recommendations."
+        },
+        {
+          "doc": "soa",
+          "relationship": "implements",
+          "note": "Match by client, date and the products recommended."
+        }
+      ],
+      "version_notes": "Per client, per instruction, dated. Providers change form versions often (the version code is usually in the footer, e.g. BTF32020). A resubmitted form for the same instruction replaces the earlier one."
     },
     {
       "id": "fsg",
@@ -621,10 +688,36 @@
       "rule": "Documents and folders are renamed. Every rename is tracked: the original name, the new name, who renamed it and when — and users can see who renamed it, so they know who to follow up with questions.",
       "decided": "Bella, 13 Oct 2026 (GH#61 Q8). The tracking needs the audit log (GH#7)."
     },
+    "file_name": {
+      "pattern": "<Surname>_<First name>_<YYYY-MM-DD> <abbrev>[ — <qualifier>].<ext>",
+      "separator": "_",
+      "client_parts": "Read from the client folder name 'Surname, First name' or 'Surname, First & Second': the surname, then each first name. A folder with no comma (a trust or company) is used whole.",
+      "examples": ["Nguyen_Lan_2024-03-14 SOA.pdf", "Nguyen_Lan_2024-02-20 Fact Find.pdf", "Nguyen_Lan_2025-06-02 ROA — further advice.pdf"],
+      "rule": "The file name starts with the client, surname then first name, joined by underscores. The date and type follow as before (decided on #10, 1 Oct 2026). The advice record type goes in the file name, never in a folder name.",
+      "couple": "A couple who share a surname: both first names, husband first, as for the folder. Black_Brad_Zara_2024-03-14 SOA.pdf",
+      "different_surnames": "Separate clients, each with their own folder and file names, unless the document explicitly says they are joint clients. A firm saying otherwise comes later (#71).",
+      "duplicate": "Same client, date and type: the second file gets a number. Nguyen_Lan_2024-03-02 Fact Find 2.pdf",
+      "no_client": "No client chosen means no client part: the name is not guessed, and the person chooses the client before filing.",
+      "decided": "Bella, 21 Oct 2026 (PR #69 comments).",
+      "open": "Couples who are not husband and wife: order not decided yet.",
+      "status": "Built in filing.proposed_filename (21 Oct 2026). Numbering duplicates needs the other files on hand, so it happens when filing, not here."
+    },
     "stage_label": {
-      "rule": "The advice process stage is shown on each document, read from advice_process_stages[].typical_docs. It is not a folder layer.",
-      "why": "An event usually holds one or two documents per stage, so stage folders would mostly hold a single file. Decided 9 Oct 2026.",
+      "rule": "The planning step is shown on each document, read from advice_process_stages[].typical_docs. Since 21 Oct 2026 the practical steps are also a folder layer inside the event: see stage_folders.",
+      "why": "9 Oct 2026: stage folders would mostly hold a single file, so label only. Replaced 21 Oct 2026 by stage_folders: filing by client and event alone is not enough value.",
       "every_stage_label": "Any stage"
+    },
+    "stage_folders": {
+      "rule": "Inside an advice event, each document sits in a folder for its practical planning step. Only steps whose documents belong to one piece of advice get a folder. Steps 1 and 6 are about the whole client relationship, so they have none.",
+      "decided": "Bella, 21 Oct 2026 (#70). Filing by client alone can be done by procedure; the value is placing each document with its advice and its step.",
+      "folders": [
+        {"name": "1 Goals and situation", "steps": [2, 3], "docs": ["fact_find", "risk_profile"]},
+        {"name": "2 Advice", "steps": [4], "docs": ["soa", "roa", "pds"]},
+        {"name": "3 Implementation", "steps": [5], "docs": ["authority_to_proceed", "provider_form"], "planned_docs": ["Account / product application", "Rollover / transfer in", "Rollover out / withdrawal / account closure", "Internal transfer / phase change", "Pension application (ABP / TTR)", "Pension maintenance / refresh", "Investment switch / rebalance", "Beneficiary nomination", "Contribution strategy forms", "Insurance inside super", "Adviser authority and fee consent", "Debt recycling / gearing implementation", "Share registry (direct equities)"], "planned_note": "Provider implementation forms. Not yet document types: each needs samples and testing first. Kinds, keywords, providers and sample links are in docs/reference/implementation_forms.json (Bella, 21 Oct 2026)."}
+      ],
+      "pds_and_roa": "Confirmed by Bella, 21 Oct 2026: the SOA, every ROA and the PDS file in 2 Advice. The PDS is given with the advice that recommends the product (a copy in the client file is the proof, 29 Sep 2026).",
+      "no_folder": "A type in no folder (file note, FSG, FDS) files at the event level, or where special_folders puts it.",
+      "status": "Built in filing.step_folder (21 Oct 2026). The step folder is proposed per document; joining it under the event folder needs grouping (#8)."
     },
     "advice_event": {
       "definition": "A single advisory decision and all documents that belong to it: the advice record (SOA or ROA), the inputs that fed it (fact find, risk profile), the implementation (authority to proceed), and supporting product disclosure (PDS) used for that decision.",
@@ -786,7 +879,12 @@
     "joint_client": {
       "rule": "A joint client is one client with one shared client folder, e.g. 'Black, Brad & Zara'. The names are kept together, never split into two folders or chosen between.",
       "decided": "Bella, 9 Oct 2026 (GH#61).",
-      "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026."
+      "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026.",
+      "file_name": "Both first names in the file name too: Black_Brad_Zara_2024-03-14 SOA.pdf (filing_model.file_name). Decided Bella, 21 Oct 2026."
+    },
+    "different_surnames": {
+      "rule": "Two people with different surnames are separate clients, each with their own folder, unless the document explicitly says they are joint clients.",
+      "decided": "Bella, 21 Oct 2026 (PR #69). A firm choosing otherwise comes later, through firm rules (#71)."
     },
     "name_format": {
       "rule": "Folder names use normal capitals whatever the document uses: 'JOHN SMITH' becomes 'Smith, John'. Titles are kept: 'Dr John Smith' becomes 'Smith, Dr John'.",
@@ -907,6 +1005,20 @@
     "minimum_threshold": 0.90,
     "minimum_note": "The firm-safe level: 0.90, set once here at the domain level and applying to every firm and every document type (Bella, 1 Oct 2026). A firm cannot lower it — it is a safety control, not a convenience, and lowering a bar is how a busy queue gets emptied by letting documents through unchecked. A type may be held ABOVE it if its failure log ever argues for that; never below.",
     "default_note": "Applies to any document type without its own entry, so adding a type to `documents` needs no edit here (ground rule #1). Equal to the firm-safe level: a new type starts at it, never below.",
+    "one_click": {
+      "rule": "Automatic batch filing. Every document at or above the line, not held and with nothing worth checking, is filed in one batch as it is read, with no click. Every filing is logged and any of it can be undone; an undone document is not refiled by the batch. Everything else is flagged for a person to decide.",
+      "line": "The firm-safe level (minimum_threshold, 0.90). A firm may raise it with a slider, never lower it.",
+      "aim": "90% or better, and higher is better.",
+      "prototype_testing": {
+        "lowest_line": 0.70,
+        "rule": "Only while the prototype is being tested, the slider may go down to 70% to show what would be filed. The screen says it is testing and nothing is written."
+      },
+      "decided": "Bella, 21 Oct 2026: the confident batch files by itself, with the log to inspect and reverse. Replaces the 13 Oct certainty_decision for confident documents. Keeps the 1 Oct firm-safe level (90%) for real filing.",
+      "not_decided": [
+        "Lowering the line for one document type only when its failure log proves it is right at that level. Revisit when there are enough results.",
+        "A 'likely, please check' group for 70 to 89%."
+      ]
+    },
     "thresholds": {
       "soa": {
         "value": 0.90,
@@ -919,6 +1031,10 @@
       "authority_to_proceed": {
         "value": 0.90,
         "why": "A signed client authorisation, and the link between advice and what was actually implemented. atp_without_advice_record is one of the three high-severity flags in the set, so a misread ATP either fires it wrongly or hides a genuine gap."
+      },
+      "provider_form": {
+        "value": 0.90,
+        "why": "It instructs a provider to move a client's money. Forms constantly mention the PDS, and a rollover form names two funds, so a misread files it under the wrong product or fund."
       },
       "fee_disclosure_statement": {
         "value": 0.90,
@@ -971,6 +1087,7 @@
       "rule": "Everything the tool proposes needs 100% certainty: document type, client name, the advice stage, and the new document name. In practice a person confirms every one before anything is filed. Nothing is filed automatically, at any confidence.",
       "why": "Any of these being wrong can lead to heavy compliance fines and problems with regulators.",
       "decided": "Bella, 13 Oct 2026 (GH#61 Q7). Matches CLAUDE.md ground rule 2: everything is a proposal a human approves.",
+      "superseded": "Bella, 21 Oct 2026, for confident documents only: see one_click. Documents at or above the line with nothing worth checking are filed automatically, logged and reversible. Everything else still needs a person. The reasoning above (a wrong type, client, step or name risks fines) is why the line is 90% for real filing and why anything flagged never files itself.",
       "consequence": "The 0.90 thresholds no longer decide whether to file; every document is confirmed. They can still decide how a proposal is shown (e.g. 'likely' vs 'needs a closer look'). How that works on screen is for Delia and Bella to agree; thresholds are unchanged until then."
     }
   },
@@ -1037,6 +1154,7 @@
       "soa": "Right client; the advice-as-at (commencement) date; the subject from its own scope.",
       "roa": "As SOA, plus which of the three ROA situations applies.",
       "authority_to_proceed": "Signed; links to the SOA or ROA it authorises.",
+      "provider_form": "Instructs the product issuer, not the adviser; it is the receiving fund's form for a rollover; signed and dated.",
       "fee_disclosure_statement": "Right client; the period; consent signed."
     },
     "flag_effects": {

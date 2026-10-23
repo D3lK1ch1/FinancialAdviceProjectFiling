@@ -1,0 +1,204 @@
+{
+  "meta": {
+    "title": "Australian financial advice implementation forms: taxonomy and provider examples",
+    "compiled": "2026-10-21",
+    "notes": [
+      "Form codes and versions change often. Treat every URL as a starting point and re-check before relying on it.",
+      "Many funds now push members to online flows (MemberAccess, adviser portals). Paper PDFs still exist for advisers and edge cases.",
+      "verify=true means the entry came from general industry knowledge, not a document found in this research pass."
+    ]
+  },
+  "providers": [
+    {
+      "id": "bt_panorama",
+      "name": "BT Panorama (Panorama Super, Panorama Investments)",
+      "type": "retail wrap platform",
+      "trustee_admin": "BT Funds Management Ltd (trustee), BT Portfolio Services Ltd (administrator)",
+      "usi": "90 194 410 365 011",
+      "channel": "Adviser portal service requests plus PDF forms (BTFxxxxx codes)",
+      "forms_root": "https://www.bt.com.au/content/dam/public/btfg-bt/documents/panorama/"
+    },
+    {
+      "id": "rest",
+      "name": "Rest Super (Rest Super, Rest Corporate, Rest Pension)",
+      "type": "industry fund",
+      "channel": "Mostly online via MemberAccess and Rest App; PDFs for binding nominations, insurance, change of details",
+      "forms_page": "https://rest.com.au/tools-advice/resources/forms"
+    },
+    {
+      "id": "hostplus",
+      "name": "Hostplus",
+      "type": "industry fund",
+      "channel": "Online pension application (pensions.hostplus.com.au) plus numbered PDF forms (e.g. 1184.3, 1195.x, 1223.x)",
+      "forms_root": "https://hostplus.com.au/content/dam/hostplus-program/site/resources/members/forms/"
+    },
+    {
+      "id": "mufg",
+      "name": "MUFG Pension & Market Services (formerly Link Group)",
+      "type": "administrator and share registry, not a fund",
+      "divisions": {
+        "MUFG Retirement Solutions": "Back office super administration for many funds. Forms are branded by the client fund, not MUFG.",
+        "MUFG Corporate Markets": "Share registry for ASX issuers (e.g. Westpac, BOQ). Forms: change of address, off-market transfer, DRP, TFN notification, direct credit, merge holdings."
+      }
+    },
+    {
+      "id": "leveraged",
+      "name": "Leveraged Equities (Bendigo and Adelaide Bank subsidiary)",
+      "type": "margin lender",
+      "channel": "Online application with adviser prefill and client handover; PDF maintenance forms",
+      "forms_page": "https://leveraged.com.au/support/forms"
+    },
+    {
+      "id": "ato",
+      "name": "Australian Taxation Office",
+      "type": "regulator",
+      "channel": "Approved forms lodged with the super fund, not the ATO (NOI, splitting, downsizer)"
+    }
+  ],
+  "categories": [
+    {
+      "id": "account_opening",
+      "name": "Account / product application",
+      "description": "Opening a new super, pension, investment wrap, or loan account.",
+      "keywords": ["application form", "new account", "apply", "investor details", "product disclosure statement", "TMD", "identification", "AML/CTF"],
+      "examples": [
+        {"provider": "hostplus", "form": "Hostplus Retirement Account application (Pension or TTR)", "channel": "online, approx 20 min; PDF available in PDS", "url": "https://pensions.hostplus.com.au", "notes": "Minimum $10,000 transferred in"},
+        {"provider": "bt_panorama", "form": "Panorama account application", "channel": "adviser portal, digital consent", "url": null, "verify": true},
+        {"provider": "leveraged", "form": "Margin Loan application (online or PDF)", "channel": "online with adviser prefill", "url": "https://www.leveraged.com.au/siteassets/documents/productandfeaturesfactsheets/adviseruseforms/leverage-adviser-online-application-reference-guide.pdf"}
+      ]
+    },
+    {
+      "id": "rollover_in",
+      "name": "Rollover / transfer in",
+      "description": "Consolidating super from another fund into the recommended fund.",
+      "keywords": ["request to transfer", "rollover", "USI", "transferring fund", "whole balance", "partial balance", "SuperStream"],
+      "examples": [
+        {"provider": "bt_panorama", "form": "Request to transfer super benefits to Panorama Super", "code": "BTF32020", "url": "https://www.bt.com.au/content/dam/public/btfg-bt/documents/panorama/Request-to-Transfer-BTF32020.pdf", "notes": "One form per FROM fund; adviser can lodge in Panorama"},
+        {"provider": "hostplus", "form": "Request to transfer into Hostplus", "code": "1184.3 (Nov 2025)", "url": "https://aem-stg.hostplus.com.au/content/dam/hostplus-program/site/resources/members/forms/1184.3-F-Rollover-ISS3.pdf.coredownload.pdf", "notes": "Found on a staging host; check live site for same code"},
+        {"provider": "hostplus", "form": "How to rollover funds from an SMSF into Hostplus (guide)", "url": "https://aem-stg.hostplus.com.au/content/dam/hostplus-program/site/resources/members/forms/How-to-rollover-funds-from-an-SMSF-into-Hostplus.pdf", "notes": "SMSF rollovers must go via SuperStream/ESA"}
+      ]
+    },
+    {
+      "id": "rollover_out_withdrawal",
+      "name": "Rollover out / withdrawal / account closure",
+      "description": "Moving money out of a fund, full closure, lump sum or partial withdrawal.",
+      "keywords": ["withdrawal", "closure", "benefit payment", "condition of release", "partial rollover", "SMSF rollover", "lump sum"],
+      "examples": [
+        {"provider": "bt_panorama", "form": "Partial withdrawal or rollover to a super fund", "code": "BTF32026", "url": "https://www.bt.com.au/content/dam/public/btfg-bt/documents/panorama/BTF32026-Partial%20withdrawal.pdf"},
+        {"provider": "bt_panorama", "form": "Super account closure: rollover to an SMSF", "url": "https://www.bt.com.au/content/dam/public/btfg-bt/documents/panorama/super_closure_smsf.pdf"},
+        {"provider": "rest", "form": "Full or partial rollover / cash withdrawal", "channel": "online only via MemberAccess", "url": "https://rest.com.au/tools-advice/resources/forms"},
+        {"provider": "hostplus", "form": "Benefit payment application", "code": "1223.9", "url": "https://hostplus.com.au/content/dam/hostplus-program/site/resources/members/forms/Benefit-payment-application-form.pdf.coredownload.pdf"},
+        {"provider": "hostplus", "form": "Pension benefit payment: withdrawal to you", "code": "1224.1", "url": "https://hostplus.com.au/content/dam/hostplus-program/site/resources/members/forms/1224-1Hostplus-Pension-Benefit-payment-withdrawal.pdf.coredownload.pdf"}
+      ]
+    },
+    {
+      "id": "internal_transfer_phase_change",
+      "name": "Internal transfer / phase change",
+      "description": "Moving within the same platform, e.g. accumulation to TTR or account based pension, in-specie between accounts.",
+      "keywords": ["transfer within", "phase", "accumulation to pension", "in specie", "transfer balance cap", "commutation"],
+      "examples": [
+        {"provider": "bt_panorama", "form": "Full transfer within Panorama Super", "code": "BTF31892", "url": "https://www.bt.com.au/content/dam/public/btfg-bt/documents/panorama/BTF31892-Full_transfer_within_Panorama_Super.pdf"},
+        {"provider": "bt_panorama", "form": "Partial transfer within Panorama Super", "code": "BTF32033", "url": "https://www.bt.com.au/content/dam/public/btfg-bt/documents/panorama/BTF32033-Partial_transfer_within_Panorama_Super.pdf", "notes": "Not for Term Allocated Pensions"}
+      ]
+    },
+    {
+      "id": "pension_commencement",
+      "name": "Pension application (ABP / TTR)",
+      "description": "Starting an account based pension or transition to retirement income stream.",
+      "keywords": ["pension application", "account based pension", "transition to retirement", "TTR", "reversionary", "minimum drawdown", "preservation age"],
+      "examples": [
+        {"provider": "hostplus", "form": "Retirement Account application", "channel": "online", "url": "https://hostplus.com.au/members/retirement/retirement-accounts/opening-a-pension-account"},
+        {"provider": "bt_panorama", "form": "Full transfer within Panorama Super (to pension phase)", "code": "BTF31892", "url": "https://www.bt.com.au/content/dam/public/btfg-bt/documents/panorama/BTF31892-Full_transfer_within_Panorama_Super.pdf"}
+      ]
+    },
+    {
+      "id": "pension_maintenance",
+      "name": "Pension maintenance / refresh",
+      "description": "Changing payment amount, frequency or bank details; refreshing a pension to add new money.",
+      "keywords": ["pension refresh", "restart", "payment frequency", "change of details", "drawdown order", "Centrelink schedule"],
+      "examples": [
+        {"provider": "bt_panorama", "form": "Pension refresh (Adviser)", "code": "BTF34073-PRA", "url": "https://www.bt.com.au/content/dam/public/btfg-bt/documents/panorama/BTF34073-PRA.pdf"},
+        {"provider": "bt_panorama", "form": "Pension refresh (Member)", "code": "BTF34073-PRM", "url": "https://www.bt.com.au/content/dam/public/btfg-bt/documents/panorama/BTF34073-PRM.pdf"},
+        {"provider": "hostplus", "form": "Pension plan change of details", "code": "1195.1", "url": "https://hostplus.com.au/content/dam/hostplus-program/site/resources/members/forms/1195-1-Pension-Plan-Change-of-Details.pdf.coredownload.pdf"}
+      ]
+    },
+    {
+      "id": "investment_switch",
+      "name": "Investment switch / rebalance",
+      "description": "Changing investment options inside a fund or pension.",
+      "keywords": ["switch", "investment option", "rebalance", "drawdown priority"],
+      "examples": [
+        {"provider": "hostplus", "form": "Pension plan switching form", "code": "1195.0", "url": "https://hostplus.com.au/content/dam/hostplus-program/site/resources/members/forms/1195-0-Pension-Plan-Switching-Form-ISS3.pdf"}
+      ]
+    },
+    {
+      "id": "beneficiary_nomination",
+      "name": "Beneficiary nomination",
+      "description": "Binding, non-lapsing, non-binding or reversionary nominations.",
+      "keywords": ["binding nomination", "non-lapsing", "reversionary", "death benefit", "witness", "dependant", "legal personal representative"],
+      "examples": [
+        {"provider": "rest", "form": "Super: binding death benefit nomination", "url": "https://rest.com.au/getmedia/8d12059e-b9fc-4caa-983e-dd1e19ea625a/nom-of-beneficiaries-super-webs.pdf", "notes": "Expires after 3 years; separate form for Rest Pension"}
+      ]
+    },
+    {
+      "id": "contributions",
+      "name": "Contribution strategy forms",
+      "description": "ATO approved notices and elections that implement contribution advice.",
+      "keywords": ["notice of intent", "section 290-170", "contributions splitting", "downsizer", "spouse contribution", "choice of fund", "NAT 71121", "NAT 15237", "NAT 75073"],
+      "examples": [
+        {"provider": "ato", "form": "Notice of intent to claim or vary a deduction for personal super contributions", "code": "NAT 71121", "url": "https://www.ato.gov.au/forms/notice-of-intent-to-claim-or-vary-a-deduction-for-personal-super-contributions/"},
+        {"provider": "ato", "form": "Superannuation contributions splitting application", "code": "NAT 15237", "url": "https://www.ato.gov.au/forms/contributions-splitting/", "notes": "Lodge NOI first if splitting deductible personal contributions; send to fund"},
+        {"provider": "ato", "form": "Downsizer contribution into super", "code": "NAT 75073", "url": "https://www.ato.gov.au/Individuals/Super/Growing-your-super/Adding-to-your-super/Downsizing-contributions-into-superannuation/", "notes": "Must reach fund before or with the contribution"},
+        {"provider": "rest", "form": "Fund nomination / standard choice form", "url": "https://rest.com.au/tools-advice/resources/forms"}
+      ]
+    },
+    {
+      "id": "insurance",
+      "name": "Insurance inside super",
+      "description": "Applying for, changing, or transferring Death, TPD and IP cover.",
+      "keywords": ["insurance application", "transfer cover", "occupation category", "TPD", "income protection", "underwriting"],
+      "examples": [
+        {"provider": "rest", "form": "Rest Super insurance application / change your insurance / transfer cover", "url": "https://rest.com.au/tools-advice/resources/forms"}
+      ]
+    },
+    {
+      "id": "adviser_authority_fees",
+      "name": "Adviser authority and fee consent",
+      "description": "Linking an adviser to an account and authorising advice fees (ongoing fee consent, fee deduction from super).",
+      "keywords": ["nominate adviser", "authority to operate", "fee consent", "ongoing fee arrangement", "advice fee", "digital consent"],
+      "examples": [
+        {"provider": "leveraged", "form": "Nominate Broker or Financial Adviser", "url": "https://www.leveraged.com.au/siteassets/documents/dilfacilitymaintenanceforms/leveraged-nominate-broker.pdf"},
+        {"provider": "bt_panorama", "form": "Digital consent (adviser requests, client approves in app)", "channel": "online", "url": null, "verify": true},
+        {"provider": "all_super_funds", "form": "Advice fee consent form (fee deducted from super)", "url": null, "verify": true}
+      ]
+    },
+    {
+      "id": "debt_recycling",
+      "name": "Debt recycling / gearing implementation",
+      "description": "No single 'debt recycling form'. Implemented through a bundle: loan split, redraw or limit increase, investment account opening, and optionally margin lending.",
+      "keywords": ["loan split", "split loan", "redraw", "line of credit", "loan increase", "margin loan", "investment loan", "offset", "refinance"],
+      "bundle_steps": [
+        "Loan split request (lender form or phone call, no new credit if total debt unchanged)",
+        "Loan increase / top-up application (full credit application if total debt rises)",
+        "Investment account application (platform, broker or wrap)",
+        "Optional: margin loan application, nominate adviser, refinance-in, security transfer"
+      ],
+      "examples": [
+        {"provider": "leveraged", "form": "Margin Loan application (Ord Minnett branded example)", "url": "https://www.leveraged.com.au/siteassets/documents/ord-minnett/ord-minnett-margin-loan-application-form.pdf"},
+        {"provider": "leveraged", "form": "Refinance In request", "url": "https://www.leveraged.com.au/siteassets/documents/facilitymaintenanceforms/leveraged-refinance-in-request.pdf"},
+        {"provider": "leveraged", "form": "Forms library (increase limit, security transfer, platform nomination, etc.)", "url": "https://leveraged.com.au/support/forms"},
+        {"provider": "big4_banks", "form": "Home loan split / variation request", "url": null, "verify": true, "notes": "Bank specific; often broker lodged"}
+      ]
+    },
+    {
+      "id": "share_registry",
+      "name": "Share registry (direct equities)",
+      "description": "Moving or updating issuer-sponsored holdings, often part of in-specie transfers or estate work.",
+      "keywords": ["off-market transfer", "SRN", "HIN", "issuer sponsored", "change of address", "DRP", "TFN notification", "merge holdings"],
+      "examples": [
+        {"provider": "mufg", "form": "Westpac share registry forms (change of address, DRP, TFN, off-market transfer, merge)", "url": "https://www.westpac.com.au/about-westpac/investor-centre/manage-your-shareholding/download-a-form/"},
+        {"provider": "mufg", "form": "Address change notification (WBC ADD114)", "url": "https://www.westpac.com.au/content/dam/public/wbc/documents/pdf/aw/ic/change-of-address.pdf"}
+      ]
+    }
+  ]
+}

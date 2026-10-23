@@ -6,12 +6,12 @@
    "knowledge_base_version": "0.4",
    "classifier": "keyword",
    "filing_profile": "stage-nested",
-   "confidence_threshold": 0.6,
+   "confidence_threshold": 0.9,
    "batch": {
     "client": null,
     "documents": 10,
-    "auto_filed": 8,
-    "needs_review": 2
+    "auto_filed": 7,
+    "needs_review": 3
    },
    "events": [
     {
@@ -287,9 +287,21 @@
      "event_id": "evt-65a64311ef",
      "attachment_reason": "anchors this event",
      "attachment_confidence": 0.77,
-     "needs_review": false,
+     "needs_review": true,
      "flags": [],
      "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": "2025-09-10 - Nguyen - ROA.pdf",
+      "path": null,
+      "rationale": "held for a person: below the 90% line"
+     },
+     "stages": [
+      "Step 4 Develop the strategic plan",
+      "Step 6 Review and monitor"
+     ],
+     "would_file": {
       "folder": [
        "Nguyen",
        "2025-09 - Insurance",
@@ -300,9 +312,11 @@
       "kind": "event_document",
       "rationale": "anchors this event"
      },
-     "stages": [
-      "Step 4 Develop the strategic plan",
-      "Step 6 Review and monitor"
+     "review_codes": [
+      "low_confidence"
+     ],
+     "review_reasons": [
+      "Below the 90% line, so a person checks it."
      ]
     },
     {
@@ -439,12 +453,12 @@
    "knowledge_base_version": "0.4",
    "classifier": "keyword",
    "filing_profile": "category-flat",
-   "confidence_threshold": 0.6,
+   "confidence_threshold": 0.9,
    "batch": {
     "client": null,
     "documents": 10,
-    "auto_filed": 8,
-    "needs_review": 2
+    "auto_filed": 7,
+    "needs_review": 3
    },
    "events": [
     {
@@ -715,9 +729,21 @@
      "event_id": "evt-65a64311ef",
      "attachment_reason": "anchors this event",
      "attachment_confidence": 0.77,
-     "needs_review": false,
+     "needs_review": true,
      "flags": [],
      "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": "2025-09-10 ROA - Insurance.pdf",
+      "path": null,
+      "rationale": "held for a person: below the 90% line"
+     },
+     "stages": [
+      "Step 4 Develop the strategic plan",
+      "Step 6 Review and monitor"
+     ],
+     "would_file": {
       "folder": [
        "Nguyen",
        "Advice Documents"
@@ -727,9 +753,11 @@
       "kind": "event_document",
       "rationale": "anchors this event"
      },
-     "stages": [
-      "Step 4 Develop the strategic plan",
-      "Step 6 Review and monitor"
+     "review_codes": [
+      "low_confidence"
+     ],
+     "review_reasons": [
+      "Below the 90% line, so a person checks it."
      ]
     },
     {
@@ -865,12 +893,12 @@
    "knowledge_base_version": "0.4",
    "classifier": "keyword",
    "filing_profile": "nested-default",
-   "confidence_threshold": 0.6,
+   "confidence_threshold": 0.9,
    "batch": {
     "client": null,
     "documents": 10,
-    "auto_filed": 8,
-    "needs_review": 2
+    "auto_filed": 7,
+    "needs_review": 3
    },
    "events": [
     {
@@ -1141,9 +1169,21 @@
      "event_id": "evt-65a64311ef",
      "attachment_reason": "anchors this event",
      "attachment_confidence": 0.77,
-     "needs_review": false,
+     "needs_review": true,
      "flags": [],
      "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": "2025-09-10 - Nguyen - ROA.pdf",
+      "path": null,
+      "rationale": "held for a person: below the 90% line"
+     },
+     "stages": [
+      "Step 4 Develop the strategic plan",
+      "Step 6 Review and monitor"
+     ],
+     "would_file": {
       "folder": [
        "Nguyen",
        "2025-09 - Insurance"
@@ -1153,9 +1193,11 @@
       "kind": "event_document",
       "rationale": "anchors this event"
      },
-     "stages": [
-      "Step 4 Develop the strategic plan",
-      "Step 6 Review and monitor"
+     "review_codes": [
+      "low_confidence"
+     ],
+     "review_reasons": [
+      "Below the 90% line, so a person checks it."
      ]
     },
     {
@@ -1291,12 +1333,12 @@
    "knowledge_base_version": "0.4",
    "classifier": "keyword",
    "filing_profile": "preserve-original",
-   "confidence_threshold": 0.6,
+   "confidence_threshold": 0.9,
    "batch": {
     "client": null,
     "documents": 10,
-    "auto_filed": 8,
-    "needs_review": 2
+    "auto_filed": 7,
+    "needs_review": 3
    },
    "events": [
     {
@@ -1567,9 +1609,21 @@
      "event_id": "evt-65a64311ef",
      "attachment_reason": "anchors this event",
      "attachment_confidence": 0.77,
-     "needs_review": false,
+     "needs_review": true,
      "flags": [],
      "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": "2025-09-10 - Nguyen - ROA - scan_007.pdf",
+      "path": null,
+      "rationale": "held for a person: below the 90% line"
+     },
+     "stages": [
+      "Step 4 Develop the strategic plan",
+      "Step 6 Review and monitor"
+     ],
+     "would_file": {
       "folder": [
        "Nguyen",
        "2025-09 - Insurance"
@@ -1579,9 +1633,11 @@
       "kind": "event_document",
       "rationale": "anchors this event"
      },
-     "stages": [
-      "Step 4 Develop the strategic plan",
-      "Step 6 Review and monitor"
+     "review_codes": [
+      "low_confidence"
+     ],
+     "review_reasons": [
+      "Below the 90% line, so a person checks it."
      ]
     },
     {
@@ -1717,12 +1773,12 @@
    "knowledge_base_version": "0.4",
    "classifier": "keyword",
    "filing_profile": "sharepoint-safe",
-   "confidence_threshold": 0.6,
+   "confidence_threshold": 0.9,
    "batch": {
     "client": null,
     "documents": 10,
-    "auto_filed": 8,
-    "needs_review": 2
+    "auto_filed": 7,
+    "needs_review": 3
    },
    "events": [
     {
@@ -1993,9 +2049,21 @@
      "event_id": "evt-65a64311ef",
      "attachment_reason": "anchors this event",
      "attachment_confidence": 0.77,
-     "needs_review": false,
+     "needs_review": true,
      "flags": [],
      "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": "2025-09-10 Nguyen ROA.pdf",
+      "path": null,
+      "rationale": "held for a person: below the 90% line"
+     },
+     "stages": [
+      "Step 4 Develop the strategic plan",
+      "Step 6 Review and monitor"
+     ],
+     "would_file": {
       "folder": [
        "Nguyen",
        "2025-09 Insurance"
@@ -2005,9 +2073,11 @@
       "kind": "event_document",
       "rationale": "anchors this event"
      },
-     "stages": [
-      "Step 4 Develop the strategic plan",
-      "Step 6 Review and monitor"
+     "review_codes": [
+      "low_confidence"
+     ],
+     "review_reasons": [
+      "Below the 90% line, so a person checks it."
      ]
     },
     {
