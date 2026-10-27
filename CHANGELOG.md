@@ -13,6 +13,43 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-27 — One page at /, always reading real documents
+
+### Changed
+- **The React page is the tool's front page** (Delia, proposal on #75). `/` serves
+  `frontend/dist/index.html`: drop PDFs, then the sidebar shows overview, advice events,
+  needs review, folder tree and filing log, and a client in the sidebar filters advice
+  events to that client. "New batch" goes back to the upload screen.
+- **The previous page moved to `/classic`.** It stays until the React page has Edit and
+  display mode.
+- **`npm run build` is plain `vite build`.** One self-contained page with no data in it;
+  `npm run dev` passes `/api` and `/review` to the backend on port 8000.
+- **`scripts/build_public_set.py` only caches answers** for `accuracy_report.py`. It no
+  longer writes a demo data file.
+
+### Removed
+- **Demo mode** (Delia): `config.APP_MODE`, `GET /api/mode`, the 403 on `/api/batch`,
+  `/app/` and `live.html`, `tests/test_mode.py`. The tool runs only on the computer whose
+  documents it reads, and the block never covered `/ingest` anyway.
+- **Demo data and demo-only screens:** `sample-data.json`, `public-data.json`,
+  `build-pages.cjs`, the guided tour, the welcome popup, the demo banner and ribbon, the
+  sample-set switcher and the filing-scheme dropdown.
+
+### Checked
+- `tests/test_pages.py`: `/` serves the built page or says how to build it, `/classic`
+  serves the previous page, uploads need no switch, the demo routes are gone.
+- Two public samples through the running app at `/api/batch` with Ollama: both read,
+  classified and held for review with a proposed path.
+
+### Known gaps
+- Edit and display mode are still only on `/classic`.
+- `manifest.py` still describes the filing as "Client, then advice event" with step
+  folders not built; the folder tree shows that text.
+- `Filed.jsx` (the batch modal in `docs/ui/4-one-click-filing.png`) isn't used by any
+  screen; automatic batch filing replaced it on 21 Oct.
+- An error from reading a PDF or reaching Ollama still reaches the page as raw text
+  (CodeQL, Step 3).
+
 ## 2026-10-23 — Exact phrases per document type
 
 ### Decided
