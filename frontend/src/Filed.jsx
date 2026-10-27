@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Icon } from './atoms.jsx';
-import { plural } from './model.js';
+import { plural, target } from './model.js';
 
 // After a batch approval: what would be filed where, and what really happened (nothing).
 export default function Filed({ docs, onUndo, onLog, onClose }) {
@@ -8,7 +8,7 @@ export default function Filed({ docs, onUndo, onLog, onClose }) {
   useEffect(() => { if (done.current) done.current.focus(); }, []);
   const byFolder = {};
   docs.forEach((x) => {
-    const dst = x.destination;
+    const dst = target(x);
     const k = dst.folder.join(' / ');
     (byFolder[k] = byFolder[k] || []).push(dst.filename);
   });

@@ -3,9 +3,12 @@ import { Icon } from './atoms.jsx';
 import Inspector from './Inspector.jsx';
 import Tour, { STEPS as TOUR } from './Tour.jsx';
 import Welcome from './Welcome.jsx';
-import Filed from './Filed.jsx';
 import { Overview, Events, Review, Tree, Log, About } from './views.jsx';
-import { DATASETS, SETS, PROFILES, statusOf, initials, plural } from './model.js';
+import { DATASETS, SETS, PROFILES, LOCAL, statusOf, initials, plural, batchable, oneClick, startLine } from './model.js';
+
+// Sample sets can have different filing schemes (the public set has only the
+// backend's own), so fall back to a set's first scheme rather than crash.
+const schemeIn = (set, profile) => (DATASETS[set][profile] ? profile : Object.keys(DATASETS[set])[0]);
 
 const REPO = 'https://github.com/ahaythorpe/advice-document-classifier';
 const WHY_LOCAL = `${REPO}/blob/main/docs/DEPLOYMENT.md`;
@@ -48,13 +51,13 @@ export default function App() {
   const [decisions, setDecisions] = useState({});      // in memory only: the demo stores nothing
   const [theme, setTheme] = useTheme();
   const [tour, setTour] = useState(null);           // step index while the tour is open
-  const [welcome, setWelcome] = useState(() => !welcomed());
+  const [welcome, setWelcome] = useState(() => !LOCAL && !welcomed());   // the demo's popup, not for real files
   const [log, setLog] = useState([]);               // the filing log: in memory only, like decisions
-  const [filed, setFiled] = useState(null);         // doc ids of the last batch, while its popup is open
   const wide = useWide();
   const scrollRef = useRef(null);
 
-  const d = DATASETS[set][profile];   // changing the scheme changes the folders and nothing else
+  const scheme = schemeIn(set, profile);
+  const d = DATASETS[set][scheme];   // changing the scheme changes the folders and nothing else
   const doc = selected && d.documents.find((x) => x.doc_id === selected);
 
   useEffect(() => {
@@ -71,7 +74,7 @@ export default function App() {
   useEffect(() => {
     const on = (e) => {
       if (e.target.closest && e.target.closest('select')) return;
-      if (e.key === 'Escape') { setSelected(null); setTour(null); setFiled(null); if (welcome) closeWelcome(); }
+      if (e.key === 'Escape') { setSelected(null); setTour(null); if (welcome) closeWelcome(); }
       if (selected && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); step(e.key === 'ArrowDown' ? 1 : -1); }
     };
     document.addEventListener('keydown', on);
@@ -89,26 +92,47 @@ export default function App() {
     setTour(i);
     setSet(SETS[0]);                    // the tour is written about the demo folder
     go(s.view);
-    const pick = s.select && s.select(DATASETS[SETS[0]][profile]);
+    const pick = s.select && s.select(DATASETS[SETS[0]][schemeIn(SETS[0], profile)]);
     setSelected(pick ? pick.doc_id : null);
   };
   const endTour = () => { setTour(null); setSelected(null); };
   const closeWelcome = () => { markWelcomed(); setWelcome(false); };
   const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const record = (e) => setLog((l) => [...l, { id: l.length + 1, at: now(), ...e }]);
-  const approveBatch = (ids, level) => {
+  // Automatic batch filing (review_policy.one_click, decided 21 Oct): every
+  // document at or above the line with nothing to check is filed as soon as it
+  // is read, and logged. Anything else is flagged for a person. A document a
+  // person has undone is never filed again by the batch.
+  const [line, setLine] = useState(() => startLine(d));
+  // The backend's mode and review options. Verdicts are written to the failure
+  // log only in live mode, and only for documents the real tool read (they
+  // carry a document_id); the made-up demo and demo-mode clicks never are.
+  const [server, setServer] = useState({ mode: null, options: null });
+  useEffect(() => {
+    Promise.all([fetch('/api/mode').then((r) => r.json()), fetch('/review/options').then((r) => r.json())])
+      .then(([m, o]) => setServer({ mode: m.mode, options: o }))
+      .catch(() => setServer({ mode: 'none', options: null }));
+  }, []);
+  const decided = useRef({});
+  const undone = useRef(new Set());
+  decided.current = decisions;
+  useEffect(() => {
+    const floor = oneClick(d).floor;
+    const ids = d.documents
+      .filter((x) => !decided.current[x.doc_id] && !undone.current.has(x.doc_id) && batchable(x, line, floor))
+      .map((x) => x.doc_id);
+    if (!ids.length) return;
     setDecisions((m) => ({ ...m, ...Object.fromEntries(ids.map((id) => [id, 'approve'])) }));
-    record({ kind: 'batch', level, ids, decision: 'approve' });
-    setFiled(ids);
-  };
+    record({ kind: 'auto', level: line, ids, decision: 'approve' });
+  }, [set, scheme, line]);
   // Undo clears the decisions that entry made and marks it undone; the log keeps it.
   const undoEntry = (id) => {
     const e = log.find((x) => x.id === id);
     if (!e) return;
     setDecisions((m) => { const n = { ...m }; e.ids.forEach((d0) => { if (n[d0] === e.decision) delete n[d0]; }); return n; });
+    e.ids.forEach((d0) => undone.current.add(d0));
     setLog((l) => l.map((x) => (x.id === id ? { ...x, undone: true } : x)));
   };
-  const undoBatch = () => { const last = log[log.length - 1]; if (last) undoEntry(last.id); setFiled(null); };
   const decide = (k) => {
     const same = decisions[selected] === k;
     setDecisions((m) => ({ ...m, [selected]: same ? undefined : k }));
@@ -122,11 +146,11 @@ export default function App() {
   const ok = d.documents.filter((x) => statusOf(x) === 'ok').length;
   const warn = d.documents.filter((x) => statusOf(x) === 'warn').length;
   const sub = { log: plural(log.filter((e) => !e.undone).length, 'entry', 'entries'), events: `${d.events.length} events · ${n} documents`, review: `${d.batch.needs_review} held`, tree: 'Proposed filing' }[view] || '';
-  const viewProps = { d, selected, onSelect: setSelected, decisions, onBatch: approveBatch };
+  const viewProps = { d, selected, onSelect: setSelected, decisions, line, onLine: setLine, log };
 
   return (
-    <div className="window" role="application" aria-label="Advice Document Filing (demo only)">
-      <div className="ribbon" aria-hidden="true">Demo</div>
+    <div className="window" role="application" aria-label={LOCAL ? 'Advice Document Filing' : 'Advice Document Filing (demo only)'}>
+      {!LOCAL && <div className="ribbon" aria-hidden="true">Demo</div>}
 
       <div className="titlebar">
         <div className="lights" aria-hidden="true"><i /><i /><i /></div>
@@ -142,14 +166,24 @@ export default function App() {
         </div>
       </div>
 
-      <div className="banner" role="note">
-        <span className="demo-tag">Demo only</span>
-        <div className="msg">
-          <b>Prototype demo, shared to show how the idea works.</b>
-          <span>Demo and publicly published documents only. Names and details are made up to protect privacy. There is no upload control, so no real client file can be added.</span>
+      {LOCAL ? (
+        <div className="banner" role="note">
+          <span className="demo-tag">Proposals only</span>
+          <div className="msg">
+            <b>Read on this computer.</b>
+            <span>Nothing is moved, renamed or saved yet. Approving here only shows what would happen.</span>
+          </div>
         </div>
-        <a href={WHY_LOCAL}>Read more&nbsp;&rarr;</a>
-      </div>
+      ) : (
+        <div className="banner" role="note">
+          <span className="demo-tag">Demo only</span>
+          <div className="msg">
+            <b>Prototype demo, shared to show how the idea works.</b>
+            <span>Demo and publicly published documents only. Names and details are made up to protect privacy. There is no upload control, so no real client file can be added.</span>
+          </div>
+          <a href={WHY_LOCAL}>Read more&nbsp;&rarr;</a>
+        </div>
+      )}
 
       <div className="body">
         <nav className="side" aria-label="Sections">
@@ -158,7 +192,7 @@ export default function App() {
             {SETS.map((k) => (
               <button key={k} className="nav" aria-current={set === k ? 'true' : undefined}
                 onClick={() => { setSet(k); setSelected(null); }}>
-                <Icon id={k === 'public' ? 'file' : 'cabinet'} />{DATASETS[k][profile].dataset_label}
+                <Icon id={k === 'public' ? 'file' : 'cabinet'} />{DATASETS[k][schemeIn(k, profile)].dataset_label}
               </button>
             ))}
           </>}
@@ -174,7 +208,7 @@ export default function App() {
             <div key={c} className="client"><span className="av">{initials(c)}</span>{c}<span className="count">{perClient[c]}</span></div>
           ))}
           <h6>Help</h6>
-          <button className="nav" onClick={() => tourTo(0)}><Icon id="play" />Take the tour</button>
+          {!LOCAL && <button className="nav" onClick={() => tourTo(0)}><Icon id="play" />Take the tour</button>}
           <button className="nav" onClick={() => setWelcome(true)}><Icon id="shield" />Disclaimers</button>
           <a className="nav" href="#about" aria-current={view === 'about' ? 'page' : undefined}><Icon id="info" />About</a>
           <div className="foot">
@@ -197,8 +231,8 @@ export default function App() {
               <div className="scheme">
                 <label htmlFor="profile">Filing scheme</label>
                 <div className="select">
-                  <select id="profile" value={profile} onChange={(e) => setProfile(e.target.value)}>
-                    {PROFILES.map((p) => <option key={p} value={p}>{DATASETS[set][p].profile_name}</option>)}
+                  <select id="profile" value={scheme} onChange={(e) => setProfile(e.target.value)}>
+                    {Object.keys(DATASETS[set]).map((p) => <option key={p} value={p}>{DATASETS[set][p].profile_name}</option>)}
                   </select>
                   <Icon id="down" />
                 </div>
@@ -206,7 +240,7 @@ export default function App() {
             </div>
 
             <div className="scroll" ref={scrollRef}>
-              <section className="view" hidden={view !== 'overview'}><Overview d={d} go={go} startTour={() => tourTo(0)} /></section>
+              <section className="view" hidden={view !== 'overview'}><Overview d={d} go={go} startTour={LOCAL ? null : () => tourTo(0)} /></section>
               <section className="view" hidden={view !== 'events'}><Events {...viewProps} /></section>
               <section className="view" hidden={view !== 'review'}><Review {...viewProps} /></section>
               <section className="view" hidden={view !== 'tree'}><Tree {...viewProps} /></section>
@@ -224,7 +258,7 @@ export default function App() {
           </main>
 
           {showInspector && (
-            <Inspector d={d} doc={doc} decision={decisions[selected]}
+            <Inspector d={d} doc={doc} decision={decisions[selected]} server={server}
               onDecide={decide} onStep={step} onClose={() => setSelected(null)} />
           )}
         </div>
@@ -233,12 +267,10 @@ export default function App() {
       {tour !== null && <Tour d={d} step={tour} onStep={tourTo} onClose={endTour}
         onBackToStart={() => { endTour(); setWelcome(true); }} />}
       {/* Hidden while a narrow screen's document panel is open: it would sit on Reject. */}
-      {tour === null && !welcome && !filed && !(showInspector && !wide) && (
+      {!LOCAL && tour === null && !welcome && !(showInspector && !wide) && (
         <button className="fab" title="How it works and the tour" aria-label="How it works and the tour"
           onClick={() => setWelcome(true)}><span aria-hidden="true">👋</span></button>
       )}
-      {filed && <Filed docs={d.documents.filter((x) => filed.includes(x.doc_id))}
-        onUndo={undoBatch} onClose={() => setFiled(null)} onLog={() => { setFiled(null); go('log'); }} />}
       {welcome && <Welcome onClose={closeWelcome} onTour={() => { closeWelcome(); tourTo(0); }} />}
     </div>
   );

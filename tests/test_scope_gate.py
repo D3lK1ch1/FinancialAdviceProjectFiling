@@ -356,3 +356,10 @@ def test_adding_file_note_does_not_capture_real_advice_documents(expected_type, 
     genuine document still winning its own title.
     """
     assert check_scope(text)["likely_type"] == expected_type
+
+
+def test_a_title_broken_across_lines_still_matches():
+    """ASIC's RG 90 example SOA extracts as 'Statement of\\nAdvice'."""
+    result = check_scope("REGULATORY GUIDE 90\nExample Statement of\nAdvice: Scaled advice for a new client")
+
+    assert result["in_scope"] and result["likely_type"] == "soa"

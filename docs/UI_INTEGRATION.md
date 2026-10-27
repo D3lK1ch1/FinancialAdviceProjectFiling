@@ -16,7 +16,7 @@ switched off until the real tool is ready (21 Oct 2026).
 | ![](ui/1-overview.png) | **Overview** | Sees the batch at a glance: how many documents, how many advice events, how many held and how many worth checking. |
 | ![](ui/2-advice-events.png) | **Advice events** | Documents grouped by client and advice event, or by status. A confidence scale shows the line below which nothing is filed. One button files every confident document with nothing to check. |
 | ![](ui/3-document-panel.png) | **Document panel** | Opens from the "Why?" button on any row. "In short" says how sure the tool is and why it chose that folder. The detail is underneath, then Approve or Reject. |
-| ![](ui/4-one-click-filing.png) | **One-click filing** | After approving a batch: every file and the folder it went to, with Undo. |
+| ![](ui/4-one-click-filing.png) | **Batch filing** | The confident ones file themselves in one batch as they're read (screenshot from the earlier one-click version). Every file and its folder, with Undo. |
 | ![](ui/5-filing-log.png) | **Filing log** | Every approval grouped by the click that made it, with each document's reason. Undo per batch. Undone entries stay in the log. |
 | ![](ui/6-folder-tree.png) | **Folder tree** | Client, then advice event, then planning step (#70). The firm can switch filing scheme. |
 

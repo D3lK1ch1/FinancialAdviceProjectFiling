@@ -13,74 +13,91 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
-## 2026-10-21 — The client folder is proposed (#6); UI integration plan; React front end from the demo; filing by planning step decided (#70, #71)
+## 2026-10-21 — Filing layout and names decided and built; React screens read real PDFs; docs condensed
 
 ### Added
-- **Client folder on the card.** The "Would be filed as" section now fills the
-  Client folder row, e.g. `Baker, George`. Still a proposal a person confirms.
-- **`choose_client()`** proposes a client only when every name the document
-  gives agrees. `John Smith` next to `Smith` is one client.
-- **`ambiguous_client` flag (high).** Two different clients, or a joint client
-  next to one of its members (`Brad and Zara Black` and `Brad Black`): no folder,
-  every name listed, none chosen. The adviser picks.
-- **Folder names follow Bella's rules:** `JOHN SMITH` → `Smith, John`,
-  `Dr John Smith` → `Smith, Dr John`, `Anna van der Berg` → `van der Berg, Anna`,
-  `Brad and Zara Black` → `Black, Brad & Zara`.
-- **Entity clients:** `ABC Pty Ltd`, `Smith Family Trust` and SMSFs are filed
-  under their own name. `John Smith ATF Smith Family Trust` → `Smith Family Trust`.
-- 57 tests. 471 pass.
-- `docs/UI_INTEGRATION.md` and `docs/ui/`: the demo's screens, what each needs
-  from this backend, and the gaps. Also how the two could join and how a
-  non-technical person would run it. For planning, nothing decided yet.
-- `frontend/`: the demo's React screens, the latest version from
-  `ahaythorpe/advice-document-classifier` (not the 10am `adf-react.zip`). Runs on
-  made-up `sample-data.json` only. Not connected to the backend yet.
-- `frontend/README.md`: what the page needs (the manifest), where each field
-  comes from in `/ingest`, the gaps, and the steps to connect it.
+- **Client folder proposed** (#6, PR #69). `choose_client()` proposes a client only when
+  every name agrees; otherwise `ambiguous_client` (high) and the adviser picks. Names follow
+  Bella's rules: `JOHN SMITH` → `Smith, John`, `Brad and Zara Black` → `Black, Brad & Zara`,
+  trusts and companies under their own name.
+- **Client-first file names**: `Nguyen_Lan_2024-03-14 SOA.pdf`, couples `Black_Brad_Zara_...`.
+  No client chosen, no client part (`filing.client_prefix()`).
+- **Planning step folders**: `filing.step_folder()` and `step_folder` on every proposal:
+  `1 Goals and situation`, `2 Advice`, `3 Implementation` (#70).
+- **React screens on the Python backend.** `frontend/` holds the demo's screens. FastAPI
+  serves them at `/app/`; `POST /api/batch` runs several PDFs through `/ingest`'s steps and
+  `manifest.py` reshapes the results. `/ingest`'s body is now `ingest_bytes()`, unchanged.
+- **The line slider**: 90% floor for real filing (a firm can only raise it); down to 70%
+  while testing, marked "Testing", nothing written (`review_policy.one_click`).
+- **Automatic batch filing** (Bella, 21 Oct): confident documents (at or above the line,
+  nothing to check) file themselves in one batch as they're read, logged, with Undo; an
+  undone document isn't refiled. Replaces the 13 Oct "nothing filed automatically" for
+  confident documents and CLAUDE.md ground rule 2's wording. Everything else is flagged.
+- **Verdicts reach the failure log from the React screens** (live mode only). Approve on a
+  held document records "confirmed"; Reject asks what it is and why (fixed reason codes)
+  and records the correction. The made-up demo and demo-mode clicks are never recorded.
+- **Demo and live mode** (`config.APP_MODE`, default demo). Demo has no upload at all:
+  `/api/batch` answers 403 even when called directly, and `/app/` opens the full screens
+  on sample sets only. Live is set up on purpose on a firm's own computer; then
+  `/app/live.html` takes PDFs. 5 tests.
+- **Public documents set**: `scripts/build_public_set.py` reads the published samples
+  once with the real backend and saves the answers as a second sample set, so the demo
+  shows real results without waiting. Mock files are never included.
+  First run (qwen3:8b, 24 PDFs): 7 typed right, 17 held, 2 application forms misread as a
+  PDS (#74). None file themselves yet: no document gets a full path until grouping (#8).
+- **`provider_form`: a new document type** for provider implementation forms (applications,
+  rollovers, pension starts, adviser nominations; #74). Title patterns from real forms,
+  signals for telling a form from a PDS or an ATP, a 90% threshold and a reviewer check.
+  Files in `3 Implementation`. The title check now places all 8 sample forms, including
+  the 2 that were read as a PDS, and takes no other sample.
+- **Accuracy report** (`scripts/accuracy_report.py`, labels in
+  `docs/reference/public_sample_labels.json`): scores the tool on the public samples and
+  counts documents that were wrong but would have filed themselves. Baseline: 7 of 16
+  known types right (44%); 2 wrong and not held (application forms read as a PDS).
+- **Implementation forms taxonomy** from Bella: 13 kinds, 6 providers, sample links
+  (`docs/reference/implementation_forms.json`, #74).
+- `docs/README.md` (which doc is for what), `docs/UI_INTEGRATION.md`,
+  `docs/reference/sample_coverage.md` (moved from #35), `docs/archive/`.
+- Tests: client names (PR #69), file names and step folders (13), manifest (7).
+
+### Changed
+- `advice_process_stages`: the six steps of the financial planning process.
+- `filing_model.stage_label` now points to `stage_folders`. Knowledge base v0.4, so
+  failure-log entries from before today can be told apart.
+- `docs/BUSINESS_CASE.md` (was `3_BUSINESS_CASE.md`): refreshed with where things stand and
+  the evidence still needed. PRD, architecture and handover moved to `docs/archive/`.
+- Issues: #61 is the one place for Bella's decisions and questions; #70 is the filing
+  layout. #26 and PR #28 folded in and closed.
 
 ### Fixed
-(The 14 Oct review's client-name misses.)
-- Names in capitals (`JOHN SMITH`) are found.
-- `Anna van der Berg` is no longer cut to `Anna`.
-- `ABC Pty Ltd`, `SMITH FAMILY SMSF` and "as trustee for" are found.
+- **Title check tolerates line breaks**: any whitespace between a title's words counts.
+  ASIC's RG 90 example SOAs extract as "Statement of⏎Advice" and were rejected before the
+  model saw them.
+- Client names in capitals, with particles (`van der Berg`) and entities (`Pty Ltd`,
+  "as trustee for") are found (14 Oct review).
+- Reading `window.DATA` on import crashed the React page once real data replaced the demo set.
+- Stale text: `app.py`'s header, `GROUND_TRUTH.md`'s folder-levels row, old stage names.
 
-### Decided
-- No folder rather than a guess when a name can't be read safely: one word
-  only (`Smith`), or a joint client with two different surnames.
-- The client is still not passed to the review decision. A person confirms
-  the client on every document, so a proposed client mustn't make a document look safer.
-- (Bella) Files go client → advice event → planning step, using the six-step
-  financial planning process. Only the practical steps get folders. Replaces the
-  9 Oct "stage is a label only" decision. Work tracked in #70.
-- (Bella) File names start `Surname_First name_`, and couples get both first
-  names. Recorded on PR #69.
-- (Bella) The public demo link is switched off until the real tool is ready.
+### Decided (Bella; full list in #61)
+- Client → advice event → planning step. SOA, every ROA and PDS in `2 Advice`; ATP and
+  provider forms in `3 Implementation`. Replaces the 9 Oct "label only" rule.
+- File names `Surname_First name_YYYY-MM-DD Type`; couples both first names, husband first;
+  different surnames are separate clients unless the document says joint; duplicates get ` 2`.
+- 90% floor stays for real filing; 70% for testing only. A person always makes the click.
+- INFO 267 dropped: a disagreement on the advice subject is flagged for a person.
+- React for screens, Python purely the backend. The public demo link is off.
 
 ### Checked
-- All 10 samples, live: `Rossi, Nick`, `Baker, George`, `Zhang, Wendy`,
-  `Patel, John` (not his wife Jane), `Black, Brad & Zara`. FSGs and PDSs:
-  none, "the document labels no client". No false `ambiguous_client`.
-- Delia's end-to-end check on the card: _to fill in_.
+- All 10 samples live for client names (PR #69). Four public PDFs end to end through
+  `/api/batch` into the screens (7 minutes on Bella's laptop with qwen3:8b).
 
 ### Known gaps
-**For Bella:**
-- Should `ambiguous_client` block Approve, or warn? A warning for now (`not_yet_decided`).
-- Are the titles, surname particles and entity-marker lists right? All marked
-  "proposed, not yet confirmed".
-- Joint folders keep the document's name order, because a name doesn't say who
-  the husband is (`joint_client.order`).
-- How should a joint folder be named when the two surnames differ?
-
-**Not built:**
-- Matching on DOB, address or account number, and `family_key`. These need a
-  firm client list to match against, and none exists.
-- No real sample names a trust or company client, so entity handling is tested
-  on made-up names only.
-- `MCDONALD` becomes `Mcdonald`. Names the document writes in mixed case are kept as written.
-- Letting a firm set its own naming and filing rules through a chat box: ideas
-  in #71, after the filing basics.
-- The React page has no Edit, no failure-log verdicts and no display mode. The
-  current `static/index.html` has all three, so it stays until they carry over.
+- Approve and Undo don't move real files yet, and an Undo isn't sent to the failure log.
+  No display mode on the React page yet, so `static/index.html` stays.
+- `failure_log.jsonl` isn't git-ignored: Delia to decide whether it is committed. No progress shown while reading.
+- Placing the step folder under its event needs grouping (#8). Provider forms aren't
+  document types yet (#74). Firm rules by chat box later (#71).
+- Open questions for Bella are in #61.
 
 ---
 

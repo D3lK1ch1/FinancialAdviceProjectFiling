@@ -2,7 +2,7 @@
 as input, tool's answer, correct answer, and a one-line why. This is the
 improvement loop and the proof of accuracy, not optional bookkeeping.
 
-Append-only JSON Lines file. Field names mirror 2_ARCHITECTURE.md's
+Append-only JSON Lines file. Field names mirror archive/2_ARCHITECTURE.md's
 `failure_log` SQLite table (document_id, predicted_type, correct_type, note,
 logged_at) so this can move into SQLite later (unit #9) without a schema
 rethink — it's the same shape, just not persisted there yet.

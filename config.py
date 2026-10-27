@@ -20,3 +20,8 @@ OLLAMA_BASE_URL = OLLAMA_URL.rsplit("/api/", 1)[0]
 # and re-run the samples when you do.
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.1")
 OLLAMA_TIMEOUT_SECONDS = float(os.environ.get("OLLAMA_TIMEOUT", "180"))
+
+# demo (the default): no uploads at all; the screens show built-in sample sets
+# only. live: a firm's own installation, set up on purpose, where its documents
+# may be read. Anything other than "live" is demo, so a typo stays safe.
+APP_MODE = "live" if os.environ.get("APP_MODE", "demo").strip().lower() == "live" else "demo"

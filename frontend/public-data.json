@@ -1,0 +1,1014 @@
+{
+ "public": {
+  "default": {
+   "dataset": "public",
+   "dataset_label": "Public documents (real tool)",
+   "dataset_note": "Published ASIC examples, blank templates and provider forms, read by the real backend. No client data. Grouping into advice events isn't built yet, so most documents show 'not placed yet'.",
+   "filing_profile": "default",
+   "profile_name": "Client, then advice event",
+   "profile_description": "The filing this backend proposes today. Step folders (#70) are not built yet.",
+   "knowledge_base_version": "0.4",
+   "confidence_threshold": 0.9,
+   "one_click": {
+    "floor": 0.9,
+    "testing": true,
+    "testing_lowest": 0.7,
+    "aim": "90% or better, and higher is better."
+   },
+   "batch": {
+    "documents": 24,
+    "needs_review": 17,
+    "auto_filed": 7
+   },
+   "events": [
+    {
+     "event_id": "evt-5df81da9c2",
+     "client": "Baker, George",
+     "subject": "Retirement & Investment",
+     "date": "2021-08",
+     "record_label": "ROA",
+     "sub_kind": null
+    }
+   ],
+   "documents": [
+    {
+     "doc_id": "abb84e27f3712e63",
+     "source_name": "foundationfp-core-fact-find-2024.pdf",
+     "type": "fact_find",
+     "type_label": "Fact Find",
+     "category": "input",
+     "confidence": 0.95,
+     "classification_evidence": "CORE FACT FIND; Do you want us to carry out a full review?; Client(s) Details; Date fact find completed",
+     "extraction_quality": null,
+     "pages": 21,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": false,
+     "review_reasons": [],
+     "review_codes": [],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [
+      "2 Identify goals",
+      "3 Assess the financial situation"
+     ],
+     "destination": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     },
+     "would_file": null
+    },
+    {
+     "doc_id": "2799893552abb1a4",
+     "source_name": "interprac-fact-find-2018.pdf",
+     "type": "fact_find",
+     "type_label": "Fact Find",
+     "category": "input",
+     "confidence": 0.95,
+     "classification_evidence": "PERSONAL FACT FIND & FINANCIAL NEEDS ANALYSIS; YOUR PERSONAL DETAILS; The more detailed information you provide your Financial Planner; This section covers questions about your personal contact information",
+     "extraction_quality": null,
+     "pages": 22,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": false,
+     "review_reasons": [],
+     "review_codes": [],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [
+      "2 Identify goals",
+      "3 Assess the financial situation"
+     ],
+     "destination": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     },
+     "would_file": null
+    },
+    {
+     "doc_id": "44b699a24cc0a200",
+     "source_name": "unisuper-flexi-pension-pds.pdf",
+     "type": "pds",
+     "type_label": "PDS",
+     "category": "disclosure",
+     "confidence": 0.95,
+     "classification_evidence": "Product Disclosure Statement; Effective on and after 1 July 2026; investment fees and costs; WE’VE REDUCED OUR FLEXI PENSION ASSET ADMIN FEE BY 50%",
+     "extraction_quality": null,
+     "pages": 65,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "ambiguous",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": false,
+     "review_reasons": [],
+     "review_codes": [],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [
+      "4 Develop the strategic plan",
+      "5 Implement the recommendations"
+     ],
+     "destination": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     },
+     "would_file": null
+    },
+    {
+     "doc_id": "6357509b083d60c9",
+     "source_name": "unisuper-lifetime-income-pds.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": "Product Disclosure Statement; Issued 1 July 2026 by UniSuper Limited; To the extent that this PDS contains any information which is inconsistent with the UniSuper Trust Deed...",
+     "extraction_quality": null,
+     "pages": 25,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "ambiguous",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "The classifier returned no type. Distinct from out_of_scope: the title gate DID match something, so the document looks like one of ours and the classifier still could not name it."
+     ],
+     "review_codes": [
+      "unknown_type"
+     ],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "eb1b740a2d7ca0dc",
+     "source_name": "unisuper-personal-account-pds.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 16,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "ambiguous",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+     ],
+     "review_codes": [
+      "out_of_scope"
+     ],
+     "threshold": null,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "ab0ae246099b71bd",
+     "source_name": "capitaleyes-risk-profiling-questionnaire.pdf",
+     "type": "risk_profile",
+     "type_label": "Risk Profile",
+     "category": "input",
+     "confidence": 0.95,
+     "classification_evidence": "Risk Profile; Carefully read the following questions; Client 1  Client 2",
+     "extraction_quality": null,
+     "pages": 5,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": "2019-01-05",
+     "date_provenance": "inferred",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": false,
+     "review_reasons": [],
+     "review_codes": [],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [
+      "3 Assess the financial situation"
+     ],
+     "destination": {
+      "folder": [],
+      "filename": "2019-01-05 Risk Profile.pdf",
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     },
+     "would_file": null
+    },
+    {
+     "doc_id": "af2a06a84b9f4b59",
+     "source_name": "equipsuper-risk-profile-questionnaire.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 7,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+     ],
+     "review_codes": [
+      "out_of_scope"
+     ],
+     "threshold": null,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "16b51f1faed89b1f",
+     "source_name": "incapital-rpq-2024.pdf",
+     "type": "risk_profile",
+     "type_label": "Risk Profile",
+     "category": "input",
+     "confidence": 0.7916666666666666,
+     "classification_evidence": "•    A key consideration is understanding your investment requirements is your attitude to and; •    The following questionnaire has been prepared to help you consider the various investment risks; •    The questions define your attitude to security and the level of risk you are prepared to accept; •    Please take the time to answer these questions as they will assist your financial adviser to; •    Please note that you may decline to provide the information requested, but you should; •    How familiar are you with investment matters?",
+     "extraction_quality": null,
+     "pages": 6,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "The classifier named a type but below that type's threshold. The proposal and its reasoning are still returned — a reviewer confirming a correct low-confidence answer is useful failure-log data."
+     ],
+     "review_codes": [
+      "low_confidence"
+     ],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [
+      "3 Assess the financial situation"
+     ],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "65af9aa87a6ac243",
+     "source_name": "llwa-risk-profile-questionnaire.pdf",
+     "type": "risk_profile",
+     "type_label": "Risk Profile",
+     "category": "input",
+     "confidence": 0.95,
+     "classification_evidence": "Risk Profile; Your attitude to investing; score to determine your investor risk profile; risk tolerance; investment mix and products will be appropriate",
+     "extraction_quality": null,
+     "pages": 7,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": false,
+     "review_reasons": [],
+     "review_codes": [],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [
+      "3 Assess the financial situation"
+     ],
+     "destination": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     },
+     "would_file": null
+    },
+    {
+     "doc_id": "8d7bdd09dfb03c24",
+     "source_name": "morningstar-neo-risk-tolerance-questionnaire.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 10,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "The classifier could not be reached at all. Not a property of the document, and must never be recorded as a classification failure against it."
+     ],
+     "review_codes": [
+      "classifier_unavailable"
+     ],
+     "threshold": null,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "24a7a48e026f9984",
+     "source_name": "asic-info266-att1-further-advice-2024.pdf",
+     "type": "file",
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.18999999999999997,
+     "classification_evidence": "Example Record of Advice (ROA): Retain existing products and increase insurance; Note: Standard 6 of the Code of Ethics provides: ‘You must take into account the broad effects...; In February 2019, Sarah provided Nick with an SOA when he received the inheritance...",
+     "extraction_quality": null,
+     "pages": 9,
+     "client": "Rossi, Nick",
+     "client_provenance": null,
+     "date": "2021-10-12",
+     "date_provenance": "declared",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "The classifier named a type but below that type's threshold. The proposal and its reasoning are still returned — a reviewer confirming a correct low-confidence answer is useful failure-log data."
+     ],
+     "review_codes": [
+      "low_confidence"
+     ],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [
+       "Rossi, Nick"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "660b31a0d15c3d5a",
+     "source_name": "asic-info266-att2-no-change-2024.pdf",
+     "type": "roa",
+     "type_label": "ROA",
+     "category": "advice_record",
+     "confidence": 0.7124999999999999,
+     "classification_evidence": "Example Record of Advice (ROA): No change advice; Record of Advice (ROA) to help financial advisers; clients may sign either a written request or consent form for advice fees; example ROA is confined to the particular facts in the scenario",
+     "extraction_quality": null,
+     "pages": 6,
+     "client": "Baker, George",
+     "client_provenance": null,
+     "date": "2021-08-30",
+     "date_provenance": "declared",
+     "event_id": "evt-5df81da9c2",
+     "attachment_reason": "from the document's scope statement",
+     "needs_review": true,
+     "review_reasons": [
+      "The classifier named a type but below that type's threshold. The proposal and its reasoning are still returned — a reviewer confirming a correct low-confidence answer is useful failure-log data."
+     ],
+     "review_codes": [
+      "low_confidence"
+     ],
+     "threshold": 0.9,
+     "flags": [
+      {
+       "id": "roa_basis_unconfirmed",
+       "severity": "medium",
+       "message": "An ROA is permitted in three situations — further advice (reg 7.7.10AE), no buy or sell (reg 7.7.10AAA), small investment (s946AA) — and which one applies changes the content the record must contain and whether a prior SOA is required at all. The document type does not settle it, so filing an ROA without recording its basis loses the fact that determines what a compliant record looks like. This is a confirmation, never an error: all three are valid.",
+       "blocks_filing": false
+      }
+     ],
+     "stages": [
+      "4 Develop the strategic plan",
+      "6 Review and monitor"
+     ],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": "Baker_George_2021-08-30 ROA — further advice.pdf",
+      "path": "_Needs review/Baker_George_2021-08-30 ROA — further advice.pdf",
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [
+       "Baker, George",
+       "2021-08 — Retirement & Investment",
+       "2 Advice"
+      ],
+      "filename": "Baker_George_2021-08-30 ROA — further advice.pdf",
+      "path": "Baker, George/2021-08 — Retirement & Investment/2 Advice/Baker_George_2021-08-30 ROA — further advice.pdf",
+      "rationale": "from the document's scope statement"
+     }
+    },
+    {
+     "doc_id": "0f0c5130a855c862",
+     "source_name": "asic-info266-att3-stockbroker-2021.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 5,
+     "client": "Zhang, Wendy",
+     "client_provenance": null,
+     "date": null,
+     "date_provenance": "ambiguous",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "The classifier returned no type. Distinct from out_of_scope: the title gate DID match something, so the document looks like one of ours and the classifier still could not name it."
+     ],
+     "review_codes": [
+      "unknown_type"
+     ],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [
+       "Zhang, Wendy"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "5dac825634a9e2cc",
+     "source_name": "asic-cp284-example-soa-attachment.pdf",
+     "type": "soa",
+     "type_label": "SOA",
+     "category": "advice_record",
+     "confidence": 0.95,
+     "classification_evidence": "Example Statement of Advice: Scaled advice for a new customer; About this guide; This guide is for Australian financial services (AFS) licensees; It explains how and why we have developed an example Statement of Advice (SOA); The example SOA was developed in consultation with stakeholders",
+     "extraction_quality": null,
+     "pages": 56,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "ambiguous",
+     "event_id": null,
+     "attachment_reason": "no usable date (ambiguous)",
+     "needs_review": true,
+     "review_reasons": [
+      "A flag fired that blocks on its own. Usually high severity, but a rule may override its severity’s default — multi_doc_bundle is medium and blocks, because filing a two-document bundle as one document destroys a record rather than mislabelling one. Named for what it does rather than for its severity, because those came apart the moment overrides existed."
+     ],
+     "review_codes": [
+      "flagged_blocking"
+     ],
+     "threshold": 0.9,
+     "flags": [
+      {
+       "id": "multi_doc_bundle",
+       "severity": "medium",
+       "message": "Needs splitting before records and links are accurate. Left unsplit, the appended document never becomes a record of its own — so atp_without_advice_record fires on correctly-executed advice, which is the fastest way to get a firm to ignore the review queue.",
+       "blocks_filing": true
+      }
+     ],
+     "stages": [
+      "4 Develop the strategic plan"
+     ],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; no usable date (ambiguous)"
+     }
+    },
+    {
+     "doc_id": "d9faf48641aa3cc9",
+     "source_name": "asic-rg90-example-soa-2013.pdf",
+     "type": "soa",
+     "type_label": "SOA",
+     "category": "advice_record",
+     "confidence": 0.95,
+     "classification_evidence": "Example Statement of Advice: Scaled advice for a new client; About this guide; This guide is for Australian financial services (AFS) licensees; It explains how and why we have developed an example Statement of Advice (SOA)",
+     "extraction_quality": null,
+     "pages": 40,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "ambiguous",
+     "event_id": null,
+     "attachment_reason": "no usable date (ambiguous)",
+     "needs_review": true,
+     "review_reasons": [
+      "A flag fired that blocks on its own. Usually high severity, but a rule may override its severity’s default — multi_doc_bundle is medium and blocks, because filing a two-document bundle as one document destroys a record rather than mislabelling one. Named for what it does rather than for its severity, because those came apart the moment overrides existed."
+     ],
+     "review_codes": [
+      "flagged_blocking"
+     ],
+     "threshold": 0.9,
+     "flags": [
+      {
+       "id": "multi_doc_bundle",
+       "severity": "medium",
+       "message": "Needs splitting before records and links are accurate. Left unsplit, the appended document never becomes a record of its own — so atp_without_advice_record fires on correctly-executed advice, which is the fastest way to get a firm to ignore the review queue.",
+       "blocks_filing": true
+      }
+     ],
+     "stages": [
+      "4 Develop the strategic plan"
+     ],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; no usable date (ambiguous)"
+     }
+    },
+    {
+     "doc_id": "f5347a92b3eda8b7",
+     "source_name": "asic-rg90-example-soa-with-atp.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.09,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 53,
+     "client": "Black, Brad & Zara",
+     "client_provenance": null,
+     "date": null,
+     "date_provenance": "ambiguous",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "The classifier returned no type. Distinct from out_of_scope: the title gate DID match something, so the document looks like one of ours and the classifier still could not name it.",
+      "A flag fired that blocks on its own. Usually high severity, but a rule may override its severity’s default — multi_doc_bundle is medium and blocks, because filing a two-document bundle as one document destroys a record rather than mislabelling one. Named for what it does rather than for its severity, because those came apart the moment overrides existed."
+     ],
+     "review_codes": [
+      "unknown_type",
+      "flagged_blocking"
+     ],
+     "threshold": 0.9,
+     "flags": [
+      {
+       "id": "multi_doc_bundle",
+       "severity": "medium",
+       "message": "Needs splitting before records and links are accurate. Left unsplit, the appended document never becomes a record of its own — so atp_without_advice_record fires on correctly-executed advice, which is the fastest way to get a firm to ignore the review queue.",
+       "blocks_filing": true
+      }
+     ],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [
+       "Black, Brad & Zara"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "0fcf44afdd1cfdcc",
+     "source_name": "clearview-wealthfoundations-application.pdf",
+     "type": "pds",
+     "type_label": "PDS",
+     "category": "disclosure",
+     "confidence": 0.95,
+     "classification_evidence": "Product Disclosure Statement (PDS                                                                                          ) dated 29 June 2024.; ClearView WealthFoundations USI CVW0001AU is issued by Equity Trustees Superannuation Limited ABN 50 055 641 757 AFSL 229757 RSE; License L0001458 as Trustee for the ClearView Retirement Plan ABN 45 828 721 007 RSE Registration No R1001624.; Application Form checklist; Please ensure all relevant sections are completed so your application can be processed without delay.; Section 3 – Investment instructions",
+     "extraction_quality": null,
+     "pages": 28,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "ambiguous",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": false,
+     "review_reasons": [],
+     "review_codes": [],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [
+      "4 Develop the strategic plan",
+      "5 Implement the recommendations"
+     ],
+     "destination": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     },
+     "would_file": null
+    },
+    {
+     "doc_id": "541a57da43baeae2",
+     "source_name": "masonstevens-super-pension-application.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 13,
+     "client": null,
+     "client_provenance": "'BSB' has no first name, so the surname can't be told apart",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+     ],
+     "review_codes": [
+      "out_of_scope"
+     ],
+     "threshold": null,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "'BSB' has no first name, so the surname can't be told apart; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "de68da72a320a922",
+     "source_name": "leveraged-nominate-broker-or-adviser.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 2,
+     "client": "Number, Loan Account",
+     "client_provenance": null,
+     "date": null,
+     "date_provenance": "ambiguous",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+     ],
+     "review_codes": [
+      "out_of_scope"
+     ],
+     "threshold": null,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [
+       "Number, Loan Account"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "501c3d110adf33c3",
+     "source_name": "bt-panorama-transfer-to-pension-btf31892.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 6,
+     "client": null,
+     "client_provenance": "'Transition' has no first name, so the surname can't be told apart",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+     ],
+     "review_codes": [
+      "out_of_scope"
+     ],
+     "threshold": null,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "'Transition' has no first name, so the surname can't be told apart; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "b13d709059c8072a",
+     "source_name": "rei-super-pension-application.pdf",
+     "type": "pds",
+     "type_label": "PDS",
+     "category": "disclosure",
+     "confidence": 0.95,
+     "classification_evidence": "PRODUCT DISCLOSURE STATEMENT (PDS); The PDS will help you to understand the product; The latest version of the PDS has a publication date of 1 July 2026",
+     "extraction_quality": null,
+     "pages": 4,
+     "client": null,
+     "client_provenance": "'BSB' has no first name, so the surname can't be told apart",
+     "date": "2026-07-01",
+     "date_provenance": "inferred",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": false,
+     "review_reasons": [],
+     "review_codes": [],
+     "threshold": 0.9,
+     "flags": [],
+     "stages": [
+      "4 Develop the strategic plan",
+      "5 Implement the recommendations"
+     ],
+     "destination": {
+      "folder": [],
+      "filename": "2026-07-01 PDS.pdf",
+      "path": null,
+      "rationale": "'BSB' has no first name, so the surname can't be told apart; only an advice record names an event; grouping this document needs other documents (#8)"
+     },
+     "would_file": null
+    },
+    {
+     "doc_id": "7727b4f6026a85f7",
+     "source_name": "ato-nat75359-rollover-whole-balance.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 2,
+     "client": null,
+     "client_provenance": "'BSB' has no first name, so the surname can't be told apart",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+     ],
+     "review_codes": [
+      "out_of_scope"
+     ],
+     "threshold": null,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "'BSB' has no first name, so the surname can't be told apart; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "e53540dfcc1b066d",
+     "source_name": "bt-panorama-request-to-transfer-btf32020.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 4,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+     ],
+     "review_codes": [
+      "out_of_scope"
+     ],
+     "threshold": null,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    },
+    {
+     "doc_id": "eb3c7806b4a4c63b",
+     "source_name": "rest-super-transfer-whole-balance.pdf",
+     "type": null,
+     "type_label": "UNKNOWN",
+     "category": null,
+     "confidence": 0.0,
+     "classification_evidence": null,
+     "extraction_quality": null,
+     "pages": 2,
+     "client": null,
+     "client_provenance": "the document labels no client; a person chooses one",
+     "date": null,
+     "date_provenance": "absent",
+     "event_id": null,
+     "attachment_reason": "only an advice record names an event; grouping this document needs other documents (#8)",
+     "needs_review": true,
+     "review_reasons": [
+      "No document type matched at the scope gate. Previously a dead end — the document left the pipeline with no type, no confidence and no flag, indistinguishable from an unreadable file. It is now a review reason: something arrived and the tool could not place it, which is exactly what a human should see."
+     ],
+     "review_codes": [
+      "out_of_scope"
+     ],
+     "threshold": null,
+     "flags": [],
+     "stages": [],
+     "destination": {
+      "folder": [
+       "_Needs review"
+      ],
+      "filename": null,
+      "path": null,
+      "rationale": "held for a person"
+     },
+     "would_file": {
+      "folder": [],
+      "filename": null,
+      "path": null,
+      "rationale": "the document labels no client; a person chooses one; only an advice record names an event; grouping this document needs other documents (#8)"
+     }
+    }
+   ]
+  }
+ }
+}
