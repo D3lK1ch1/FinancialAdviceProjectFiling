@@ -101,7 +101,7 @@ def ingest_bytes(contents: bytes, filename: str, display: str = DEFAULT_DISPLAY_
     result["engine_version"] = engine_version(identity)
     if "identity_error" in identity:
         result["engine_version_error"] = identity["identity_error"]
-    result.update(check_scope(result["extracted_text"]))
+    result.update(check_scope(result["extracted_text"], pages[0] if pages else None))
     result["likely_type_name"] = _DOC_NAMES.get(result["likely_type"])
     doc_type = None
     if result["in_scope"]:

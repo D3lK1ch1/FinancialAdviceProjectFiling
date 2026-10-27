@@ -13,6 +13,57 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-23 — Exact phrases per document type
+
+### Decided
+- **Exact phrases per document type** (Bella). Wording copied from the public samples,
+  each found only in its own type across all 36: `exact_phrases` in `knowledge_base.json`.
+  `scope_gate.py` reads them on page 1 when no title is at the top.
+- **Phrases that rule a type out** (Bella). Form wording on page 1 means not a PDS;
+  "Record of Advice" means not an SOA. `exact_phrases.rules_out`.
+- **"Prepared for" labels the client** (Bella). Bare "Client" was tested and left out.
+- **Fee consent phrases** ("Ongoing fee arrangement" and three more), and "Ongoing fee
+  arrangement" rules out an ROA. From made-up documents only. Title check on all 63
+  labelled samples: 57 right, 6 blank, none wrong.
+- **Client decisions** (Bella): a joint folder keeps the document's name order;
+  `ambiguous_client` blocks Approve; same full name is told apart by date of birth (not built, #6).
+- **Fee consent is its own type** (`fee_consent`), separate from the fee disclosure
+  statement (Bella). The four made-up fee consents are relabelled; score unchanged at 57 of 63.
+- **Answer sheet checked** (Bella): change-of-address and nominate-adviser forms are provider
+  forms; an SOA with an ATP attached is split and each filed on its own.
+- **Name lists confirmed** (Bella): titles, surname particles, and trust and company words.
+- **Only a husband and wife share a folder** (Bella). De facto partners and relatives who
+  share a surname get their own folders.
+- **"Client Authority" is an ATP title; "Binding death benefit nomination" is no longer a
+  provider form phrase** (an SOA recommending one read as a form). "Dear" tested as a client
+  label and left out. Title check on all 56 labelled samples: 49 right, 7 left blank for a
+  person, none named as the wrong type.
+
+### Changed
+- **The title check reads page 1** (`scope_gate.check_scope(text, first_page)`). Rules-out
+  phrases drop a type even when its title is there; with no title at the top, the type with
+  the most of its own phrases on page 1 wins. On the 36 public samples the title check is
+  now right on 34, up from 29. Still missed: a UniSuper PDS and a Westpac change of address,
+  which have neither a title nor a listed phrase on page 1. The model was not rerun.
+
+### Added
+- **14 new local samples** (gitignored, sources in `samples/public/SOURCES.md`): 5 adviser
+  FSGs, 4 fact finds and 18 made-up documents from three made-up practices, messy on
+  purpose (cover letters, bundles, look-alikes, typos, fee consents, file notes, an FSG).
+
+### Known gaps
+- **Title check: 6 of 63 left blank.** Two letter-style SOAs (a cover letter first, or
+  titled "Our advice to you") and four public forms and guides with no title near the top.
+  The client is found on few made-up documents: "Clients", "Client" and "Dear …" aren't
+  client labels. Two non-bundles get a bundle flag. The model was not run on any of these.
+
+### Checked
+- **Body text alone misleads.** "Product Disclosure Statement" appears in 9 of 20 provider
+  forms, and 6 of the 12 misses have the right title on page 1. Details in
+  `docs/GROUND_TRUTH.md`, 23 Oct.
+
+---
+
 ## 2026-10-21 — Filing layout and names decided and built; React screens read real PDFs; docs condensed
 
 ### Added

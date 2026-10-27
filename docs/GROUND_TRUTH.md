@@ -67,7 +67,8 @@ each label. They live in `knowledge_base.json`, never in Python.
 | `fact_find` | Client information form | "Fact Find", "Client Data Form" |
 | `risk_profile` | Risk questionnaire | "Risk Profile", "Risk Tolerance Questionnaire" |
 | `file_note` | Adviser's meeting notes | "File Note", "Meeting Note" |
-| `fee_disclosure_statement` | Yearly fee statement | "Fee Disclosure Statement", "FDS", "Ongoing Fee Consent" |
+| `fee_disclosure_statement` | Yearly fee statement: fees already charged | "Fee Disclosure Statement", "FDS" |
+| `fee_consent` | The client agrees to ongoing fees going forward | "Ongoing Fee Consent", "Consent to Deduct Advice Fees" |
 
 A **client review** is a meeting, not a document type. It usually produces some of the
 documents above (a file note, an ROA, a fee statement).
@@ -143,6 +144,56 @@ documents above (a file note, an ROA, a fee statement).
 - **Front end:** React for the screens, Python purely the backend. FastAPI serves the built
   page; Node is only for building it. Plan in `docs/UI_INTEGRATION.md` and
   `frontend/README.md`. The public demo link is off until the real tool is ready.
+
+### Decided 23 Oct 2026 (Bella)
+- **Exact phrases per document type.** Wording copied from the public samples, which
+  the tool should treat as strong evidence when it appears on page 1. Each one was
+  checked against all 36 samples and appears only in its own type:
+  `knowledge_base.json` `exact_phrases`, read on page 1 by `scope_gate.py` when no
+  title is at the top. A phrase found only in the body is weak:
+  "Product Disclosure Statement" appears in 9 of the 20 provider forms, which is why
+  forms get read as a PDS. ASIC's "Example Statement of Advice" wording was left out
+  because a firm's own SOA won't contain it.
+- **"Prepared for" labels the client** (`client_model.name_labels`). It found the right
+  client on the RG 90 2013 SOA and both of Bella's made-up SOAs, and no wrong name on any
+  sample. Bare "Client" was left out: it reads headings such as "Client Fact Find" as names.
+- **Only a husband and wife share a folder.** De facto partners, cousins and siblings who
+  share a surname get their own folders, and sit next to each other alphabetically.
+  Answers the open "couples who aren't husband and wife" question.
+  `filing_model.file_name.not_married`.
+- **Name lists confirmed:** the titles kept in folder names (Mr, Mrs, Ms, Miss, Mx, Dr,
+  Prof, Sir, Dame, Rev), surname particles (van, von, de, di…) and the words that mark a
+  trust or company (Pty, Ltd, Trust, SMSF…, and ATF/ITF for trustees). `client_model`.
+- **Fee consents are found by their wording.** They are letters, so the letterhead and
+  address push the title out of the title window. Phrases on page 1: "Ongoing fee
+  arrangement", "Consent to deduct advice fees", "Renewal of your ongoing fee", "Renewing
+  your ongoing advice". "Ongoing fee arrangement" also rules out an ROA: a renewal letter
+  lists past ROAs among the services. These come from made-up documents only; check them
+  against a real fee consent when one is available, and an ROA that recommends a fee
+  arrangement may now be read as a fee consent.
+- **Joint folder order:** the tool can't tell the husband from a name, so it keeps the
+  order the document uses; nobody needs to confirm it. `client_model.joint_client`.
+- **Two possible clients blocks Approve.** `ambiguous_client` is a hard stop: nothing files
+  until a person picks the client. `review_policy.flag_effect_by_rule`.
+- **Same full name, different clients: told apart by date of birth.** Not built yet (#6);
+  until then both go to a person. `client_model.same_surname.same_full_name`.
+- **Fee consent and fee disclosure statement are two types** (`fee_consent`,
+  `fee_disclosure_statement`). An FDS reports fees already charged; a consent agrees to fees
+  going forward. Different documents, filed separately.
+- **Answer sheet checked** (Bella). A bank's change-of-address form and a "nominate broker or
+  adviser" form are provider forms: implementation documents, filed in `3 Implementation`.
+  An SOA with an ATP stuck to it is split, and each is filed on its own (SOA in `2 Advice`,
+  ATP in `3 Implementation`). The tool already holds every bundle for a person to split.
+- **Tested on the made-up set** (11 messy documents, 23 Oct). "Client Authority" is an ATP
+  title. "Binding death benefit nomination" was dropped as a provider form phrase: an SOA
+  that recommends one read as a form. "Dear" was tested as a client label and left out: it
+  reads "Ms", "Brad" and "ASIC" as clients.
+- **A title alone can mislead, so some phrases rule a type out.** On page 1,
+  "Product Disclosure Statement" is printed on 4 provider forms and only 2 PDSs, and
+  "Statement of Advice" is on page 1 of all 3 ROAs. `exact_phrases.rules_out`: form
+  wording on page 1 ("Use this form to", "Date of birth", "Declaration"…) means it is not a
+  PDS, even when the PDS title is there; "Record of Advice" means it is not an SOA. None of
+  the rules-out phrases is on page 1 of a sample of the type it rules out.
 
 ## Known differences from existing docs (resolve, don't ignore)
 | Topic | This file | Elsewhere | Status |

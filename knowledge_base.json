@@ -73,7 +73,7 @@
     {"stage": 3, "name": "Assess the financial situation", "plain": "Income, expenses, assets, debts, super, insurance and risk tolerance are reviewed. This is the evidence for the best-interests duty.", "governing_provisions": ["s961B (best interests)", "s912G record-keeping (via ASIC Instrument 2024/508)"], "typical_docs": ["fact_find", "risk_profile", "file_note"]},
     {"stage": 4, "name": "Develop the strategic plan", "plain": "The recommendations are formed and documented in a Statement of Advice, or a Record of Advice where one is permitted, and given to the client with any PDS for a recommended product.", "governing_provisions": ["s961B", "s961G (appropriate advice)", "s946A", "s946C (timing)", "s946B (ROA path: reg 7.7.10AE further advice; reg 7.7.10AAA no buy or sell; s946AA small investment)"], "typical_docs": ["soa", "roa", "pds", "file_note"]},
     {"stage": 5, "name": "Implement the recommendations", "plain": "The plan is put into action: accounts opened, investments moved, insurance updated. The client authorises it first and product applications are lodged.", "governing_provisions": ["General s912A conduct; product application terms; dealing provisions"], "typical_docs": ["authority_to_proceed", "provider_form", "pds", "file_note"], "not_yet_document_types": ["provider implementation forms (opening a super account, rolling over super, applying for a pension, opening an investment account) — not yet document types (see #23). They file in 3 Implementation."]},
-    {"stage": 6, "name": "Review and monitor", "plain": "Periodic check-ins adjust the plan for market, tax or life changes. Ongoing fee arrangements are disclosed and consented to. Smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "file_note"]}
+    {"stage": 6, "name": "Review and monitor", "plain": "Periodic check-ins adjust the plan for market, tax or life changes. Ongoing fee arrangements are disclosed and consented to. Smaller changes may be recorded rather than fully re-advised.", "governing_provisions": ["Ongoing fee arrangement / consent provisions (Div 3 Pt 7.7A, as amended by DBFO Tranche 1)", "s946B + reg 7.7.10AE"], "typical_docs": ["roa", "fee_disclosure_statement", "fee_consent", "file_note"]}
   ],
   "version_status_values": {
     "current": "The live, in-force version of this document for this client (or this edition, for licensee/issuer-wide docs).",
@@ -131,7 +131,12 @@
           "note": "The SOA's recommendations must trace back to the fact find and risk profile."
         }
       ],
-      "version_notes": "Client-specific and dated. A new SOA for the same client and scope supersedes the prior one; rarely a true duplicate."
+      "version_notes": "Client-specific and dated. A new SOA for the same client and scope supersedes the prior one; rarely a true duplicate.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Read on page 1 by scope_gate.py.",
+        "phrases": ["Consequences of replacing"],
+        "rules_out": ["Record of Advice"]
+      }
     },
     {
       "id": "roa",
@@ -260,7 +265,12 @@
           "note": "Where the ROA advises an action the client then authorises."
         }
       ],
-      "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the three situations — it changes both content expectations and whether a prior SOA is required."
+      "version_notes": "Sequenced after any SOA. Multiple ROAs coexist as current if they cover different advice events; only same-scope re-issues supersede. Capture WHICH of the three situations — it changes both content expectations and whether a prior SOA is required.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Read on page 1 by scope_gate.py.",
+        "phrases": ["Record of Advice", "Previous advice"],
+        "rules_out": ["Ongoing fee arrangement"]
+      }
     },
     {
       "id": "authority_to_proceed",
@@ -283,7 +293,7 @@
         "two_weeks_in_note": "Very often appended to the back of the SOA it implements. When splitting a scanned bundle, the ATP is the classic 'document 2' hiding at the end of an SOA PDF. Always link it to the advice record it authorises — an ATP with no matching SOA/ROA is an exception worth flagging."
       },
       "classifier_hints": {
-        "title_patterns": ["Authority to Proceed", "Authority to Implement", "Client Authorisation", "Authority to Act"],
+        "title_patterns": ["Authority to Proceed", "Authority to Implement", "Client Authorisation", "Authority to Act", "Client Authority"],
         "key_fields": ["client name", "client signature", "the party being authorised — adviser name, authorised-representative number, licensee", "reference to the SOA/ROA being authorised", "products/actions authorised", "date signed"],
         "distinguishing_signals": ["a first-person grant of authority — 'I/We authorise ...' — not a description of advice", "names the party receiving the authority, and enumerates the specific actions it covers", "prominent signature block binding the client to that grant", "short and instructional, not explanatory", "references the advice record it implements", "may share a document with the SOA"],
         "confusable_with": ["soa — the ATP authorises; the SOA advises", "provider_form — both carry a signature and a list of actions, but the authority runs to different parties: an ATP authorises the ADVISER to act, a provider form instructs the PRODUCT ISSUER. Read who is being empowered, not what is being signed.", "fee_disclosure_statement — also a signed authorisation, but of ongoing FEES rather than of implementing advice"]
@@ -366,7 +376,11 @@
           "note": "Match by client, date and the products recommended."
         }
       ],
-      "version_notes": "Per client, per instruction, dated. Providers change form versions often (the version code is usually in the footer, e.g. BTF32020). A resubmitted form for the same instruction replaces the earlier one."
+      "version_notes": "Per client, per instruction, dated. Providers change form versions often (the version code is usually in the footer, e.g. BTF32020). A resubmitted form for the same instruction replaces the earlier one.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Read on page 1 by scope_gate.py.",
+        "phrases": ["Use this form to", "Complete this form to", "When to use this form", "Office use only", "Dealer group name", "Adviser full name", "Request to transfer", "Partial transfer within", "Application form"]
+      }
     },
     {
       "id": "fsg",
@@ -462,7 +476,12 @@
         ]
       },
       "links_to": [],
-      "version_notes": "Editioned by issuer and effective date, not per client. A newer PDS edition supersedes the prior edition for that product."
+      "version_notes": "Editioned by issuer and effective date, not per client. A newer PDS edition supersedes the prior edition for that product.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Read on page 1 by scope_gate.py.",
+        "phrases": ["Fees and costs summary", "Consumer advisory warning", "How super works"],
+        "rules_out": ["Use this form to", "Complete this form", "Office use only", "Date of birth", "Tax file number", "Declaration", "Personal details"]
+      }
     },
     {
       "id": "fact_find",
@@ -563,7 +582,11 @@
           "note": "Risk category should be consistent with SOA recommendations; inconsistency is a flag."
         }
       ],
-      "version_notes": "Per client, dated. A re-assessment supersedes the prior profile."
+      "version_notes": "Per client, dated. A re-assessment supersedes the prior profile.",
+      "exact_phrases": {
+        "note": "Exact wording printed on real public samples (Bella, 23 Oct 2026). Read on page 1 by scope_gate.py.",
+        "phrases": ["Risk profile questionnaire", "Risk Tolerance Questionnaire", "Total score", "Your investor profile"]
+      }
     },
     {
       "id": "file_note",
@@ -629,7 +652,7 @@
     },
     {
       "id": "fee_disclosure_statement",
-      "name": "Fee Disclosure Statement / Ongoing Fee Consent",
+      "name": "Fee Disclosure Statement",
       "abbrev": "FDS",
       "category": "ongoing_service",
       "advice_record_role": false,
@@ -638,38 +661,86 @@
         "note": "DBFO Tranche 1 changed the ongoing-fee/consent mechanics; confirm the current consolidated form on enactment dates."
       },
       "teaching": {
-        "what_it_is": "Documents disclosing ongoing advice fees and obtaining the client's consent to continue charging them.",
-        "why_it_exists": "Protects clients in ongoing fee arrangements by requiring periodic disclosure and renewed consent.",
+        "what_it_is": "A statement of the ongoing advice fees a client paid over a period and the services they were entitled to and received.",
+        "why_it_exists": "Lets a client in an ongoing fee arrangement see what they paid and what they got for it.",
         "where_it_sits": "Ongoing service & review (stage 6).",
         "two_weeks_in_note": "This is the area DBFO Tranche 1 already reshaped, so older files and newer files may look different. Flag rather than guess when the format doesn't match the expected era."
       },
       "classifier_hints": {
         "title_patterns": [
           "Fee Disclosure Statement",
-          "FDS",
-          "Ongoing Fee Consent",
-          "Consent to Deduct Advice Fees"
+          "FDS"
         ],
         "key_fields": [
           "client name",
           "fees charged in the period",
           "services the client was entitled to / received",
-          "consent signature",
           "period covered",
           "date"
         ],
         "distinguishing_signals": [
           "fee tables by period",
-          "consent/authorisation to continue or deduct fees",
-          "references an ongoing fee arrangement"
+          "looks back over a past period"
         ],
         "confusable_with": [
-          "authority_to_proceed — ATP authorises implementation of advice; this authorises ongoing FEES",
+          "fee_consent — a consent asks the client to agree to fees going forward; an FDS reports fees already charged. A different document, filed separately (Bella, 23 Oct 2026).",
           "soa — this is fee administration, not advice"
         ]
       },
       "links_to": [],
       "version_notes": "Per client, periodic (usually annual). Each period's statement is discrete; a corrected re-issue for the same period supersedes."
+    },
+    {
+      "id": "fee_consent",
+      "name": "Ongoing Fee Consent",
+      "abbrev": "Fee Consent",
+      "category": "ongoing_service",
+      "advice_record_role": false,
+      "legislation": {
+        "primary": "Ongoing fee arrangement provisions, Div 3 of Pt 7.7A, as amended by DBFO Tranche 1 (single consent regime commenced under DBFO)",
+        "note": "DBFO Tranche 1 changed the ongoing-fee/consent mechanics; confirm the current consolidated form on enactment dates."
+      },
+      "teaching": {
+        "what_it_is": "The client's signed consent to an ongoing fee arrangement, or to advice fees being deducted from their account, for a stated period.",
+        "why_it_exists": "An ongoing fee can't be charged, or deducted from a client's super or pension, without the client's written consent.",
+        "where_it_sits": "Ongoing service & review (stage 6); a first consent often follows the SOA that recommends the ongoing service.",
+        "two_weeks_in_note": "This is the area DBFO Tranche 1 already reshaped, so older files and newer files may look different. Flag rather than guess when the format doesn't match the expected era."
+      },
+      "classifier_hints": {
+        "title_patterns": [
+          "Ongoing Fee Consent",
+          "Consent to Deduct Advice Fees"
+        ],
+        "key_fields": [
+          "client name",
+          "the fee and how often it is charged",
+          "the account it is deducted from",
+          "period of the arrangement",
+          "consent signature",
+          "date"
+        ],
+        "distinguishing_signals": [
+          "asks the client to agree, going forward",
+          "a signature block for consent",
+          "often a renewal letter"
+        ],
+        "confusable_with": [
+          "fee_disclosure_statement — an FDS reports fees already charged; a consent agrees to fees going forward. A different document, filed separately (Bella, 23 Oct 2026).",
+          "authority_to_proceed — an ATP authorises implementing advice; this authorises FEES",
+          "soa — this is fee administration, not advice"
+        ]
+      },
+      "links_to": [],
+      "version_notes": "Per client, per arrangement period. A renewal consent starts a new period; it does not replace the earlier one.",
+      "exact_phrases": {
+        "note": "Wording from Bella's made-up fee consents (23 Oct 2026); no public sample yet. Read on page 1 by scope_gate.py.",
+        "phrases": [
+          "Ongoing fee arrangement",
+          "Consent to deduct advice fees",
+          "Renewal of your ongoing fee",
+          "Renewing your ongoing advice"
+        ]
+      }
     }
   ],
   "filing_model": {
@@ -699,7 +770,7 @@
       "duplicate": "Same client, date and type: the second file gets a number. Nguyen_Lan_2024-03-02 Fact Find 2.pdf",
       "no_client": "No client chosen means no client part: the name is not guessed, and the person chooses the client before filing.",
       "decided": "Bella, 21 Oct 2026 (PR #69 comments).",
-      "open": "Couples who are not husband and wife: order not decided yet.",
+      "not_married": "Only a husband and wife share a folder. Others who share a surname (de facto partners, cousins, siblings) are separate clients with their own folders; the shared surname keeps them next to each other alphabetically. Decided Bella, 23 Oct 2026.",
       "status": "Built in filing.proposed_filename (21 Oct 2026). Numbering duplicates needs the other files on hand, so it happens when filing, not here."
     },
     "stage_label": {
@@ -716,7 +787,7 @@
         {"name": "3 Implementation", "steps": [5], "docs": ["authority_to_proceed", "provider_form"], "planned_docs": ["Account / product application", "Rollover / transfer in", "Rollover out / withdrawal / account closure", "Internal transfer / phase change", "Pension application (ABP / TTR)", "Pension maintenance / refresh", "Investment switch / rebalance", "Beneficiary nomination", "Contribution strategy forms", "Insurance inside super", "Adviser authority and fee consent", "Debt recycling / gearing implementation", "Share registry (direct equities)"], "planned_note": "Provider implementation forms. Not yet document types: each needs samples and testing first. Kinds, keywords, providers and sample links are in docs/reference/implementation_forms.json (Bella, 21 Oct 2026)."}
       ],
       "pds_and_roa": "Confirmed by Bella, 21 Oct 2026: the SOA, every ROA and the PDS file in 2 Advice. The PDS is given with the advice that recommends the product (a copy in the client file is the proof, 29 Sep 2026).",
-      "no_folder": "A type in no folder (file note, FSG, FDS) files at the event level, or where special_folders puts it.",
+      "no_folder": "A type in no folder (file note, FSG, FDS, fee consent) files at the event level, or where special_folders puts it.",
       "status": "Built in filing.step_folder (21 Oct 2026). The step folder is proposed per document; joining it under the event folder needs grouping (#8)."
     },
     "advice_event": {
@@ -874,12 +945,13 @@
   },
   "client_model": {
     "status": "Started (GH#6). Finds the names a document gives for its client; does not yet choose one.",
-    "name_labels": ["client name", "account name", "soa for"],
-    "name_labels_source": "Only labels seen in the real samples: 'Client name:' in INFO 266 att 1 and att 2 and the INFO 267 SOA; 'Account name:' in the INFO 266 att 3 stockbroker ROA; 'SOA for' in the running header of the example SOA inside RG 90 ('SOA for Brad and Zara Black', every page from p31). Add a label when a real document uses one, not before.",
+    "name_labels": ["client name", "account name", "soa for", "prepared for"],
+    "name_labels_source": "Only labels seen in the real samples: 'Client name:' in INFO 266 att 1 and att 2 and the INFO 267 SOA; 'Account name:' in the INFO 266 att 3 stockbroker ROA; 'SOA for' in the running header of the example SOA inside RG 90 ('SOA for Brad and Zara Black', every page from p31). 'Prepared for' on the cover table of the RG 90 2013 example SOA and Bella's made-up SOAs (Bella, 23 Oct 2026); bare 'Client' was tested and left out, because it reads 'Client Fact Find' and similar headings as names. Add a label when a real document uses one, not before.",
     "joint_client": {
       "rule": "A joint client is one client with one shared client folder, e.g. 'Black, Brad & Zara'. The names are kept together, never split into two folders or chosen between.",
       "decided": "Bella, 9 Oct 2026 (GH#61).",
       "order": "Husband's first name first, e.g. 'Black, Brad & Zara' — the convention firms expect. Decided Bella, 13 Oct 2026.",
+      "order_when_unknown": "A name doesn't say who the husband is, so the tool keeps the order the document uses ('Brad and Zara Black' becomes 'Black, Brad & Zara'). No person needs to confirm it. Bella, 23 Oct 2026.",
       "file_name": "Both first names in the file name too: Black_Brad_Zara_2024-03-14 SOA.pdf (filing_model.file_name). Decided Bella, 21 Oct 2026."
     },
     "different_surnames": {
@@ -891,7 +963,7 @@
       "decided": "Bella, 14 Oct 2026. Titles kept because clients, especially doctors, expect them.",
       "titles": ["Mr", "Mrs", "Ms", "Miss", "Mx", "Dr", "Prof", "Sir", "Dame", "Rev"],
       "surname_particles": ["van", "von", "der", "den", "de", "del", "della", "da", "di", "du", "la", "le"],
-      "lists_source": "Proposed by Delia, 20 Oct 2026, not yet confirmed by Bella. Titles: common Australian forms of address. Particles: the lower-case words that belong to a surname ('Anna van der Berg' is 'van der Berg, Anna'), from the 14 Oct review. Add one when a real document needs it."
+      "lists_source": "Proposed by Delia, 20 Oct 2026; confirmed by Bella, 23 Oct 2026. Titles: common Australian forms of address. Particles: the lower-case words that belong to a surname ('Anna van der Berg' is 'van der Berg, Anna'), from the 14 Oct review. Add one when a real document needs it."
     },
     "entity_client": {
       "rule": "A trust, SMSF or company is the client in its own right. Its folder uses the entity's own name, and each entity has its own folder, separate from the people behind it.",
@@ -899,12 +971,12 @@
       "markers": ["Pty", "Ltd", "Limited", "Trust", "Fund", "SMSF", "Superannuation", "Super", "Holdings"],
       "trustee_markers": ["ATF", "ITF", "as trustee for"],
       "trustee_rule": "'John Smith ATF Smith Family Trust' names the trustee and the trust. The client is the trust (several_names: if a trustee is named, file under the trust).",
-      "markers_source": "Proposed by Delia, 20 Oct 2026, not yet confirmed by Bella. Words that make a name an entity rather than a person. No real sample names an entity client yet."
+      "markers_source": "Proposed by Delia, 20 Oct 2026; confirmed by Bella, 23 Oct 2026. Words that make a name an entity rather than a person. No real sample names an entity client yet."
     },
     "same_surname": {
       "rule": "Clients who share a surname are told apart by first name: 'Surname, First name'. In practice two clients share only the surname, not the full name.",
       "decided": "Bella, 13 Oct 2026 (GH#61 Q3).",
-      "open": "Two different clients with the same full name is not covered by this rule; under the several_names fallback it goes to the adviser."
+      "same_full_name": "Two different clients with exactly the same full name are told apart by date of birth. Bella, 23 Oct 2026. Not built yet: matching on date of birth is #6. Until then both go to a person."
     },
     "several_names": {
       "rule": "Several names on one document usually share a surname with different first names: file under the surname. If a trustee is named, file under the trust. If neither works, flag it and ask the adviser. Never guess.",
@@ -1040,6 +1112,10 @@
         "value": 0.90,
         "why": "Fee disclosure and ongoing-fee consent carry their own compliance exposure, and fds_era_mismatch depends on this type being identified correctly before the pre/post-DBFO check can run at all."
       },
+      "fee_consent": {
+        "value": 0.90,
+        "why": "Same exposure as the FDS: no ongoing fee may be charged or deducted without a valid consent, and fds_era_mismatch reads consent documents too."
+      },
       "fact_find": {
         "value": 0.90,
         "why": "Evidence of safe harbour steps 1-2 — what the adviser knew about the client when advising. A supporting document, but the advice is only as sound as the record of the client it rests on, and fact_find_after_soa sequencing depends on it."
@@ -1134,7 +1210,8 @@
       "soa",
       "roa",
       "authority_to_proceed",
-      "fee_disclosure_statement"
+      "fee_disclosure_statement",
+      "fee_consent"
     ],
     "own_clients_only_note": "An adviser approves these only for their own clients: one adviser must not sign off another's advice record. Compliance may approve any.",
     "edit_may_change": [
@@ -1155,7 +1232,8 @@
       "roa": "As SOA, plus which of the three ROA situations applies.",
       "authority_to_proceed": "Signed; links to the SOA or ROA it authorises.",
       "provider_form": "Instructs the product issuer, not the adviser; it is the receiving fund's form for a rollover; signed and dated.",
-      "fee_disclosure_statement": "Right client; the period; consent signed."
+      "fee_disclosure_statement": "Right client; the period; fees and services listed.",
+      "fee_consent": "Right client; the period; consent signed."
     },
     "flag_effects": {
       "hard_stop": "Approve is unavailable until the problem is fixed. Only compliance may clear it.",
@@ -1166,6 +1244,7 @@
       "risk_mismatch": "hard_stop",
       "fact_find_after_soa": "hard_stop",
       "multi_doc_bundle": "hard_stop",
+      "ambiguous_client": "hard_stop",
       "no_date": "warning",
       "fds_era_mismatch": "warning",
       "roa_basis_unconfirmed": "warning"
@@ -1175,12 +1254,12 @@
       "risk_mismatch": "Goes straight to whether the advice is appropriate.",
       "fact_find_after_soa": "Suggests the advice was written before the client was understood.",
       "multi_doc_bundle": "Filing a bundle as one document loses a record; stop until split.",
+      "ambiguous_client": "A document in the wrong client's folder is a compliance risk; nothing files until a person picks the client. Bella, 23 Oct 2026.",
       "no_date": "The approver can read the date and enter it.",
       "fds_era_mismatch": "Often only an old template, but worth a look.",
       "roa_basis_unconfirmed": "Asks which ROA situation applies; the approver answers it."
     },
     "not_yet_decided": [
-      "ambiguous_client",
       "roa_without_soa",
       "superseding_ambiguity",
       "advice_record_label_shift",
@@ -1213,7 +1292,7 @@
       {"id": "atp_without_advice_record", "evaluation": "stateful", "trigger": "Authority to Proceed with no matching SOA/ROA on file", "why": "An authorisation to implement advice that isn't on file — either a bundle-split miss or a genuine gap.", "severity": "high"},
       {"id": "fact_find_after_soa", "evaluation": "stateful", "trigger": "Fact Find dated later than the SOA it should underpin", "why": "Advice may predate the information it was supposedly based on (best-interests concern).", "severity": "medium"},
       {"id": "risk_mismatch", "evaluation": "stateful", "trigger": "Risk Profile category not reflected in SOA recommendations", "why": "Possible best-interests/suitability gap (s961B).", "severity": "high"},
-      {"id": "multi_doc_bundle", "evaluation": "stateless", "trigger": "Single file appears to contain more than one document type (classic: SOA + appended Authority to Proceed)", "why": "Needs splitting before records and links are accurate. Left unsplit, the appended document never becomes a record of its own — so atp_without_advice_record fires on correctly-executed advice, which is the fastest way to get a firm to ignore the review queue.", "severity": "medium", "forces_review": true, "forces_review_why": "Overrides the severity default. Medium normally attaches a question without blocking, because a queue that asks about every document gets ignored. This rule is the override review_policy.forces_review_decision records: filing a two-document bundle as one document destroys a record rather than mislabelling one, and unlike a basis confirmation it cannot be corrected later from what was filed.", "asks": "Does this file hold more than one document, and if so where does the second start?", "never_split_automatically": "The flag proposes candidate boundaries as evidence; a human approves any split. A missed bundle is a flag nobody actioned. A WRONG split silently destroys a record by cutting a document in half, and nothing downstream can tell that it happened. Ground rule #2 applies with force.", "detection": {"pagination_restart": {"strength": "strong", "rule": "A page-number marker reading 'page 1 of N' on any page other than the first. A document's own pagination restarting mid-file is direct evidence of a boundary, independent of titles, headers and type.", "pattern": "\\bpage\\s+(\\d{1,3})\\s+of\\s+(\\d{1,3})\\b", "pattern_note": "The gap is tolerant because extraction pads it — the real RG 90 sample yields 'Page 2          of 23'.", "evidence": "Validated on samples/soa_atp/asic-rg90-example-soa-with-atp.pdf, which is RG 90 itself followed by an example SOA whose footer restarts at 'Page 1 of 23' on page 31. Correctly silent on every single-document sample tested."}, "title_transition": {"strength": "weaker", "rule": "The document type implied by each page's leading region, read with the same title patterns the scope gate uses. A running header produces a CONSTANT type across pages; a boundary produces a CHANGE. So the signal is the transition, not the presence of a second type's name.", "why_not_frequency": "Suppressing types that appear on most pages looks sensible and is wrong: in a real bundle the larger document's own running header legitimately appears on most pages of the whole file, so frequency-based suppression hides exactly the boundary being looked for.", "excursion_rule": "A transition A -> B is ignored where A reappears after B, AND where B already appeared before it. Both halves are needed: the first ignores the departure into a section, the second ignores the file handing itself back to the type it already was. A section inside one document returns to its parent; an appended document does not. This is what separates a PDS with a 'risk profile' section from a PDS with something genuinely appended — without the second half, the RETURN from the excursion is reported as a boundary.", "known_weakness": "A heading that names another document type, never returning to the parent, still reads as a boundary — a late 'Financial Services Guide' heading inside an SOA, for example. Candidates are evidence for a human, not a decision, so a wrong candidate costs a look rather than a record.", "evidence": "Validated on two real ASIC documents that contain an appended Authority to Proceed as their final page: asic-cp284-example-soa-attachment.pdf (soa -> authority_to_proceed at p56) and asic-rg90-example-soa-2013.pdf (at p40). Also correctly suppressed a pds -> risk_profile -> pds excursion in unisuper-flexi-pension-pds.pdf."}, "leading_region_chars": 500, "leading_region_note": "The same window scope_gate.py reads, for the same reason: a document names other types in its body, and only the top of a page is its own heading."}},
+      {"id": "multi_doc_bundle", "evaluation": "stateless", "trigger": "Single file appears to contain more than one document type (classic: SOA + appended Authority to Proceed)", "why": "Needs splitting before records and links are accurate. Left unsplit, the appended document never becomes a record of its own — so atp_without_advice_record fires on correctly-executed advice, which is the fastest way to get a firm to ignore the review queue.", "severity": "medium", "firm_practice": "Firms split an SOA with an appended ATP and file each separately: the SOA in 2 Advice, the ATP in 3 Implementation. A bundle is never filed stuck together. Bella, 23 Oct 2026.", "forces_review": true, "forces_review_why": "Overrides the severity default. Medium normally attaches a question without blocking, because a queue that asks about every document gets ignored. This rule is the override review_policy.forces_review_decision records: filing a two-document bundle as one document destroys a record rather than mislabelling one, and unlike a basis confirmation it cannot be corrected later from what was filed.", "asks": "Does this file hold more than one document, and if so where does the second start?", "never_split_automatically": "The flag proposes candidate boundaries as evidence; a human approves any split. A missed bundle is a flag nobody actioned. A WRONG split silently destroys a record by cutting a document in half, and nothing downstream can tell that it happened. Ground rule #2 applies with force.", "detection": {"pagination_restart": {"strength": "strong", "rule": "A page-number marker reading 'page 1 of N' on any page other than the first. A document's own pagination restarting mid-file is direct evidence of a boundary, independent of titles, headers and type.", "pattern": "\\bpage\\s+(\\d{1,3})\\s+of\\s+(\\d{1,3})\\b", "pattern_note": "The gap is tolerant because extraction pads it — the real RG 90 sample yields 'Page 2          of 23'.", "evidence": "Validated on samples/soa_atp/asic-rg90-example-soa-with-atp.pdf, which is RG 90 itself followed by an example SOA whose footer restarts at 'Page 1 of 23' on page 31. Correctly silent on every single-document sample tested."}, "title_transition": {"strength": "weaker", "rule": "The document type implied by each page's leading region, read with the same title patterns the scope gate uses. A running header produces a CONSTANT type across pages; a boundary produces a CHANGE. So the signal is the transition, not the presence of a second type's name.", "why_not_frequency": "Suppressing types that appear on most pages looks sensible and is wrong: in a real bundle the larger document's own running header legitimately appears on most pages of the whole file, so frequency-based suppression hides exactly the boundary being looked for.", "excursion_rule": "A transition A -> B is ignored where A reappears after B, AND where B already appeared before it. Both halves are needed: the first ignores the departure into a section, the second ignores the file handing itself back to the type it already was. A section inside one document returns to its parent; an appended document does not. This is what separates a PDS with a 'risk profile' section from a PDS with something genuinely appended — without the second half, the RETURN from the excursion is reported as a boundary.", "known_weakness": "A heading that names another document type, never returning to the parent, still reads as a boundary — a late 'Financial Services Guide' heading inside an SOA, for example. Candidates are evidence for a human, not a decision, so a wrong candidate costs a look rather than a record.", "evidence": "Validated on two real ASIC documents that contain an appended Authority to Proceed as their final page: asic-cp284-example-soa-attachment.pdf (soa -> authority_to_proceed at p56) and asic-rg90-example-soa-2013.pdf (at p40). Also correctly suppressed a pds -> risk_profile -> pds excursion in unisuper-flexi-pension-pds.pdf."}, "leading_region_chars": 500, "leading_region_note": "The same window scope_gate.py reads, for the same reason: a document names other types in its body, and only the top of a page is its own heading."}},
       {"id": "advice_record_label_shift", "evaluation": "stateless", "trigger": "Document plays the advice-record role but titling is ambiguous between SOA and CAR", "why": "During the DBFO transition both may appear; capture the correct statutory label. DORMANT: 'car' is not a document type while DBFO Tranche 2 is unlegislated, so nothing fires this today. Kept because the rule becomes live the moment the successor type is added back — see reform_watch.", "severity": "low", "status": "dormant"},
       {"id": "fds_era_mismatch", "evaluation": "stateless", "trigger": "Fee/consent document format doesn't match the expected pre/post-DBFO-Tranche-1 era for its date", "why": "Ongoing-fee consent mechanics changed under DBFO; wrong-era format may indicate a compliance gap.", "severity": "medium"},
       {"id": "no_date", "evaluation": "stateless", "trigger": "No date extractable from a document type that requires one for sequencing", "why": "Version tracking and advice-timing checks impossible without a date.", "severity": "medium"},
