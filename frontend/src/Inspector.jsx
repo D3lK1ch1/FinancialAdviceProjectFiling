@@ -35,7 +35,7 @@ async function sendVerdict(doc, correctType, reason) {
 }
 
 function Verdict({ doc, decision, server, onDecide }) {
-  const canRecord = server.mode === 'live' && !!doc.document_id && !!server.options;
+  const canRecord = !!doc.document_id && !!server.options;
   const [rejecting, setRejecting] = useState(false);
   const [type, setType] = useState('');
   const [reason, setReason] = useState('');
@@ -82,7 +82,7 @@ function Verdict({ doc, decision, server, onDecide }) {
       )}
       <small>{status || (canRecord
         ? (decision ? (decision === 'approve' ? 'Approved.' : 'Rejected.') : 'A person decides. Verdicts go to the failure log.')
-        : (decision ? `${decision === 'approve' ? 'Approved' : 'Rejected'}. Not recorded: demo.` : 'A person decides. Not recorded: demo.'))}</small>
+        : (decision ? `${decision === 'approve' ? 'Approved' : 'Rejected'}. Not recorded: the app couldn’t load the review options.` : 'A person decides. Not recorded: the app couldn’t load the review options.'))}</small>
     </div>
   );
 }

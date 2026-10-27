@@ -161,6 +161,24 @@ svg.i{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .client{display:flex;align-items:center;gap:9px;padding:5px 10px;font-size:13px;color:var(--mute)}
 .av{width:20px;height:20px;border-radius:6px;background:var(--accentbg);color:var(--accent);display:grid;place-items:center;font-size:10.5px;font-weight:700;flex:none}
 .client .count{margin-left:auto;font-size:11.5px;color:var(--faint)}
+button.client{width:100%;background:none;border:0;border-radius:7px;text-align:left;cursor:pointer;font:inherit;font-size:13px}
+button.client:hover{background:var(--sel);color:var(--fg)}
+button.client[aria-pressed="true"]{background:var(--sheet);color:var(--fg);box-shadow:0 0 0 1px var(--line);font-weight:550}
+.nav.off{color:var(--faint);cursor:default}
+.nav.off:hover{background:none}
+.nav.off svg.i{color:var(--faint)}
+.side-hint{font-size:12px;line-height:1.4}
+.client-chip{display:inline-flex;align-items:center;gap:5px;background:var(--accentbg);color:var(--accent)}
+.client-chip svg.i{width:12px;height:12px}
+
+/* ================================================================ upload */
+.drop{display:flex;flex-direction:column;align-items:center;gap:8px;padding:56px 24px;border:1.5px dashed var(--line);border-radius:12px;background:var(--sub);text-align:center;cursor:pointer;color:var(--mute);font-size:13.5px}
+.drop svg.i{width:28px;height:28px;color:var(--accent)}
+.drop b{color:var(--fg);font-size:15px}
+.drop .btn{flex:none;margin-top:8px}
+.drop.over{border-color:var(--accent);background:var(--accentbg)}
+.drop.busy{cursor:progress}
+.pick-error{margin:12px 0 0;color:var(--bad);font-size:13px}
 .side .foot{margin-top:auto;padding:10px;font-size:11.5px;color:var(--faint);line-height:1.6}
 .side .foot b{display:block;color:var(--mute);font-weight:550}
 .meter{height:4px;border-radius:2px;background:var(--sel);overflow:hidden;margin:6px 0 4px;display:flex}

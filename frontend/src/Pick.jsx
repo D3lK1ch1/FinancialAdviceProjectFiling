@@ -1,16 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { Icon } from './atoms.jsx';
+import { NAV, TitleBar, VIEWS } from './Frame.jsx';
 
-// The live page (/app/live.html): choose PDFs and send them to the backend.
-// Only works when the backend is set up in live mode; in demo mode it says so
-// and offers the demo instead. The backend refuses uploads in demo mode anyway.
+// The first screen at /: drop or choose PDFs, and they go to /api/batch. The
+// sidebar is shown greyed out, so a person sees what they will get once the
+// documents are read.
 export default function Pick({ onData }) {
-  const [mode, setMode] = useState(null);
   const [busy, setBusy] = useState(0);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch('/api/mode').then((r) => r.json()).then((m) => setMode(m.mode)).catch(() => setMode('unknown'));
-  }, []);
+  const [over, setOver] = useState(false);
 
   const send = async (files) => {
     const pdfs = [...files].filter((f) => f.name.toLowerCase().endsWith('.pdf'));
@@ -20,30 +18,49 @@ export default function Pick({ onData }) {
     pdfs.forEach((f) => form.append('files', f));
     try {
       const res = await fetch('/api/batch', { method: 'POST', body: form });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || `The backend answered ${res.status}.`);
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || `The app answered ${res.status}.`);
       onData(await res.json());
     } catch (e) {
       setError(`Could not read the documents. ${e.message}`);
       setBusy(0);
     }
   };
+  const drop = (e) => { e.preventDefault(); setOver(false); if (!busy) send(e.dataTransfer.files); };
 
   return (
-    <div className="scrim pick-scrim">
-      <div className="welcome pick" role="dialog" aria-labelledby="pick-title">
-        <h2 id="pick-title">Advice Document Filing</h2>
-        {mode === 'live' ? <>
-          <p className="welcome-lede">Choose the PDFs to read. They are read on this computer.
-            Nothing is moved, renamed or saved.</p>
-          {busy
-            ? <p className="pick-busy" role="status">Reading {busy} {busy === 1 ? 'document' : 'documents'}. This can take a minute per document.</p>
-            : <label className="btn primary pick-btn">Choose PDFs
-                <input type="file" accept="application/pdf,.pdf" multiple hidden onChange={(e) => send(e.target.files)} /></label>}
-          {error && <p className="pick-error" role="alert">{error}</p>}
-        </> : <>
-          <p className="welcome-lede">{mode === null ? 'Checking…' : 'Uploading is switched off. This is a demo, so it only shows sample and public documents.'}</p>
-          <a className="btn primary pick-btn" href="./">Open the demo</a>
-        </>}
+    <div className="window" role="application" aria-label="Advice Document Filing">
+      <TitleBar />
+      <div className="body">
+        <nav className="side" aria-label="Sections">
+          <h6>Batch</h6>
+          {NAV.map(([v, ic]) => <span key={v} className="nav off" aria-disabled="true"><Icon id={ic} />{VIEWS[v]}</span>)}
+          <h6>Clients</h6>
+          <span className="nav off side-hint">Found in the documents once they are read.</span>
+        </nav>
+        <div className="sheet">
+          <main className="main">
+            <div className="toolbar"><h2>Add documents</h2></div>
+            <div className="scroll">
+              <div className="pad">
+                <label className={`drop ${over ? 'over' : ''} ${busy ? 'busy' : ''}`}
+                  onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+                  onDragLeave={() => setOver(false)} onDrop={drop}>
+                  <Icon id="file" />
+                  {busy
+                    ? <b role="status">Reading {busy} {busy === 1 ? 'document' : 'documents'}. This can take about a minute each.</b>
+                    : <>
+                        <b>Drop PDFs here, or choose files</b>
+                        <span>They are read on this computer. Nothing is moved, renamed or saved.</span>
+                        <span className="btn primary">Choose PDFs</span>
+                      </>}
+                  <input type="file" accept="application/pdf,.pdf" multiple hidden disabled={!!busy}
+                    onChange={(e) => send(e.target.files)} />
+                </label>
+                {error && <p className="pick-error" role="alert">{error}</p>}
+              </div>
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );
