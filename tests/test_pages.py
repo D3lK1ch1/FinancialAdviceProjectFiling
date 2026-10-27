@@ -33,6 +33,21 @@ def test_root_says_how_to_build_when_the_page_is_missing(monkeypatch, tmp_path):
     assert "/classic" in response.text
 
 
+def test_the_browser_checks_for_a_newer_page_every_time(monkeypatch, tmp_path):
+    """A rebuilt page must show without a hard refresh (Ctrl+F5)."""
+    (tmp_path / "index.html").write_text("<div id='root'></div>", encoding="utf-8")
+    monkeypatch.setattr(app_module, "_PAGE", StaticFiles(directory=tmp_path))
+    first = client.get("/")
+    assert first.headers["cache-control"] == "no-cache"
+
+    again = client.get("/", headers={"If-None-Match": first.headers["etag"]})
+    assert again.status_code == 304
+    assert again.headers["cache-control"] == "no-cache"
+
+    monkeypatch.setattr(app_module, "_PAGE", StaticFiles(directory=tmp_path / "dist", check_dir=False))
+    assert client.get("/").headers["cache-control"] == "no-cache"
+
+
 def test_the_previous_page_is_at_classic():
     response = client.get("/classic")
 

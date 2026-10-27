@@ -22,6 +22,8 @@ overwrites a finished step (see Contributing in `README.md`).
   events to that client. "New batch" goes back to the upload screen.
 - **The previous page moved to `/classic`.** It stays until the React page has Edit and
   display mode.
+- **`/` is sent with `Cache-Control: no-cache`.** After the switch a browser kept showing
+  the old page until Ctrl+F5; now it checks for a newer page on every load.
 - **`npm run build` is plain `vite build`.** One self-contained page with no data in it;
   `npm run dev` passes `/api` and `/review` to the backend on port 8000.
 - **`scripts/build_public_set.py` only caches answers** for `accuracy_report.py`. It no

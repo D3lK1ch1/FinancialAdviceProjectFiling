@@ -48,9 +48,14 @@ _NOT_BUILT = (
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     try:
-        return await _PAGE.get_response("index.html", request.scope)
+        response = await _PAGE.get_response("index.html", request.scope)
     except StarletteHTTPException:
-        return HTMLResponse(_NOT_BUILT, status_code=503)
+        response = HTMLResponse(_NOT_BUILT, status_code=503)
+    # Ask the server every time. Without this a browser can keep showing an
+    # older page at the same address after a rebuild (it did, 27 Oct). An
+    # unchanged page still comes back as a quick 304.
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 # The previous drop-zone page. Kept until the React page has Edit and display
