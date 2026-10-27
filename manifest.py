@@ -21,7 +21,7 @@ _EVENT_FOLDER = re.compile(r"^(\d{4}-\d{2})\W*(.*)$")
 
 
 def build_manifest(results: list[dict]) -> dict:
-    """{"local": {"default": manifest}}, the shape `window.DATA` has in the demo."""
+    """{"local": {"default": manifest}}, what /api/batch returns to the React page."""
     documents, events = [], {}
     for result in results:
         doc = _document(result)

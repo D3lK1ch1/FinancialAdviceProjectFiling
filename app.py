@@ -1,19 +1,19 @@
 """
 API layer. /ingest reads one PDF and returns its type, verified confidence,
 flags, client, review decision and filing proposal. /api/batch does the same
-for several and returns the manifest the React page (/app/) reads. Proposals
+for several and returns the manifest the React page (/) reads. Proposals
 only: nothing is persisted or filed.
 """
 
 import hashlib
 from io import BytesIO
 
-from fastapi import FastAPI, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-import config
 from classifier import classify, engine_identity, engine_version
 from clients import choose_client, find_client_candidates
 from filing import proposed_filing
@@ -32,35 +32,40 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 _DOC_NAMES = {doc["id"]: doc["name"] for doc in _KB["documents"]}
 
 
-@app.get("/")
-def root():
+# The React page (frontend/). `npm run build` writes one self-contained file,
+# frontend/dist/index.html, with no data in it: the page asks for PDFs and
+# sends them to /api/batch. The app still starts when the front end isn't
+# built; / then says how to build it. StaticFiles finds the file, so this
+# module imports no file-system library (tests/test_storage.py, ground rule 3).
+_PAGE = StaticFiles(directory="frontend/dist", check_dir=False)
+_NOT_BUILT = (
+    "<!doctype html><meta charset='utf-8'><title>Advice Document Filing</title>"
+    "<p>The page isn't built yet. Run <code>cd frontend &amp;&amp; npm install &amp;&amp; npm run build</code>, "
+    "then reload. The previous page is at <a href='/classic'>/classic</a>.</p>"
+)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    try:
+        return await _PAGE.get_response("index.html", request.scope)
+    except StarletteHTTPException:
+        return HTMLResponse(_NOT_BUILT, status_code=503)
+
+
+# The previous drop-zone page. Kept until the React page has Edit and display
+# mode (Step 4), then removed.
+@app.get("/classic")
+def classic():
     return FileResponse("static/index.html")
-
-
-# The React page (frontend/). `npm run build` writes frontend/dist/app/index.html
-# with no data in it, so the page asks for files and calls /api/batch.
-# check_dir=False: the app still starts when the front end isn't built; /app/
-# is then a 404 (frontend/README.md says how to build it). static/index.html
-# stays at / until the React page has Edit, failure-log verdicts and display
-# mode.
-app.mount("/app", StaticFiles(directory="frontend/dist/app", html=True, check_dir=False), name="app")
-
-
-@app.get("/api/mode")
-def mode():
-    """demo or live (config.APP_MODE). The page shows an upload control only when live."""
-    return {"mode": config.APP_MODE}
 
 
 @app.post("/api/batch")
 async def batch(files: list[UploadFile], display: str = DEFAULT_DISPLAY_MODE):
     """Several documents through /ingest's pipeline, as the manifest the React page reads.
 
-    Proposals only, like /ingest: nothing is written. Refused in demo mode, so a
-    firm's documents can't be sent to a demo even by calling this directly.
+    Proposals only, like /ingest: nothing is written.
     """
-    if config.APP_MODE != "live":
-        raise HTTPException(status_code=403, detail="Uploads are off in demo mode.")
     _check_display(display)
     return build_manifest([ingest_bytes(await f.read(), f.filename, display) for f in files])
 
