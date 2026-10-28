@@ -220,7 +220,8 @@ def test_ingest_stamps_its_engine_and_the_stamp_round_trips_to_the_log(log_path,
     assert entry["engine_version"] == stamp
 
 
-def test_ingest_says_why_when_the_engine_cannot_be_identified(monkeypatch):
+def test_ingest_says_why_when_the_engine_cannot_be_identified(monkeypatch, caplog):
+    """A plain sentence on screen; Ollama's own reason only in the server log."""
     monkeypatch.setattr("app.engine_identity", lambda: {
         "model": "llama3.1", "model_digest": None, "ollama_version": None,
         "identity_error": "version: refused; digest: refused",
@@ -228,4 +229,5 @@ def test_ingest_says_why_when_the_engine_cannot_be_identified(monkeypatch):
     ingested = client.post("/ingest", files={"file": ("scan.pdf", _blank_pdf(), "application/pdf")}).json()
 
     assert ingested["engine_version"]["model_digest"] is None
-    assert ingested["engine_version_error"] == "version: refused; digest: refused"
+    assert ingested["engine_version_error"] == "Couldn't read which model version Ollama is running."
+    assert "version: refused; digest: refused" in caplog.text
