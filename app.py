@@ -6,10 +6,11 @@ only: nothing is persisted or filed.
 """
 
 import hashlib
+import logging
 from io import BytesIO
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -27,9 +28,25 @@ from review import CorrectionRejected, assess, record_correction
 from scope_gate import check_scope
 
 app = FastAPI(title="Advice Document Filing — POC")
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 _DOC_NAMES = {doc["id"]: doc["name"] for doc in _KB["documents"]}
+
+# What a person sees when something fails, instead of the exception's own
+# text. That text can show file paths, library versions and the machine's
+# network setup (CodeQL: information exposure through an exception). The
+# full text goes to the server log with the document's hash, never its
+# filename (the de-identification rule in failure_log.py).
+_log = logging.getLogger("advice_filing")
+_PLAIN = {
+    "unreadable": "This PDF couldn't be opened. It may be password-protected, damaged or not a PDF.",
+    "classifier": "Ollama didn't answer",
+    "engine": "Couldn't read which model version Ollama is running.",
+}
+
+
+def _plain(kind: str, raw: str, document_id: str) -> str:
+    _log.warning("%s for document %s: %s", kind, document_id[:12], raw)
+    return _PLAIN[kind]
 
 
 # The React page (frontend/). `npm run build` writes one self-contained file,
@@ -41,7 +58,7 @@ _PAGE = StaticFiles(directory="frontend/dist", check_dir=False)
 _NOT_BUILT = (
     "<!doctype html><meta charset='utf-8'><title>Advice Document Filing</title>"
     "<p>The page isn't built yet. Run <code>cd frontend &amp;&amp; npm install &amp;&amp; npm run build</code>, "
-    "then reload. The previous page is at <a href='/classic'>/classic</a>.</p>"
+    "then reload.</p>"
 )
 
 
@@ -56,13 +73,6 @@ async def root(request: Request):
     # unchanged page still comes back as a quick 304.
     response.headers["Cache-Control"] = "no-cache"
     return response
-
-
-# The previous drop-zone page. Kept until the React page has Edit and display
-# mode (Step 4), then removed.
-@app.get("/classic")
-def classic():
-    return FileResponse("static/index.html")
 
 
 @app.post("/api/batch")
@@ -93,6 +103,8 @@ def ingest_bytes(contents: bytes, filename: str, display: str = DEFAULT_DISPLAY_
     # bytes rather than the filename, which is routinely the client's name —
     # see the de-identification rule in failure_log.py.
     result["document_id"] = hashlib.sha256(contents).hexdigest()
+    if result["parse_error"]:
+        result["parse_error"] = _plain("unreadable", result["parse_error"], result["document_id"])
     # Per-page text is for server-side work (bundle detection — see the
     # multi_doc_bundle rule in knowledge_base.json). It is not part of the
     # response: echoing it alongside extracted_text would roughly double the
@@ -110,7 +122,7 @@ def ingest_bytes(contents: bytes, filename: str, display: str = DEFAULT_DISPLAY_
     identity = engine_identity()
     result["engine_version"] = engine_version(identity)
     if "identity_error" in identity:
-        result["engine_version_error"] = identity["identity_error"]
+        result["engine_version_error"] = _plain("engine", identity["identity_error"], result["document_id"])
     result.update(check_scope(result["extracted_text"], pages[0] if pages else None))
     result["likely_type_name"] = _DOC_NAMES.get(result["likely_type"])
     doc_type = None
@@ -126,6 +138,10 @@ def ingest_bytes(contents: bytes, filename: str, display: str = DEFAULT_DISPLAY_
             result["extracted_text"],
             result["likely_type"],
         )
+        if result["classification"].get("classifier_error"):
+            result["classification"]["classifier_error"] = _plain(
+                "classifier", result["classification"]["classifier_error"], result["document_id"]
+            )
         result["classification"]["doc_type_name"] = _DOC_NAMES.get(result["classification"].get("doc_type"))
         doc_type = result["classification"].get("doc_type")
     # Always present, even when nothing fired and even out of scope — a
