@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from './atoms.jsx';
 import Inspector from './Inspector.jsx';
-import { NAV, TitleBar, VIEWS } from './Frame.jsx';
+import { NAV, TitleBar, VIEWS, useTeaching } from './Frame.jsx';
 import { Overview, Events, Review, Tree, Log, About } from './views.jsx';
 import { manifest, statusOf, initials, batchable, oneClick, startLine, plural } from './model.js';
 
@@ -25,6 +25,7 @@ export default function App({ onNewBatch }) {
   const [client, setClient] = useState(null);       // Advice events shows only this client's documents
   const [decisions, setDecisions] = useState({});   // in memory only: nothing is written yet
   const [log, setLog] = useState([]);               // the filing log: in memory only, like decisions
+  const [teaching, setTeaching] = useTeaching();
   const wide = useWide();
   const scrollRef = useRef(null);
 
@@ -113,7 +114,7 @@ export default function App({ onNewBatch }) {
 
   return (
     <div className="window" role="application" aria-label="Advice Document Filing">
-      <TitleBar />
+      <TitleBar teaching={teaching} onTeaching={setTeaching} />
 
       <div className="banner" role="note">
         <span className="demo-tag">Proposals only</span>
@@ -176,7 +177,7 @@ export default function App({ onNewBatch }) {
           </main>
 
           {showInspector && (
-            <Inspector d={d} doc={doc} decision={decisions[selected]} server={server}
+            <Inspector d={d} doc={doc} decision={decisions[selected]} server={server} teaching={teaching}
               onDecide={decide} onStep={step} onClose={() => setSelected(null)} />
           )}
         </div>

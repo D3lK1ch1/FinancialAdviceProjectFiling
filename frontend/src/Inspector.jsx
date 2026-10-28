@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Icon, FileIcon, Confidence, StatusBadge, Type, Finding } from './atoms.jsx';
 import { pct, plural } from './model.js';
 
@@ -62,22 +62,29 @@ function Verdict({ doc, decision, server, onDecide }) {
   return (
     <div className="insp-foot">
       <div className="acts">
-        <button className="btn yes" aria-pressed={decision === 'approve'} onClick={approve}><Icon id="check" />Approve</button>
+        {/* A document with no proposed type has nothing to approve. */}
+        {doc.type && <button className="btn yes" aria-pressed={decision === 'approve'} onClick={approve}><Icon id="check" />Approve</button>}
         <button className="btn no" aria-pressed={decision === 'reject'} onClick={reject}><Icon id="x" />Reject</button>
       </div>
       {rejecting && (
         <div className="verdict">
           <label>What is it?
+            {/* Not the type the tool proposed: the server refuses a correction that changes nothing. */}
             <select value={type} onChange={(e) => setType(e.target.value)}>
               <option value="">Choose a type</option>
-              {server.options.document_types.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              {server.options.document_types.filter((t) => t.id !== doc.type)
+                .map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select></label>
           <label>Why was it wrong?
             <select value={reason} onChange={(e) => setReason(e.target.value)}>
               <option value="">Choose a reason</option>
               {server.options.reject_reasons.map((r) => <option key={r.code} value={r.code} title={r.meaning}>{r.code.replace(/_/g, ' ')}</option>)}
             </select></label>
-          <button className="btn sm primary" disabled={!type || !reason} onClick={submit}>Record</button>
+          {reason && <p className="reason-meaning">{(server.options.reject_reasons.find((r) => r.code === reason) || {}).meaning}</p>}
+          <div className="verdict-acts">
+            <button className="btn sm primary" disabled={!type || !reason} onClick={submit}>Record</button>
+            <button className="btn sm" onClick={() => setRejecting(false)}>Cancel</button>
+          </div>
         </div>
       )}
       <small>{status || (canRecord
@@ -87,7 +94,26 @@ function Verdict({ doc, decision, server, onDecide }) {
   );
 }
 
-export default function Inspector({ d, doc, decision, server, onDecide, onStep, onClose }) {
+// Display mode (#11): the knowledge base's note on this type, for staff new to
+// the industry. Text beside the result only; nothing above reads it.
+const TEACHING = [
+  ['what_it_is', 'What it is'],
+  ['why_it_exists', 'Why it exists'],
+  ['where_it_sits', 'Where it sits'],
+  ['two_weeks_in_note', 'Worth knowing'],
+];
+
+function Teaching({ note }) {
+  return (
+    <div className="isec teach"><h4>What this document is</h4>
+      <dl className="kv">
+        {TEACHING.filter(([k]) => note[k]).map(([k, label]) => <Fragment key={k}><dt>{label}</dt><dd>{note[k]}</dd></Fragment>)}
+      </dl>
+    </div>
+  );
+}
+
+export default function Inspector({ d, doc, decision, server, teaching, onDecide, onStep, onClose }) {
   if (!doc) {
     return (
       <aside className="insp" aria-label="Document details">
@@ -118,6 +144,8 @@ export default function Inspector({ d, doc, decision, server, onDecide, onStep, 
 
       <div className="insp-body">
         <Summary d={d} doc={doc} ev={ev} />
+
+        {teaching && doc.teaching && <Teaching note={doc.teaching} />}
 
         <div className="isec"><h4>Classification</h4>
           <dl className="kv">

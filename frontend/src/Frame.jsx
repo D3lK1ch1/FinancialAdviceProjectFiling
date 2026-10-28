@@ -18,7 +18,17 @@ function useTheme() {
   return [mode, setMode];
 }
 
-export function TitleBar() {
+// Display mode (#11): show the knowledge base's teaching notes, or don't. Only
+// hides text on screen, so it can't change a classification, a flag or a
+// review (ground rule 4). On by default, like the knowledge base's setting.
+export function useTeaching() {
+  const read = () => { try { return localStorage.getItem('teaching') !== 'off'; } catch { return true; } };
+  const [on, setOn] = useState(read);
+  const set = (v) => { setOn(v); try { localStorage.setItem('teaching', v ? 'on' : 'off'); } catch { /* storage optional */ } };
+  return [on, set];
+}
+
+export function TitleBar({ teaching, onTeaching }) {
   const [theme, setTheme] = useTheme();
   return (
     <div className="titlebar">
@@ -26,6 +36,13 @@ export function TitleBar() {
       <span className="appmark" aria-hidden="true"><Icon id="cabinet" /></span>
       <span className="appname">Advice Document Filing</span>
       <span className="grow" />
+      {onTeaching && (
+        <div className="seg" role="group" aria-label="Teaching notes">
+          <span className="seg-l">Teaching notes</span>
+          <button aria-pressed={teaching} onClick={() => onTeaching(true)}>On</button>
+          <button aria-pressed={!teaching} onClick={() => onTeaching(false)}>Off</button>
+        </div>
+      )}
       <div className="seg" role="group" aria-label="Theme">
         {['auto', 'light', 'dark'].map((m) => (
           <button key={m} aria-pressed={theme === m} onClick={() => setTheme(m)}>{m[0].toUpperCase() + m.slice(1)}</button>

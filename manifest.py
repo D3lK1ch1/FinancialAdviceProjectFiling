@@ -91,6 +91,9 @@ def _document(result: dict) -> dict:
         # Where it would go if a person filed it anyway: what testing mode shows
         # for a document held only for low confidence.
         "would_file": _destination({}, filing) if review.get("needs_review") else None,
+        # Display mode (#11): the knowledge base's note on this type, or None
+        # when display is off or there is no type. The page only shows it.
+        "teaching": result.get("teaching"),
     }
 
 

@@ -352,6 +352,10 @@ h1{font-size:26px;line-height:1.2;letter-spacing:-.024em;margin:0 0 10px;font-we
 .verdict label{display:grid;gap:3px}
 .verdict select{border:1px solid var(--line);background:var(--sheet);color:var(--fg);border-radius:6px;padding:4px 6px;font-size:12.5px}
 .verdict .btn{justify-self:start}
+.verdict-acts{display:flex;gap:8px}
+.verdict-acts .btn{flex:none}
+.reason-meaning{margin:0;font-size:12px;color:var(--mute)}
+.isec.teach dd{line-height:1.45}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .isec{padding:12px 0;border-bottom:1px solid var(--hair)}
 .isec:last-child{border-bottom:0}

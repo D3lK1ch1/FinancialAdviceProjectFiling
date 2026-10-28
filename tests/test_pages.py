@@ -1,4 +1,4 @@
-"""One address for the tool: the React page at /, the previous page at /classic.
+"""One address for the tool: the React page at /.
 
 There is no demo mode: /api/batch always reads what it is sent, because the
 tool only ever runs on the computer whose documents it reads.
@@ -30,7 +30,6 @@ def test_root_says_how_to_build_when_the_page_is_missing(monkeypatch, tmp_path):
 
     assert response.status_code == 503
     assert "npm run build" in response.text
-    assert "/classic" in response.text
 
 
 def test_the_browser_checks_for_a_newer_page_every_time(monkeypatch, tmp_path):
@@ -48,19 +47,13 @@ def test_the_browser_checks_for_a_newer_page_every_time(monkeypatch, tmp_path):
     assert client.get("/").headers["cache-control"] == "no-cache"
 
 
-def test_the_previous_page_is_at_classic():
-    response = client.get("/classic")
-
-    assert response.status_code == 200
-    assert "/ingest" in response.text
-
-
 def test_uploads_need_no_switch():
     pdf = ("files", ("doc.pdf", b"%PDF-1.4 not really", "application/pdf"))
 
     assert client.post("/api/batch", files=[pdf]).status_code == 200
 
 
-def test_the_demo_routes_are_gone():
-    assert client.get("/api/mode").status_code == 404
-    assert client.get("/app/").status_code == 404
+def test_the_old_pages_are_gone():
+    """The demo routes, and /classic once the React page had Edit and display mode."""
+    for path in ("/api/mode", "/app/", "/classic", "/static/index.html"):
+        assert client.get(path).status_code == 404, path

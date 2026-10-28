@@ -57,11 +57,14 @@ holds and where each part comes from in `/ingest`.
 | `knowledge_base_version` | `engine_version` | |
 | `batch` counts | none | counted over the batch |
 
-**Missing from the React page that the current `static/index.html` has.** These
-must carry over before the React page replaces it:
-- **Edit:** correcting the type, with a reason code from `/review/options`. The React
-  page has Approve and Reject only.
-- **Display mode** (teach or don't, #11).
+**Correcting a document** is Reject in the document panel: pick what it actually is
+(never the type the tool proposed) and why, from `/review/options`. A document with no
+proposed type has Reject only.
+
+**Display mode** (#11): the document panel shows the knowledge base's teaching note
+for the document's type under "What this document is". "Teaching notes On / Off" in
+the title bar shows or hides it and is remembered in the browser. It only hides text:
+classification, flags and review never change.
 
 ## Still to do
 
@@ -72,7 +75,6 @@ must carry over before the React page replaces it:
    - `POST /api/undo {entry_id}` moves the files back and marks the entry undone.
    - The page's `decide` and `undoEntry` in `src/App.jsx` call these instead of
      keeping state in memory.
-2. **Edit and display mode** (above), then remove `/classic`.
-3. **Package as a desktop app** for non-technical users: one installer, the backend
+2. **Package as a desktop app** for non-technical users: one installer, the backend
    and this page in a window, files never leave the computer. The open question
    is how Ollama and the model get installed. Spike this first.
