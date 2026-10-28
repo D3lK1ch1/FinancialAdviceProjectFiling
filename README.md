@@ -93,12 +93,15 @@ tools". Accept, then run the command again.
    ```
 3. Open **http://127.0.0.1:8000/** and drop PDFs on the page. When they've been
    read, the sidebar shows the overview, advice events, documents needing review,
-   the proposed folder tree and the filing log.
+   the proposed folder tree and the filing log. Click a document for its panel:
+   why it was placed there, a short note on what that kind of document is
+   ("Teaching notes" in the title bar turns these on or off), and Approve or Reject.
 4. Stop with `Ctrl+C` (also `Ctrl` on a Mac, not `Cmd`).
 
-**"Couldn't reach the classifier … connection refused"** (`WinError 10061` /
-`Errno 61`) means Ollama isn't running. This has nothing to do with Wi-Fi. Start
-Ollama and drop the file again. The first document after a few idle minutes can
+**"Ollama didn't answer"** usually means Ollama isn't running. This has nothing to
+do with Wi-Fi. Start Ollama and drop the file again. The page shows only that plain
+sentence; the full reason (for example `WinError 10061` / `Errno 61`, connection
+refused, or a model that isn't pulled) is in the terminal running uvicorn. The first document after a few idle minutes can
 take about a minute while the model loads.
 
 ## Reviewing a document
@@ -163,7 +166,6 @@ storage.py          storage seam: local folder now, cloud later
 display.py          teaching mode
 failure_log.py      de-identified verdict log (failure_log.jsonl)
 frontend/           the React page (npm run build writes frontend/dist/index.html, served at /)
-static/index.html   the previous single-document page, served at /classic
 knowledge_base.json document types, hints, flags, policies (v0.3)
 harness.py          older batch keyword-matcher prototype (see below)
 tests/              pytest suite
