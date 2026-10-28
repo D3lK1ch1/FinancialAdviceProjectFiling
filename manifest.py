@@ -21,7 +21,7 @@ _EVENT_FOLDER = re.compile(r"^(\d{4}-\d{2})\W*(.*)$")
 
 
 def build_manifest(results: list[dict]) -> dict:
-    """{"local": {"default": manifest}}, the shape `window.DATA` has in the demo."""
+    """{"local": {"default": manifest}}, what /api/batch returns to the React page."""
     documents, events = [], {}
     for result in results:
         doc = _document(result)
@@ -91,6 +91,9 @@ def _document(result: dict) -> dict:
         # Where it would go if a person filed it anyway: what testing mode shows
         # for a document held only for low confidence.
         "would_file": _destination({}, filing) if review.get("needs_review") else None,
+        # Display mode (#11): the knowledge base's note on this type, or None
+        # when display is off or there is no type. The page only shows it.
+        "teaching": result.get("teaching"),
     }
 
 

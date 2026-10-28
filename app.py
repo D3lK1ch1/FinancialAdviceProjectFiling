@@ -1,19 +1,20 @@
 """
 API layer. /ingest reads one PDF and returns its type, verified confidence,
 flags, client, review decision and filing proposal. /api/batch does the same
-for several and returns the manifest the React page (/app/) reads. Proposals
+for several and returns the manifest the React page (/) reads. Proposals
 only: nothing is persisted or filed.
 """
 
 import hashlib
+import logging
 from io import BytesIO
 
-from fastapi import FastAPI, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request, UploadFile
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-import config
 from classifier import classify, engine_identity, engine_version
 from clients import choose_client, find_client_candidates
 from filing import proposed_filing
@@ -27,40 +28,59 @@ from review import CorrectionRejected, assess, record_correction
 from scope_gate import check_scope
 
 app = FastAPI(title="Advice Document Filing — POC")
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 _DOC_NAMES = {doc["id"]: doc["name"] for doc in _KB["documents"]}
 
-
-@app.get("/")
-def root():
-    return FileResponse("static/index.html")
-
-
-# The React page (frontend/). `npm run build` writes frontend/dist/app/index.html
-# with no data in it, so the page asks for files and calls /api/batch.
-# check_dir=False: the app still starts when the front end isn't built; /app/
-# is then a 404 (frontend/README.md says how to build it). static/index.html
-# stays at / until the React page has Edit, failure-log verdicts and display
-# mode.
-app.mount("/app", StaticFiles(directory="frontend/dist/app", html=True, check_dir=False), name="app")
+# What a person sees when something fails, instead of the exception's own
+# text. That text can show file paths, library versions and the machine's
+# network setup (CodeQL: information exposure through an exception). The
+# full text goes to the server log with the document's hash, never its
+# filename (the de-identification rule in failure_log.py).
+_log = logging.getLogger("advice_filing")
+_PLAIN = {
+    "unreadable": "This PDF couldn't be opened. It may be password-protected, damaged or not a PDF.",
+    "classifier": "Ollama didn't answer",
+    "engine": "Couldn't read which model version Ollama is running.",
+}
 
 
-@app.get("/api/mode")
-def mode():
-    """demo or live (config.APP_MODE). The page shows an upload control only when live."""
-    return {"mode": config.APP_MODE}
+def _plain(kind: str, raw: str, document_id: str) -> str:
+    _log.warning("%s for document %s: %s", kind, document_id[:12], raw)
+    return _PLAIN[kind]
+
+
+# The React page (frontend/). `npm run build` writes one self-contained file,
+# frontend/dist/index.html, with no data in it: the page asks for PDFs and
+# sends them to /api/batch. The app still starts when the front end isn't
+# built; / then says how to build it. StaticFiles finds the file, so this
+# module imports no file-system library (tests/test_storage.py, ground rule 3).
+_PAGE = StaticFiles(directory="frontend/dist", check_dir=False)
+_NOT_BUILT = (
+    "<!doctype html><meta charset='utf-8'><title>Advice Document Filing</title>"
+    "<p>The page isn't built yet. Run <code>cd frontend &amp;&amp; npm install &amp;&amp; npm run build</code>, "
+    "then reload.</p>"
+)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    try:
+        response = await _PAGE.get_response("index.html", request.scope)
+    except StarletteHTTPException:
+        response = HTMLResponse(_NOT_BUILT, status_code=503)
+    # Ask the server every time. Without this a browser can keep showing an
+    # older page at the same address after a rebuild (it did, 27 Oct). An
+    # unchanged page still comes back as a quick 304.
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 @app.post("/api/batch")
 async def batch(files: list[UploadFile], display: str = DEFAULT_DISPLAY_MODE):
     """Several documents through /ingest's pipeline, as the manifest the React page reads.
 
-    Proposals only, like /ingest: nothing is written. Refused in demo mode, so a
-    firm's documents can't be sent to a demo even by calling this directly.
+    Proposals only, like /ingest: nothing is written.
     """
-    if config.APP_MODE != "live":
-        raise HTTPException(status_code=403, detail="Uploads are off in demo mode.")
     _check_display(display)
     return build_manifest([ingest_bytes(await f.read(), f.filename, display) for f in files])
 
@@ -83,6 +103,8 @@ def ingest_bytes(contents: bytes, filename: str, display: str = DEFAULT_DISPLAY_
     # bytes rather than the filename, which is routinely the client's name —
     # see the de-identification rule in failure_log.py.
     result["document_id"] = hashlib.sha256(contents).hexdigest()
+    if result["parse_error"]:
+        result["parse_error"] = _plain("unreadable", result["parse_error"], result["document_id"])
     # Per-page text is for server-side work (bundle detection — see the
     # multi_doc_bundle rule in knowledge_base.json). It is not part of the
     # response: echoing it alongside extracted_text would roughly double the
@@ -100,7 +122,7 @@ def ingest_bytes(contents: bytes, filename: str, display: str = DEFAULT_DISPLAY_
     identity = engine_identity()
     result["engine_version"] = engine_version(identity)
     if "identity_error" in identity:
-        result["engine_version_error"] = identity["identity_error"]
+        result["engine_version_error"] = _plain("engine", identity["identity_error"], result["document_id"])
     result.update(check_scope(result["extracted_text"], pages[0] if pages else None))
     result["likely_type_name"] = _DOC_NAMES.get(result["likely_type"])
     doc_type = None
@@ -116,6 +138,10 @@ def ingest_bytes(contents: bytes, filename: str, display: str = DEFAULT_DISPLAY_
             result["extracted_text"],
             result["likely_type"],
         )
+        if result["classification"].get("classifier_error"):
+            result["classification"]["classifier_error"] = _plain(
+                "classifier", result["classification"]["classifier_error"], result["document_id"]
+            )
         result["classification"]["doc_type_name"] = _DOC_NAMES.get(result["classification"].get("doc_type"))
         doc_type = result["classification"].get("doc_type")
     # Always present, even when nothing fired and even out of scope — a

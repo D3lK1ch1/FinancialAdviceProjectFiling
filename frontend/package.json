@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node build-pages.cjs",
-    "preview:sample": "npm run build"
+    "build": "vite build"
   },
   "dependencies": {
     "react": "^18.3.1",

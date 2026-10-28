@@ -13,6 +13,74 @@ overwrites a finished step (see Contributing in `README.md`).
 
 ---
 
+## 2026-10-29 — Correcting and teaching notes on the page; the old page removed
+
+### Added
+- **Teaching notes in the document panel** (display mode, #11). "What this document is"
+  shows the knowledge base's `teaching` block for the type; "Teaching notes On / Off" in
+  the title bar hides it. The page only shows or hides text, so the setting stays
+  independent of classification and review (ground rule 4). `manifest.py` now passes
+  `teaching` through.
+
+### Changed
+- **Reject works as the old page's correction did:** the proposed type isn't offered as
+  the correction, a document with no type has no Approve, the chosen reason's meaning is
+  shown, and there is a Cancel.
+
+### Removed
+- **`/classic` and `static/index.html`** (Delia's Step 4). The React page now has
+  everything the old page had. The ground rule 1 guard in `tests/test_review_buttons.py`
+  (no type or reason code typed into the page) now reads `frontend/src/`.
+
+### Checked
+- `tests/test_pages.py`: `/classic`, `/static/index.html` and the demo routes are 404.
+  `tests/test_manifest.py`: the teaching note reaches the page, and is None when display is off.
+
+## 2026-10-27 — One page at /, always reading real documents
+
+### Changed
+- **The React page is the tool's front page** (Delia, proposal on #75). `/` serves
+  `frontend/dist/index.html`: drop PDFs, then the sidebar shows overview, advice events,
+  needs review, folder tree and filing log, and a client in the sidebar filters advice
+  events to that client. "New batch" goes back to the upload screen.
+- **The previous page moved to `/classic`.** It stays until the React page has Edit and
+  display mode.
+- **`/` is sent with `Cache-Control: no-cache`.** After the switch a browser kept showing
+  the old page until Ctrl+F5; now it checks for a newer page on every load.
+- **`npm run build` is plain `vite build`.** One self-contained page with no data in it;
+  `npm run dev` passes `/api` and `/review` to the backend on port 8000.
+- **`scripts/build_public_set.py` only caches answers** for `accuracy_report.py`. It no
+  longer writes a demo data file.
+
+### Fixed
+- **A failure shows a plain sentence, not the exception's text** (CodeQL "information
+  exposure through an exception", Delia's Step 3). An unreadable PDF, Ollama not answering
+  and an unreadable model version each have one fixed message in `app.py`. The full text
+  goes to the server log under the document's hash, never its filename. `tests/test_error_messages.py`.
+
+### Removed
+- **Demo mode** (Delia): `config.APP_MODE`, `GET /api/mode`, the 403 on `/api/batch`,
+  `/app/` and `live.html`, `tests/test_mode.py`. The tool runs only on the computer whose
+  documents it reads, and the block never covered `/ingest` anyway.
+- **Demo data and demo-only screens:** `sample-data.json`, `public-data.json`,
+  `build-pages.cjs`, the guided tour, the welcome popup, the demo banner and ribbon, the
+  sample-set switcher and the filing-scheme dropdown.
+
+### Checked
+- `tests/test_pages.py`: `/` serves the built page or says how to build it, `/classic`
+  serves the previous page, uploads need no switch, the demo routes are gone.
+- Two public samples through the running app at `/api/batch` with Ollama: both read,
+  classified and held for review with a proposed path.
+
+### Known gaps
+- Edit and display mode are still only on `/classic`.
+- `manifest.py` still describes the filing as "Client, then advice event" with step
+  folders not built; the folder tree shows that text.
+- `Filed.jsx` (the batch modal in `docs/ui/4-one-click-filing.png`) isn't used by any
+  screen; automatic batch filing replaced it on 21 Oct.
+- A rejected verdict (`/review/correction`, 422) still returns its validation message.
+  That text is the app's own, not an exception's, but CodeQL may still flag it.
+
 ## 2026-10-23 — Exact phrases per document type
 
 ### Decided

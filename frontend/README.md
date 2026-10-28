@@ -1,58 +1,42 @@
 # Front end (React)
 
-The screens from the demo (`ahaythorpe/advice-document-classifier`, 21 Oct 2026):
-overview, advice events, document panel, automatic batch filing, filing log with undo,
-folder tree, guided tour. Not yet connected to this repo's Python backend. This
-file is the plan for connecting it. `docs/UI_INTEGRATION.md` (PR #72) has the
-screenshots and the reasoning.
+The page the tool shows at `/`: an upload screen, then overview, advice events,
+documents needing review, the proposed folder tree, a filing log with undo, and a
+document panel with Approve and Reject. The design is from the demo
+(`ahaythorpe/advice-document-classifier`, 21 Oct 2026). `docs/ui/` has the
+screenshots and `docs/UI_INTEGRATION.md` the reasoning. There is no demo mode and
+no built-in data: the page only shows documents you give it.
 
-`sample-data.json` is made-up demo data from the demo repo's pipeline. No real
-client data.
-
-## Run it on sample data
+## Build it and run it
 
 Needs Node 18+.
-
-    cd frontend
-    npm install
-    npm run preview:sample      # writes dist/demo.html; open it in a browser
-
-The page reads one object, `window.DATA`, put in at build time where
-`index.html` says `__DATA__`. `npm run dev` won't work until step 2 below
-replaces that with a fetch.
-
-## Demo and live mode
-
-The backend starts in **demo mode** unless `APP_MODE=live` is set. In demo mode
-`/app/` shows the full screens on sample sets only (the made-up folder, and public
-documents read by the real tool), and the backend refuses uploads. Live mode is for
-a firm's own installation: `/app/live.html` then takes PDFs.
-
-To refresh the public set: `python scripts/build_public_set.py <public samples folder>`,
-then `npm run build`.
-
-## Run it with the Python backend (real PDFs)
 
     cd frontend && npm install && npm run build && cd ..
     python -m uvicorn app:app --port 8000
 
-With `APP_MODE=live`, open http://localhost:8000/app/live.html and choose PDFs. Python reads them
+`npm run build` writes one self-contained file, `dist/index.html`, which FastAPI
+serves at http://127.0.0.1:8000/. Drop PDFs on the page. Python reads them
 (`POST /api/batch`, the same steps as `/ingest`) and the page shows the results.
-Proposals only: nothing is moved, renamed or saved. Approve and Undo only change
-what's on screen.
+Proposals only: nothing is moved, renamed or saved. Approve and Undo change what's
+on screen, and a verdict on a document goes to the failure log
+(`/review/correction`).
+
+While working on the page, `npm run dev` serves it with live reload and passes
+`/api` and `/review` to the backend on port 8000, so keep uvicorn running too.
 
 Automatic batch filing follows `review_policy.one_click`: as documents are read,
 everything at or above the line with nothing to check is filed in one batch, logged
 in the Filing log, and can be undone (an undone document isn't refiled). 90% is the
-floor for real use and a firm can only raise it; the demo uses 70%, marked "Demo line".
+floor for real use and a firm can only raise it; while the tool is tested the line can go
+to 70%, marked "Testing line".
 Below 90% the batch also takes documents held for low confidence alone, never flagged
 ones. Nothing is written to disk yet.
 
 ## What the page needs: the manifest
 
-Everything on screen comes from one object per filing scheme:
-`{ dataset: { scheme_id: manifest } }`. Below is what a manifest holds and where
-each part would come from in `/ingest` today.
+Everything on screen comes from what `/api/batch` returns,
+`{ "local": { "default": manifest } }` (`manifest.py`). Below is what a manifest
+holds and where each part comes from in `/ingest`.
 
 | Manifest field | From `/ingest` today | Gap |
 |---|---|---|
@@ -73,33 +57,24 @@ each part would come from in `/ingest` today.
 | `knowledge_base_version` | `engine_version` | |
 | `batch` counts | none | counted over the batch |
 
-**Missing from the React page that the current `static/index.html` has.** These
-must carry over before the React page replaces it:
-- **Edit:** correcting the type, with a reason code from `/review/options`. The React
-  page has Approve and Reject only.
-- **Recording verdicts to the failure log** (`/review/correction`), with the engine stamp.
-- **Display mode** (teach or don't, #11).
+**Correcting a document** is Reject in the document panel: pick what it actually is
+(never the type the tool proposed) and why, from `/review/options`. A document with no
+proposed type has Reject only.
 
-## Connecting it, step by step
+**Display mode** (#11): the document panel shows the knowledge base's teaching note
+for the document's type under "What this document is". "Teaching notes On / Off" in
+the title bar shows or hides it and is remembered in the browser. It only hides text:
+classification, flags and review never change.
 
-1. **Backend: a batch endpoint that returns a manifest.** For example
-   `POST /api/batch` with a folder, running the `/ingest` steps over each file and
-   grouping them (#8). Until grouping lands, every document sits under "Outside
-   any advice event", which is honest. Rules stay in the knowledge base.
-2. **Page: fetch instead of `window.DATA`.** One place changes: `DATASETS` in
-   `src/model.js`. Keep the `__DATA__` build for the sample demo.
-3. **Serve the built page from FastAPI** at `/`, the way `static/index.html` is
-   served today. One program on one port, nothing else to install for the
-   person using it.
-4. **Approve, file and undo for real.**
+## Still to do
+
+1. **Approve, file and undo for real.**
    - `POST /api/approve {doc_ids, level}` writes through `storage.LocalStorage.put()`,
      never from the classifier (ground rule 3). It appends an entry to a filing log
      and returns the entry.
    - `POST /api/undo {entry_id}` moves the files back and marks the entry undone.
-   - The page's `approveBatch`, `decide` and `undoEntry` in `src/App.jsx` call these
-     instead of keeping state in memory.
-5. **Filing schemes from the knowledge base**, not `profiles/*.json` copied by hand
-   (#70, PR #28, #71 later).
-6. **Package as a desktop app** for non-technical users: one installer, the backend
+   - The page's `decide` and `undoEntry` in `src/App.jsx` call these instead of
+     keeping state in memory.
+2. **Package as a desktop app** for non-technical users: one installer, the backend
    and this page in a window, files never leave the computer. The open question
    is how Ollama and the model get installed. Spike this first.

@@ -51,8 +51,7 @@ def _result(**filing) -> dict:
     }
 
 
-def test_batch_returns_one_manifest_with_every_document(monkeypatch):
-    monkeypatch.setattr("config.APP_MODE", "live")
+def test_batch_returns_one_manifest_with_every_document():
     files = [("files", ("one.pdf", _pdf(None), "application/pdf")),
              ("files", ("two.pdf", _pdf("Client name: George Baker"), "application/pdf"))]
     body = client.post("/api/batch", files=files).json()
@@ -120,3 +119,17 @@ def test_a_document_carries_what_a_verdict_needs():
 
     assert doc["document_id"] == "a" * 64
     assert doc["engine_version"] == {"model": "llama3.1"}
+
+
+def test_a_document_carries_its_teaching_note_for_display_mode():
+    """The page shows the knowledge base's note (#11); it never writes its own."""
+    from display import teaching_for
+
+    result = _result()
+    result["teaching"] = teaching_for("soa", "teach")
+    [doc] = build_manifest([result])["local"]["default"]["documents"]
+    assert doc["teaching"]["what_it_is"] == result["teaching"]["what_it_is"]
+
+    result["teaching"] = teaching_for("soa", "off")
+    [doc] = build_manifest([result])["local"]["default"]["documents"]
+    assert doc["teaching"] is None

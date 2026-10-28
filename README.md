@@ -76,7 +76,10 @@ Your prompt now starts with `(.venv)`, and `python` works the same on both syste
 ```
 python -m pip install -r requirements.txt
 ollama pull llama3.1          # about 5 GB, once
+cd frontend && npm install && npm run build && cd ..    # the page; needs Node 18+
 ```
+
+Run `npm run build` again after pulling changes to `frontend/`.
 
 On a Mac, the first `git` command may offer to install "command line developer
 tools". Accept, then run the command again.
@@ -88,19 +91,22 @@ tools". Accept, then run the command again.
    ```
    python -m uvicorn app:app --port 8000
    ```
-3. Open **http://127.0.0.1:8000/** and drop a PDF on the page. Or open
-   **http://127.0.0.1:8000/app/** for the new screens. Build them once first
-   (`frontend/README.md`).
+3. Open **http://127.0.0.1:8000/** and drop PDFs on the page. When they've been
+   read, the sidebar shows the overview, advice events, documents needing review,
+   the proposed folder tree and the filing log. Click a document for its panel:
+   why it was placed there, a short note on what that kind of document is
+   ("Teaching notes" in the title bar turns these on or off), and Approve or Reject.
 4. Stop with `Ctrl+C` (also `Ctrl` on a Mac, not `Cmd`).
 
-**"Couldn't reach the classifier … connection refused"** (`WinError 10061` /
-`Errno 61`) means Ollama isn't running. This has nothing to do with Wi-Fi. Start
-Ollama and drop the file again. The first document after a few idle minutes can
+**"Ollama didn't answer"** usually means Ollama isn't running. This has nothing to
+do with Wi-Fi. Start Ollama and drop the file again. The page shows only that plain
+sentence; the full reason (for example `WinError 10061` / `Errno 61`, connection
+refused, or a model that isn't pulled) is in the terminal running uvicorn. The first document after a few idle minutes can
 take about a minute while the model loads.
 
 ## Reviewing a document
 
-Each result card ends in **Your verdict**. Nothing is filed or moved. Your
+Click a document to open its panel, which ends in **Approve** and **Reject**. Nothing is filed or moved. Your
 verdict is **recorded** so the tool's accuracy can be measured.
 
 - **Approve**: the document type is right.
@@ -146,7 +152,7 @@ Nothing is persisted. Each request goes PDF in, JSON out.
 ### Project layout
 
 ```
-app.py              FastAPI app: POST /ingest, POST /review/correction, GET /review/options
+app.py              FastAPI app: the page at /, POST /api/batch, POST /ingest, POST /review/correction, GET /review/options
 parser.py           PDF -> text + metadata
 scope_gate.py       deterministic in-scope check from title patterns
 classifier.py       LLM classification via local Ollama
@@ -159,7 +165,7 @@ filing.py           proposed folder and file name
 storage.py          storage seam: local folder now, cloud later
 display.py          teaching mode
 failure_log.py      de-identified verdict log (failure_log.jsonl)
-static/index.html   drop-zone UI served at /
+frontend/           the React page (npm run build writes frontend/dist/index.html, served at /)
 knowledge_base.json document types, hints, flags, policies (v0.3)
 harness.py          older batch keyword-matcher prototype (see below)
 tests/              pytest suite

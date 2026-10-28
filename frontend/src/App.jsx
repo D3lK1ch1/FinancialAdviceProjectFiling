@@ -1,37 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from './atoms.jsx';
 import Inspector from './Inspector.jsx';
-import Tour, { STEPS as TOUR } from './Tour.jsx';
-import Welcome from './Welcome.jsx';
+import { NAV, TitleBar, VIEWS, useTeaching } from './Frame.jsx';
 import { Overview, Events, Review, Tree, Log, About } from './views.jsx';
-import { DATASETS, SETS, PROFILES, LOCAL, statusOf, initials, plural, batchable, oneClick, startLine } from './model.js';
+import { manifest, statusOf, initials, batchable, oneClick, startLine, plural } from './model.js';
 
-// Sample sets can have different filing schemes (the public set has only the
-// backend's own), so fall back to a set's first scheme rather than crash.
-const schemeIn = (set, profile) => (DATASETS[set][profile] ? profile : Object.keys(DATASETS[set])[0]);
-
-const REPO = 'https://github.com/ahaythorpe/advice-document-classifier';
-const WHY_LOCAL = `${REPO}/blob/main/docs/DEPLOYMENT.md`;
-const VIEWS = { overview: 'Overview', events: 'Advice events', review: 'Needs review', tree: 'Folder tree', log: 'Filing log', about: 'About' };
 const WITH_INSPECTOR = ['events', 'review', 'tree', 'log'];
 
-// The welcome popup shows once per browser; storage is optional, so it may show again.
-const welcomed = () => { try { return localStorage.getItem('welcomed') === '1'; } catch { return false; } };
-const markWelcomed = () => { try { localStorage.setItem('welcomed', '1'); } catch { /* demo: storage optional */ } };
-
 const viewFromHash = () => (VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : 'overview');
-
-function useTheme() {
-  // Light by default; Auto follows the computer's setting.
-  const read = () => { try { return localStorage.getItem('theme') || 'light'; } catch { return 'light'; } };
-  const [mode, setMode] = useState(read);
-  useEffect(() => {
-    const el = document.documentElement;
-    try { localStorage.setItem('theme', mode); } catch { /* demo: storage optional */ }
-    mode === 'auto' ? el.removeAttribute('data-theme') : el.setAttribute('data-theme', mode);
-  }, [mode]);
-  return [mode, setMode];
-}
 
 function useWide() {
   const [wide, setWide] = useState(() => window.innerWidth > 1100);
@@ -43,21 +19,17 @@ function useWide() {
   return wide;
 }
 
-export default function App() {
-  const [set, setSet] = useState(SETS[0]);
-  const [profile, setProfile] = useState(PROFILES[0]);
+export default function App({ onNewBatch }) {
   const [view, setView] = useState(viewFromHash);
   const [selected, setSelected] = useState(null);
-  const [decisions, setDecisions] = useState({});      // in memory only: the demo stores nothing
-  const [theme, setTheme] = useTheme();
-  const [tour, setTour] = useState(null);           // step index while the tour is open
-  const [welcome, setWelcome] = useState(() => !LOCAL && !welcomed());   // the demo's popup, not for real files
+  const [client, setClient] = useState(null);       // Advice events shows only this client's documents
+  const [decisions, setDecisions] = useState({});   // in memory only: nothing is written yet
   const [log, setLog] = useState([]);               // the filing log: in memory only, like decisions
+  const [teaching, setTeaching] = useTeaching();
   const wide = useWide();
   const scrollRef = useRef(null);
 
-  const scheme = schemeIn(set, profile);
-  const d = DATASETS[set][scheme];   // changing the scheme changes the folders and nothing else
+  const d = manifest();
   const doc = selected && d.documents.find((x) => x.doc_id === selected);
 
   useEffect(() => {
@@ -74,7 +46,7 @@ export default function App() {
   useEffect(() => {
     const on = (e) => {
       if (e.target.closest && e.target.closest('select')) return;
-      if (e.key === 'Escape') { setSelected(null); setTour(null); if (welcome) closeWelcome(); }
+      if (e.key === 'Escape') setSelected(null);
       if (selected && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); step(e.key === 'ArrowDown' ? 1 : -1); }
     };
     document.addEventListener('keydown', on);
@@ -87,16 +59,7 @@ export default function App() {
   }, [selected]);
 
   const go = (v) => { location.hash = v; };
-  const tourTo = (i) => {
-    const s = TOUR[i];
-    setTour(i);
-    setSet(SETS[0]);                    // the tour is written about the demo folder
-    go(s.view);
-    const pick = s.select && s.select(DATASETS[SETS[0]][schemeIn(SETS[0], profile)]);
-    setSelected(pick ? pick.doc_id : null);
-  };
-  const endTour = () => { setTour(null); setSelected(null); };
-  const closeWelcome = () => { markWelcomed(); setWelcome(false); };
+  const showClient = (c) => { setClient(c); go('events'); };
   const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const record = (e) => setLog((l) => [...l, { id: l.length + 1, at: now(), ...e }]);
   // Automatic batch filing (review_policy.one_click, decided 21 Oct): every
@@ -104,14 +67,13 @@ export default function App() {
   // is read, and logged. Anything else is flagged for a person. A document a
   // person has undone is never filed again by the batch.
   const [line, setLine] = useState(() => startLine(d));
-  // The backend's mode and review options. Verdicts are written to the failure
-  // log only in live mode, and only for documents the real tool read (they
-  // carry a document_id); the made-up demo and demo-mode clicks never are.
-  const [server, setServer] = useState({ mode: null, options: null });
+  // The review options from the knowledge base. Verdicts go to the failure log
+  // once these have loaded, for documents the tool read (they carry a document_id).
+  const [server, setServer] = useState({ options: null });
   useEffect(() => {
-    Promise.all([fetch('/api/mode').then((r) => r.json()), fetch('/review/options').then((r) => r.json())])
-      .then(([m, o]) => setServer({ mode: m.mode, options: o }))
-      .catch(() => setServer({ mode: 'none', options: null }));
+    fetch('/review/options').then((r) => r.json())
+      .then((o) => setServer({ options: o }))
+      .catch(() => setServer({ options: null }));
   }, []);
   const decided = useRef({});
   const undone = useRef(new Set());
@@ -124,7 +86,7 @@ export default function App() {
     if (!ids.length) return;
     setDecisions((m) => ({ ...m, ...Object.fromEntries(ids.map((id) => [id, 'approve'])) }));
     record({ kind: 'auto', level: line, ids, decision: 'approve' });
-  }, [set, scheme, line]);
+  }, [line]);
   // Undo clears the decisions that entry made and marks it undone; the log keeps it.
   const undoEntry = (id) => {
     const e = log.find((x) => x.id === id);
@@ -145,71 +107,41 @@ export default function App() {
   const n = d.batch.documents;
   const ok = d.documents.filter((x) => statusOf(x) === 'ok').length;
   const warn = d.documents.filter((x) => statusOf(x) === 'warn').length;
-  const sub = { log: plural(log.filter((e) => !e.undone).length, 'entry', 'entries'), events: `${d.events.length} events · ${n} documents`, review: `${d.batch.needs_review} held`, tree: 'Proposed filing' }[view] || '';
+  const live = log.filter((e) => !e.undone).length;
+  const sub = { log: plural(live, 'entry', 'entries'), events: `${d.events.length} events · ${n} documents`, review: `${d.batch.needs_review} held`, tree: 'Proposed filing' }[view] || '';
+  const counts = { events: d.events.length, review: d.batch.needs_review, tree: n, log: live };
   const viewProps = { d, selected, onSelect: setSelected, decisions, line, onLine: setLine, log };
 
   return (
-    <div className="window" role="application" aria-label={LOCAL ? 'Advice Document Filing' : 'Advice Document Filing (demo only)'}>
-      {!LOCAL && <div className="ribbon" aria-hidden="true">Demo</div>}
+    <div className="window" role="application" aria-label="Advice Document Filing">
+      <TitleBar teaching={teaching} onTeaching={setTeaching} />
 
-      <div className="titlebar">
-        <div className="lights" aria-hidden="true"><i /><i /><i /></div>
-        <span className="appmark" aria-hidden="true"><Icon id="cabinet" /></span>
-        <span className="appname">Advice Document Filing</span>
-        <span className="pill" title="An early demo to show the idea."><Icon id="info" /><span className="lbl">Prototype</span></span>
-        <span className="grow" />
-        <a className="tb-link" href={REPO}><Icon id="code" />Source</a>
-        <div className="seg" role="group" aria-label="Theme">
-          {['auto', 'light', 'dark'].map((m) => (
-            <button key={m} aria-pressed={theme === m} onClick={() => setTheme(m)}>{m[0].toUpperCase() + m.slice(1)}</button>
-          ))}
+      <div className="banner" role="note">
+        <span className="demo-tag">Proposals only</span>
+        <div className="msg">
+          <b>Read on this computer.</b>
+          <span>Nothing is moved, renamed or saved yet. Approving here only shows what would happen.</span>
         </div>
       </div>
 
-      {LOCAL ? (
-        <div className="banner" role="note">
-          <span className="demo-tag">Proposals only</span>
-          <div className="msg">
-            <b>Read on this computer.</b>
-            <span>Nothing is moved, renamed or saved yet. Approving here only shows what would happen.</span>
-          </div>
-        </div>
-      ) : (
-        <div className="banner" role="note">
-          <span className="demo-tag">Demo only</span>
-          <div className="msg">
-            <b>Prototype demo, shared to show how the idea works.</b>
-            <span>Demo and publicly published documents only. Names and details are made up to protect privacy. There is no upload control, so no real client file can be added.</span>
-          </div>
-          <a href={WHY_LOCAL}>Read more&nbsp;&rarr;</a>
-        </div>
-      )}
-
       <div className="body">
         <nav className="side" aria-label="Sections">
-          {SETS.length > 1 && <>
-            <h6>Sample set</h6>
-            {SETS.map((k) => (
-              <button key={k} className="nav" aria-current={set === k ? 'true' : undefined}
-                onClick={() => { setSet(k); setSelected(null); }}>
-                <Icon id={k === 'public' ? 'file' : 'cabinet'} />{DATASETS[k][schemeIn(k, profile)].dataset_label}
-              </button>
-            ))}
-          </>}
           <h6>Batch</h6>
-          {[['overview', 'grid'], ['events', 'layers', d.events.length], ['review', 'alert', d.batch.needs_review, 'warn'], ['tree', 'folder', n], ['log', 'check', log.filter((e) => !e.undone).length]].map(([v, ic, count, c]) => (
+          {NAV.map(([v, ic]) => (
             <a key={v} className="nav" href={`#${v}`} aria-current={view === v ? 'page' : undefined}>
               <Icon id={ic} />{VIEWS[v]}
-              {count ? <span className={`count ${c || ''}`}>{count}</span> : null}
+              {counts[v] ? <span className={`count ${v === 'review' ? 'warn' : ''}`}>{counts[v]}</span> : null}
             </a>
           ))}
+          <button className="nav" onClick={onNewBatch}><Icon id="file" />New batch</button>
           <h6>Clients</h6>
+          {!Object.keys(perClient).length && <span className="nav off side-hint">No client name found in these documents.</span>}
           {Object.keys(perClient).sort().map((c) => (
-            <div key={c} className="client"><span className="av">{initials(c)}</span>{c}<span className="count">{perClient[c]}</span></div>
+            <button key={c} className="client" aria-pressed={client === c} onClick={() => showClient(client === c ? null : c)}>
+              <span className="av">{initials(c)}</span>{c}<span className="count">{perClient[c]}</span>
+            </button>
           ))}
           <h6>Help</h6>
-          {!LOCAL && <button className="nav" onClick={() => tourTo(0)}><Icon id="play" />Take the tour</button>}
-          <button className="nav" onClick={() => setWelcome(true)}><Icon id="shield" />Disclaimers</button>
           <a className="nav" href="#about" aria-current={view === 'about' ? 'page' : undefined}><Icon id="info" />About</a>
           <div className="foot">
             <b>{ok} of {n} ready to file</b>
@@ -227,51 +159,29 @@ export default function App() {
             <div className="toolbar">
               <h2>{VIEWS[view]}</h2>
               <span className="sub">{sub}</span>
-              <span className="grow" />
-              <div className="scheme">
-                <label htmlFor="profile">Filing scheme</label>
-                <div className="select">
-                  <select id="profile" value={scheme} onChange={(e) => setProfile(e.target.value)}>
-                    {Object.keys(DATASETS[set]).map((p) => <option key={p} value={p}>{DATASETS[set][p].profile_name}</option>)}
-                  </select>
-                  <Icon id="down" />
-                </div>
-              </div>
             </div>
 
             <div className="scroll" ref={scrollRef}>
-              <section className="view" hidden={view !== 'overview'}><Overview d={d} go={go} startTour={LOCAL ? null : () => tourTo(0)} /></section>
-              <section className="view" hidden={view !== 'events'}><Events {...viewProps} /></section>
+              <section className="view" hidden={view !== 'overview'}><Overview d={d} go={go} /></section>
+              <section className="view" hidden={view !== 'events'}><Events {...viewProps} client={client} onClient={setClient} /></section>
               <section className="view" hidden={view !== 'review'}><Review {...viewProps} /></section>
               <section className="view" hidden={view !== 'tree'}><Tree {...viewProps} /></section>
               <section className="view" hidden={view !== 'log'}><Log {...viewProps} log={log} onUndo={undoEntry} /></section>
-              <section className="view" hidden={view !== 'about'}><About whyLocal={WHY_LOCAL} /></section>
+              <section className="view" hidden={view !== 'about'}><About /></section>
 
               <footer>
                 <span className="kb"><Icon id="shield" /><span>Knowledge base v{d.knowledge_base_version}</span></span> · Australia, Corporations Act 2001, ASIC.
-                Not legal advice.<br />
-                Changing the filing scheme changes the folders and nothing else. The
-                classification, the advice events and the points to check are identical. That is what
-                lets the tool fit a firm’s existing system instead of replacing it.
+                Not legal advice.
               </footer>
             </div>
           </main>
 
           {showInspector && (
-            <Inspector d={d} doc={doc} decision={decisions[selected]} server={server}
+            <Inspector d={d} doc={doc} decision={decisions[selected]} server={server} teaching={teaching}
               onDecide={decide} onStep={step} onClose={() => setSelected(null)} />
           )}
         </div>
       </div>
-
-      {tour !== null && <Tour d={d} step={tour} onStep={tourTo} onClose={endTour}
-        onBackToStart={() => { endTour(); setWelcome(true); }} />}
-      {/* Hidden while a narrow screen's document panel is open: it would sit on Reject. */}
-      {!LOCAL && tour === null && !welcome && !(showInspector && !wide) && (
-        <button className="fab" title="How it works and the tour" aria-label="How it works and the tour"
-          onClick={() => setWelcome(true)}><span aria-hidden="true">👋</span></button>
-      )}
-      {welcome && <Welcome onClose={closeWelcome} onTour={() => { closeWelcome(); tourTo(0); }} />}
     </div>
   );
 }

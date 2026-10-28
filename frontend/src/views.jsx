@@ -5,7 +5,7 @@ import {
 } from './model.js';
 
 /* ---------------------------------------------------------------- Overview */
-export function Overview({ d, go, startTour }) {
+export function Overview({ d, go }) {
   const count = (s) => d.documents.filter((x) => statusOf(x) === s).length;
   const held = count('warn');
   const check = count('bad');
@@ -19,12 +19,11 @@ export function Overview({ d, go, startTour }) {
   return (
     <div className="pad">
       <p className="eyebrow">{d.dataset_label} · {d.batch.documents} files</p>
-      <h1>{{ public: 'Real published PDFs and a tool that won’t guess', local: 'Your documents, read and proposed for filing' }[d.dataset] || 'A messy client folder in, a proposed filing out'}</h1>
+      <h1>Your documents, read and proposed for filing</h1>
       <p className="lede">The tool reads each document and works out what it is, which client it is for and which{' '}
-        <em>advice event</em> it belongs to: one piece of advice and every document behind it. The confident ones are filed automatically in one batch: 70% sure or more in this demo, 90% or more in
+        <em>advice event</em> it belongs to: one piece of advice and every document behind it. The confident ones are filed automatically in one batch: 70% sure or more while the tool is tested, 90% or more in
         real use. The ones it is unsure of are flagged and a person decides. Every filing is logged and can be undone.</p>
       {d.dataset_note && <div className="box sub set-note"><Icon id="info" /><span>{d.dataset_note}</span></div>}
-      {startTour && <button className="btn primary tour-cta" onClick={startTour}><Icon id="play" />Take the 1-minute tour</button>}
       <div className="stats">
         {stats.map((t) => (
           <button key={t.l} className={`stat ${t.c || ''}`} onClick={() => go(t.to)}>
@@ -71,7 +70,7 @@ function DocRow({ x, selected, onSelect, threshold, decision }) {
 
 export const Decided = ({ k }) => (
   <span className={`badge ${k === 'approve' ? 'filed' : 'bad'}`}><Icon id={k === 'approve' ? 'check' : 'x'} />
-    {k === 'approve' ? 'Filed (demo)' : 'Rejected'}</span>
+    {k === 'approve' ? 'Approved' : 'Rejected'}</span>
 );
 
 // The automatic batch: shows what was filed at the line and lets the line move.
@@ -85,7 +84,7 @@ function BatchBar({ d, decisions, line, onLine, log }) {
   return (
     <div className={`batch ${testing ? 'testing' : ''}`}>
       <div className="batch-tx">
-        <b>Filed automatically: {plural(auto, 'document', 'documents')}{testing && <span className="test-tag">Demo line</span>}</b>
+        <b>Filed automatically: {plural(auto, 'document', 'documents')}{testing && <span className="test-tag">Testing line</span>}</b>
         <label className="slider">
           <span>Line: <strong>{pct(line)}%</strong></span>
           <input type="range" min={Math.round(rule.lowest * 100)} max={99} step={1} value={Math.round(line * 100)}
@@ -94,10 +93,10 @@ function BatchBar({ d, decisions, line, onLine, log }) {
         <span>
           Everything at or above the line with nothing to check is filed in one batch as it is read.{' '}
           {testing
-            ? <>This demo uses {pct(line)}%; real use never goes below {pct(rule.floor)}%. </>
+            ? <>{pct(line)}% is for testing only; real use never goes below {pct(rule.floor)}%. </>
             : <>A firm can raise the line, never lower it below {pct(rule.floor)}%. </>}
           {flagged > 0 && <>{plural(flagged, 'other is', 'others are')} flagged for a person. </>}
-          Nothing is written in this demo.</span>
+          Nothing is written yet.</span>
       </div>
       <a className="btn" href="#log"><Icon id="check" />Check or undo in the Filing log</a>
     </div>
@@ -119,10 +118,12 @@ const STATUS_META = {
   Confident: 'nothing to check',
 };
 
-export function Events({ d, selected, onSelect, decisions, line, onLine, log }) {
+export function Events({ d, selected, onSelect, decisions, line, onLine, log, client, onClient }) {
   const [filter, setFilter] = useState('all');
   const [by, setBy] = useState('event');
-  const keep = FILTERS.find((f) => f.key === filter).test;
+  // A client picked in the sidebar narrows every filter to that client's documents.
+  const test = FILTERS.find((f) => f.key === filter).test;
+  const keep = (x) => test(x) && (!client || x.client === client);
   const { groups, loose } = groupByEvent(d, keep);
   const byStatus = groupByStatus(d, keep);
   const empty = !groups.length && !loose.length;
@@ -134,9 +135,11 @@ export function Events({ d, selected, onSelect, decisions, line, onLine, log }) 
       <div className="tabs" role="tablist">
         {FILTERS.map((f) => (
           <button key={f.key} className="tab" role="tab" aria-selected={filter === f.key} onClick={() => setFilter(f.key)}>
-            {f.label}<b>{d.documents.filter(f.test).length}</b>
+            {f.label}<b>{d.documents.filter((x) => f.test(x) && (!client || x.client === client)).length}</b>
           </button>
         ))}
+        {client && <button className="tab client-chip" onClick={() => onClient(null)} title="Show every client">
+          {client}<Icon id="x" /></button>}
         <span className="grow" />
         <div className="seg" role="group" aria-label="Group by">
           <span className="seg-l">Group by</span>
@@ -222,7 +225,7 @@ export function Log({ d, log, selected, onSelect, onUndo }) {
   return (
     <div className="pad log">
       <p className="intro-line">Every approval, grouped by the click that made it. Open a document to see why it was filed there.
-        In this demo the log lives in this browser tab only.</p>
+        For now the log lives in this browser tab only.</p>
       {!log.length && <div className="box sub empty">Nothing filed yet. Approve the confident ones on Advice events, or decide one at a time in a document’s panel.</div>}
       {log.slice().reverse().map((e) => (
         <div key={e.id} className={`box log-entry ${e.undone ? 'undone' : ''}`}>
@@ -308,11 +311,11 @@ const STEPS = [
   ['Read', 'Text is pulled from every file in the folder, scanned or digital. Its extraction quality is scored.'],
   ['Identify', 'Each document is typed (SOA, ROA, FSG, Fact Find, Risk Profile…), dated and matched to a client and advice event.'],
   ['Check', 'Rules from the knowledge base look for gaps and mismatches a person should check, such as a risk profile that does not match the SOA.'],
-  ['Propose', 'A folder is proposed: the client, then the advice event. If the tool is unsure it holds the document and says why.'],
-  ['File', 'The confident ones are filed automatically in one batch: 70% or more in this demo, 90% or more in real use. The ones it is unsure of are flagged and a person decides. Every filing is logged and can be undone.'],
+  ['Propose', 'A folder is proposed: the client, then the advice event, then the planning step. If the tool is unsure it holds the document and says why.'],
+  ['File', 'The confident ones are filed automatically in one batch: 70% or more while the tool is tested, 90% or more in real use. The ones it is unsure of are flagged and a person decides. Every filing is logged and can be undone.'],
 ];
 
-export function About({ whyLocal }) {
+export function About() {
   return (
     <div className="pad about">
       <p className="eyebrow">Why I built this</p>
@@ -337,11 +340,7 @@ export function About({ whyLocal }) {
       <div className="box">
         <h3><Icon id="lock" />Built with privacy in mind</h3>
         <p>Client files are confidential. A hosted version of the tool would mean uploading them to somebody else’s computer. That is a data-residency decision for the licensee, not a deployment choice.</p>
-        <p>That is why the design keeps documents on the firm’s own computer. This page is a prototype demo on demo and publicly published documents. It has no upload control because there is nowhere for one to go. <a href={whyLocal}>Read more&nbsp;&rarr;</a></p>
-      </div>
-      <div className="box">
-        <h3><Icon id="folder" />Fits the firm’s existing system</h3>
-        <p>Changing the filing scheme changes the folders and nothing else. The classification, the advice events and the points to check are identical. That is what lets the tool fit a firm’s existing system instead of replacing it.</p>
+        <p>That is why the tool runs on the firm’s own computer. The documents you add here are read on this computer and are not sent anywhere else.</p>
       </div>
     </div>
   );

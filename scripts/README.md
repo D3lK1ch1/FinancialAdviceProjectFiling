@@ -8,14 +8,12 @@ From the project folder, with the environment active and Ollama running:
     python scripts/accuracy_report.py
 
 The first reads every PDF under `samples/` that it hasn't read before (about a
-minute each) and refreshes the demo's public set (`frontend/public-data.json`). The
-second prints the score.
+minute each) and caches each answer. The second prints the score.
 
 - **After changing the knowledge base or the code,** delete `samples/.results/` first,
   so every document is read again with the change. Otherwise old answers are reused.
 - **To use the intended model**, Llama 3.1, nothing extra is needed: it is the default.
   To try another, set `OLLAMA_MODEL`, for example `OLLAMA_MODEL=qwen3:8b`.
-- **Then rebuild the screens** to show the new public set: `cd frontend && npm run build`.
 
 ## Where the samples are
 
